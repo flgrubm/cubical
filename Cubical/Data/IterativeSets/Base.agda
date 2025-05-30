@@ -45,9 +45,6 @@ overline-∞ (sup-W A f) = A
 tilde-∞ : (A : V∞ {ℓ}) → overline-∞ A → V∞ {ℓ}
 tilde-∞ (sup-W B f) = f
 
--- t : {ℓ : Level} {A B : Type ℓ} → A ≡ B → A → B
--- t = transport
-
 -- theorem 3 + 4
 thm3-fun : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)
 thm3-fun {ℓ = ℓ} {x = x} {y = y} p = e , h where
@@ -55,11 +52,15 @@ thm3-fun {ℓ = ℓ} {x = x} {y = y} p = e , h where
   h : (z : overline-∞ x) → tilde-∞ x z ≡ (tilde-∞ y (e .fst z))
   h z i = tilde-∞ (p i) (transport-filler (cong overline-∞ p) z i)
 
+-- helper : {A : Type ℓ} {B : Type ℓ'} {C : I → Type ℓ''} → (P : PathP (λ i → C i) A B) → (x : A) → (y : B) →
+
+-- postulate helper : {C : I → Type ℓ} → (P Q : PathP (λ i → C i) (Type ℓ) (Type ℓ)) → P ≡ Q → (x : C i0) → transport P x ≡ transport Q x
+
 thm3-inv : {ℓ : Level} → {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)) → x ≡ y
-thm3-inv {ℓ = ℓ} {x = sup-W A f} {y = sup-W B g} (e , h) i = sup-W A→Bi f→gi where
-  A→Bi = ua e i
-  f→gi : A→Bi → V∞
-  f→gi z = {!!} -- funExtNonDep (λ {z₀} {z₁} p → {! !}) i
+thm3-inv {ℓ = ℓ} {x = sup-W A f} {y = sup-W B g} (e , h) i = sup-W (A→B i) (f→g i) where
+  A→B = ua e
+  f→g : (j : I) → (A→B j) → V∞
+  f→g j = funExtNonDep {ℓ} {ℓ-suc ℓ} {λ i → A→B i} {λ _ → V∞} {f} {g} (λ {z₀} {z₁} p → h z₀ ∙ {! !}) j
 
 postulate thm3-rightInv : {ℓ : Level} → {x y : V∞ {ℓ}} → section (thm3-fun {ℓ} {x} {y}) (thm3-inv {ℓ} {x} {y})
 
@@ -73,6 +74,10 @@ thm4-fun : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → (z : V∞) → f
 thm4-fun {ℓ = ℓ} {x = x} {y = y} p z i = fiber (tilde-∞ (p i)) z
 
 postulate thm4-inv : {ℓ : Level} → {x y : V∞ {ℓ}} → ((z : V∞) → fiber (tilde-∞ x) z ≡ fiber (tilde-∞ y) z) → x ≡ y
+-- thm4-inv {ℓ = ℓ} {x = sup-W A f} {y = sup-W B g} h i = sup-W A→Bi f→gi where
+--   A→Bi = {!!}
+--   f→gi : A→Bi → V∞
+--   f→gi = {!!}
 
 postulate thm4-rightInv : {ℓ : Level} → {x y : V∞ {ℓ}} → section (thm4-fun {ℓ} {x} {y}) (thm4-inv {ℓ} {x} {y})
 
