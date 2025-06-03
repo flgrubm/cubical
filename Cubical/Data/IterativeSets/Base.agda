@@ -142,27 +142,44 @@ embeddingToEquivOfPath {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {f = f} isemb x
 cor11-1 : {ℓ : Level} → {x y : V⁰ {ℓ}} → (x ≡ y) ≃ (x .fst ≡ y .fst)
 cor11-1 {ℓ = ℓ} {x = x} {y = y} = embeddingToEquivOfPath (cor11 .snd) x y
 
-infixr 15 _∘e_
+-- infixr 15 _∘e_
 
-_∘e_ : {ℓ ℓ' ℓ'' : Level} → {A : Type ℓ} → {B : Type ℓ'} → {C : Type ℓ''} → B ≃ C → A ≃ B → A ≃ C
-_∘e_ {A = A} {B = B} {C = C} (l₁ , l₂) (r₁ , r₂) = eqfun , equivprf where
-  eqfun = l₁ ∘ r₁
-  equivprf : isEquiv eqfun
-  equivprf .equiv-proof c = inh , contrprf where
-    inh : fiber eqfun c
-    inh .fst = r₂ .equiv-proof (l₂ .equiv-proof c .fst .fst) .fst .fst
-    inh .snd = cong l₁ (rr (l₂ .equiv-proof c .fst .fst)) ∙ ll c where
-      ll : (c' : C) → l₁ (l₂ .equiv-proof c' .fst .fst) ≡ c'
-      ll c' = l₂ .equiv-proof c' .fst .snd
-      rr : (b' : B) → r₁ (r₂ .equiv-proof b' .fst .fst) ≡ b'
-      rr b' = r₂ .equiv-proof b' .fst .snd
-    contrprf : (d : fiber eqfun c) → inh ≡ d
-    contrprf (a , p) = {!!}
+-- _∘e_ : {ℓ ℓ' ℓ'' : Level} → {A : Type ℓ} → {B : Type ℓ'} → {C : Type ℓ''} → B ≃ C → A ≃ B → A ≃ C
+-- _∘e_ {A = A} {B = B} {C = C} (l₁ , l₂) (r₁ , r₂) = eqfun , equivprf where
+--   eqfun = l₁ ∘ r₁
+--   equivprf : isEquiv eqfun
+--   equivprf .equiv-proof c = inh , contrprf where
+--     inh : fiber eqfun c
+--     inh .fst = r₂ .equiv-proof (l₂ .equiv-proof c .fst .fst) .fst .fst
+--     inh .snd = cong l₁ (rr (l₂ .equiv-proof c .fst .fst)) ∙ ll c where
+--       ll : (c' : C) → l₁ (l₂ .equiv-proof c' .fst .fst) ≡ c'
+--       ll c' = l₂ .equiv-proof c' .fst .snd
+--       rr : (b' : B) → r₁ (r₂ .equiv-proof b' .fst .fst) ≡ b'
+--       rr b' = r₂ .equiv-proof b' .fst .snd
+--     contrprf : (d : fiber eqfun c) → inh ≡ d
+--     contrprf (a , p) = {!!}
 
 -- ... theorem 12
 
-thm12-help : {ℓ : Level} → {x y : V⁰ {ℓ}} → ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ (x .fst)) z ≃ fiber (tilde-∞ (y .fst)) z))
-thm12-help = thm4 ∘e cor11-1
+thm12-help1 : {ℓ : Level} → {x y : V⁰ {ℓ}} → ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ (x .fst)) z ≃ fiber (tilde-∞ (y .fst)) z))
+thm12-help1 = compEquiv cor11-1 thm4
+
+-- couldn't find it in the library
+isPropEquiv : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → isProp A → isProp B → isProp (A ≃ B)
+isPropEquiv _ pB = isPropΣ (isPropΠ (λ _ → pB)) isPropIsEquiv
+
+thm12-help2 : {ℓ : Level} → (x y : V⁰ {ℓ}) → isProp ((z : V∞) → (z ∈∞ (x .fst)) ≃ (z ∈∞ (y .fst)))
+thm12-help2 x y = isPropΠ λ z → isPropEquiv (isEmbedding→hasPropFibers {!!} z) {!!} -- pretty sure they should be `x .snd .fst` and similarly `isEmbedding→hasPropFibers (y .snd .fst) z`
+
+isPropRespectEquiv : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → (A ≃ B) → isProp A → isProp B
+isPropRespectEquiv = isOfHLevelRespectEquiv 1
 
 thm12 : {ℓ : Level} → isSet (V⁰ {ℓ})
-thm12 x y x₁ y₁ = {!!}
+thm12 x y = isPropRespectEquiv (invEquiv thm12-help1) (thm12-help2 x y)
+
+-- sup desup
+
+postulate sup⁰ : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
+-- sup⁰ (A , f) = sup-∞ A (λ z → f .fst z .fst) , (λ x y → {!!}) , {!!}
+
+postulate desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
