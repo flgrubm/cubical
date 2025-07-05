@@ -32,15 +32,17 @@ open import Cubical.Data.W.W
 private
   variable
     ℓ ℓ' ℓ'' : Level
+    A A' : Type ℓ
+    B B' : A → Type ℓ
 
 V∞ : {ℓ : Level} → Type (ℓ-suc ℓ)
 V∞ {ℓ} = W (Type ℓ) (λ x → x)
 
 -- Gylterud 2020
-overline-W : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → (x : W A B) → A
+overline-W : (x : W A B) → A
 overline-W (sup-W a f) = a
 
-tilde-W : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → (x : W A B) → B (overline-W x) → W A B
+tilde-W : (x : W A B) → B (overline-W x) → W A B
 tilde-W (sup-W a f) = f
 
 -- it's not really possible to use sup-∞ as a constructor, is it still helpful to have it?
@@ -53,29 +55,44 @@ overline-∞ = overline-W
 tilde-∞ : (A : V∞ {ℓ}) → overline-∞ A → V∞ {ℓ}
 tilde-∞ = tilde-W
 
+-- try something
+
+_≡W'_ : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → W A B → W A B → Type (ℓ-max ℓ ℓ')
+_≡W'_ {B = B} (sup-W x α) (sup-W y β) = Σ[ p ∈ x ≡ y ] ((z : B x) → (α z ≡W' β (subst B p z)))
+
+_≡W_ : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → W A B → W A B → Type (ℓ-max ℓ ℓ')
+v ≡W w = (sup-W (overline-W v) (tilde-W v)) ≡W' (sup-W (overline-W w) (tilde-W w))
+
+-- maybe try to follow https://elisabeth.stenholm.one/category-of-iterative-sets/trees.w-types.html#3487 in order
+-- ≡-equiv-≡W : {v w : W A B} → ((v ≡ w) ≃ (v ≡W w))
+-- ≡-equiv-≡W {v = v} {w = w} = isoToEquiv (iso to {!!} {!!} {!!})
+--   where
+--     to : (v ≡ w) → (v ≡W' w)
+--     to p = (λ i → overline-W (p i)) , λ z → {!to!}
+
 -- from Gylterud's article
 
-mapΣ : {ℓA ℓB ℓC ℓD : Level} → {A : Type ℓA} → {B : Type ℓB} → {C : A → Type ℓC} → {D : B → Type ℓD} → (f : A → B) → (g : (x : A) → C x → D (f x)) → (Σ[ x ∈ A ] C x) → (Σ[ x ∈ B ] D x)
-mapΣ f g t .fst = f (t .fst)
-mapΣ f g t .snd = g (t .fst) (t .snd)
+-- mapΣ : {ℓA ℓB ℓC ℓD : Level} → {A : Type ℓA} → {B : Type ℓB} → {C : A → Type ℓC} → {D : B → Type ℓD} → (f : A → B) → (g : (x : A) → C x → D (f x)) → (Σ[ x ∈ A ] C x) → (Σ[ x ∈ B ] D x)
+-- mapΣ f g t .fst = f (t .fst)
+-- mapΣ f g t .snd = g (t .fst) (t .snd)
 
-postulate equivΣ : {ℓA ℓB ℓC ℓD : Level} → {A : Type ℓA} → {B : Type ℓB} → {C : A → Type ℓC} → {D : B → Type ℓD} → (e : A ≃ B) → (g : (x : A) → C x ≃ D (e .fst x)) → (Σ[ x ∈ A ] C x) ≃ (Σ[ x ∈ B ] D x)
--- equivΣ e g .fst = mapΣ (e .fst) λ x → g x .fst
--- equivΣ e g .snd = {!!}
+equivΣ : {ℓA ℓB ℓC ℓD : Level} → {A : Type ℓA} → {B : Type ℓB} → {C : A → Type ℓC} → {D : B → Type ℓD} → (e : A ≃ B) → ((x : A) → C x ≃ D (e .fst x)) → (Σ[ x ∈ A ] C x) ≃ (Σ[ x ∈ B ] D x)
+equivΣ = Σ-cong-equiv
 
-
+-- lem1 : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {x y : W A B} → ((x ≡ y) ≃ (Σ[ α ∈ overline-W x ≡ overline-W y ] tilde-W x ≡ (tilde-W y ∘ transport (cong B α))))
+-- lem1 = {!!}
 
 -- this probably won't work
 postulate lem1'' : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {x y : W A B} → ((x ≡ y) ≃ (Σ[ α ∈ overline-W x ≡ overline-W y ] tilde-W x ≡ (tilde-W y ∘ transport (cong B α))))
 -- lem1'' {B = B} {x = x} {y = y} = fundamentalTheoremOfId (λ z₁ z₂ → Σ[ α ∈ overline-W z₁ ≡ overline-W z₂ ] (tilde-W z₁ ≡ (tilde-W z₂ ∘ transport (cong B α)))) (λ z → refl , funExt (λ a → cong (tilde-W z) (sym (transportRefl a)))) {!!} x y
 
-∙reflIsId : {A : Type ℓ} → {x y : A} → (p : x ≡ y) → p ∙ refl ≡ p
-∙reflIsId p = {!!}
+-- ∙reflIsId : {A : Type ℓ} → {x y : A} → (p : x ≡ y) → p ∙ refl ≡ p
+-- ∙reflIsId p = {!!}
 
 lem1' : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {x y : W A B} → ((x ≡ y) ≃ (Σ[ α ∈ overline-W x ≡ overline-W y ] tilde-W x ≡ (tilde-W y ∘ transport (cong B α))))
 lem1' {ℓ} {ℓ'} {A} {B} {x = sup-W a f} {y = sup-W b g} = isoToEquiv (iso to from sec ret) where
-  to : sup-W a f ≡ sup-W b g → Σ[ α ∈ a ≡ b ] f ≡ (g ∘ transport (cong B α))
-  to = J {!!} (refl {x = a} , {!!})
+  postulate to : sup-W a f ≡ sup-W b g → Σ[ α ∈ a ≡ b ] f ≡ (g ∘ transport (cong B α))
+  -- to = J {!!} (refl {x = a} , {!!})
 
   postulate from : (Σ[ α ∈ a ≡ b ] f ≡ (g ∘ transport (cong B α))) → sup-W a f ≡ sup-W b g
   -- from = {!!}
@@ -112,6 +129,16 @@ postulate thm3-leftInv : {ℓ : Level} → {x y : V∞ {ℓ}} → retract (thm3-
 
 thm3 : {ℓ : Level} → {x y : V∞ {ℓ}} → ((x ≡ y) ≃ (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)))
 thm3 {ℓ = ℓ} {x = x} {y = y} = isoToEquiv (iso (thm3-fun {ℓ} {x} {y}) (thm3-inv {ℓ} {x} {y}) (thm3-rightInv {ℓ} {x} {y}) (thm3-leftInv {ℓ} {x} {y}))
+
+-- Gylterud
+
+-- lem4 : {ℓ : Level} → {x y : V∞ {ℓ}} → ((Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z))
+-- lem4 {ℓ} {x} {y} = isoToEquiv (iso to {!!} {!!} {!!})
+--   where
+--     to : (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)) → ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z)
+--     to σ z = {!!}
+
+-- back to Gratzer et al.
 
 thm4-fun : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → (z : V∞) → fiber (tilde-∞ x) z ≡ fiber (tilde-∞ y) z
 thm4-fun {ℓ = ℓ} {x = x} {y = y} p z i = fiber (tilde-∞ (p i)) z
