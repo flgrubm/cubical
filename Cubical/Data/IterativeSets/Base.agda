@@ -57,62 +57,8 @@ overline-∞ = overline-W
 tilde-∞ : (A : V∞ {ℓ}) → overline-∞ A → V∞ {ℓ}
 tilde-∞ = tilde-W
 
--- try something
-
-_≡W'_ : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → W A B → W A B → Type (ℓ-max ℓ ℓ')
-_≡W'_ {B = B} (sup-W x α) (sup-W y β) = Σ[ p ∈ x ≡ y ] ((z : B x) → (α z ≡W' β (subst B p z)))
-
-_≡W_ : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → W A B → W A B → Type (ℓ-max ℓ ℓ')
-v ≡W w = (sup-W (overline-W v) (tilde-W v)) ≡W' (sup-W (overline-W w) (tilde-W w))
-
-postulate ≡W-comp : {u v w : W A B} → (u ≡W v) → (v ≡W w) → (u ≡W w)
--- ≡W-comp p q .fst = (p .fst) ∙ (q .fst)
--- ≡W-comp p q .snd z = {!!}
-
-postulate ≡W-refl : (w : W A B) → w ≡W' w
--- ≡W-refl (sup-W _ _) .fst = refl
--- ≡W-refl (sup-W _ α) .snd z = {!!}
-
-
--- maybe try to follow https://elisabeth.stenholm.one/category-of-iterative-sets/trees.w-types.html#3487 in order
--- ≡-equiv-≡W : {v w : W A B} → ((v ≡ w) ≃ (v ≡W w))
--- ≡-equiv-≡W {v = v} {w = w} = isoToEquiv (iso to {!!} {!!} {!!})
---   where
---     to : (v ≡ w) → (v ≡W' w)
---     to p = (λ i → overline-W (p i)) , λ z → {!to!}
-
--- from Gylterud's article
-
--- mapΣ : {ℓA ℓB ℓC ℓD : Level} → {A : Type ℓA} → {B : Type ℓB} → {C : A → Type ℓC} → {D : B → Type ℓD} → (f : A → B) → (g : (x : A) → C x → D (f x)) → (Σ[ x ∈ A ] C x) → (Σ[ x ∈ B ] D x)
--- mapΣ f g t .fst = f (t .fst)
--- mapΣ f g t .snd = g (t .fst) (t .snd)
-
-equivΣ : {ℓA ℓB ℓC ℓD : Level} → {A : Type ℓA} → {B : Type ℓB} → {C : A → Type ℓC} → {D : B → Type ℓD} → (e : A ≃ B) → ((x : A) → C x ≃ D (e .fst x)) → (Σ[ x ∈ A ] C x) ≃ (Σ[ x ∈ B ] D x)
-equivΣ = Σ-cong-equiv
-
--- lem1 : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {x y : W A B} → ((x ≡ y) ≃ (Σ[ α ∈ overline-W x ≡ overline-W y ] tilde-W x ≡ (tilde-W y ∘ transport (cong B α))))
--- lem1 = {!!}
-
--- this probably won't work
-postulate lem1'' : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {x y : W A B} → ((x ≡ y) ≃ (Σ[ α ∈ overline-W x ≡ overline-W y ] tilde-W x ≡ (tilde-W y ∘ transport (cong B α))))
--- lem1'' {B = B} {x = x} {y = y} = fundamentalTheoremOfId (λ z₁ z₂ → Σ[ α ∈ overline-W z₁ ≡ overline-W z₂ ] (tilde-W z₁ ≡ (tilde-W z₂ ∘ transport (cong B α)))) (λ z → refl , funExt (λ a → cong (tilde-W z) (sym (transportRefl a)))) {!!} x y
-
--- ∙reflIsId : {A : Type ℓ} → {x y : A} → (p : x ≡ y) → p ∙ refl ≡ p
--- ∙reflIsId p = {!!}
-
-lem1' : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {x y : W A B} → ((x ≡ y) ≃ (Σ[ α ∈ overline-W x ≡ overline-W y ] tilde-W x ≡ (tilde-W y ∘ transport (cong B α))))
-lem1' {ℓ} {ℓ'} {A} {B} {x = sup-W a f} {y = sup-W b g} = isoToEquiv (iso to from sec ret) where
-  postulate to : sup-W a f ≡ sup-W b g → Σ[ α ∈ a ≡ b ] f ≡ (g ∘ transport (cong B α))
-  -- to = J {!!} (refl {x = a} , {!!})
-
-  postulate from : (Σ[ α ∈ a ≡ b ] f ≡ (g ∘ transport (cong B α))) → sup-W a f ≡ sup-W b g
-  -- from = {!!}
-
-  postulate sec : section to from
-  -- sec = {!!}
-
-  postulate ret : retract to from
-  -- ret = {!!}
+destruct-V∞ : {x : V∞ {ℓ}} → x ≡ sup-W (overline-∞ x) (tilde-∞ x)
+destruct-V∞ {x = (sup-W A f)} = refl
 
 -- continue with Gratzer, Gylterud, Mörtberg, Stenholm
 
@@ -201,131 +147,134 @@ unorderedPair : V∞ → V∞ → V∞
 unorderedPair x y = sup-∞ Bool (λ b → if b then x else y)
 
 -- iterative sets
+isIterativeSet' : V∞ {ℓ} → Type (ℓ-suc ℓ)
+isIterativeSet' (sup-W A f) = (isEmbedding f) × ((a : A) → isIterativeSet' (f a))
+
 isIterativeSet : V∞ {ℓ} → Type (ℓ-suc ℓ)
-isIterativeSet (sup-W A f) = (isEmbedding f) × ((a : A) → isIterativeSet (f a))
--- potentially don't do pattern matching, change everywhere afterwards?
+isIterativeSet x = isIterativeSet' x -- (sup-W (overline-∞ x) (tilde-∞ x))
 
 V⁰ : {ℓ : Level} → Type (ℓ-suc ℓ)
 V⁰ {ℓ = ℓ} = Σ[ x ∈ V∞ {ℓ} ] isIterativeSet x
 
 overline-0 : V⁰ {ℓ} → Type ℓ
--- overline-0 (sup-W A f , p) = A
 overline-0 = overline-∞ ∘ fst
 
 tilde-0 : (A : V⁰ {ℓ}) → overline-0 A → V∞ {ℓ}
--- tilde-0 (sup-W B f , p) = f
 tilde-0 = tilde-∞ ∘ fst
 
+prf-0 : (A : V⁰ {ℓ}) → isIterativeSet (A .fst)
+prf-0 = snd
+
 isEmbedding-tilde-∞ : {ℓ : Level} → (x : V⁰ {ℓ}) → isEmbedding (tilde-0 x)
-isEmbedding-tilde-∞ (sup-W A f , isitset) = isitset .fst
+isEmbedding-tilde-∞ x = {!prf-0 x .fst!} -- fst ∘ prf-0
 
-lem10 : {ℓ : Level} → (x : V∞ {ℓ}) → isProp (isIterativeSet x)
-lem10 {ℓ = ℓ} (sup-W A f) = isProp× (isPropIsEmbedding) helper where
-  helper : isProp ((a : A) → isIterativeSet (f a))
-  helper g h i x = lem10 (f x) (g x) (h x) i
+-- lem10 : {ℓ : Level} → (x : V∞ {ℓ}) → isProp (isIterativeSet x)
+-- lem10 {ℓ = ℓ} (sup-W A f) = isProp× (isPropIsEmbedding) helper where
+--   helper : isProp ((a : A) → isIterativeSet (f a))
+--   helper g h i x = lem10 (f x) (g x) (h x) i
 
-cor11 : {ℓ : Level} → V⁰ {ℓ} ↪ V∞ {ℓ}
-cor11 {ℓ = ℓ} = EmbeddingΣProp lem10
+-- cor11 : {ℓ : Level} → V⁰ {ℓ} ↪ V∞ {ℓ}
+-- cor11 {ℓ = ℓ} = EmbeddingΣProp lem10
 
--- maybe this is somthing for Cubical.Functions.Embedding?
-embeddingToEquivOfPath : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → {f : A → B} → isEmbedding f → (x y : A) → (x ≡ y) ≃ (f x ≡ f y)
-embeddingToEquivOfPath {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {f = f} isemb x y = cong f , isemb x y
+-- -- maybe this is somthing for Cubical.Functions.Embedding?
+-- embeddingToEquivOfPath : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → {f : A → B} → isEmbedding f → (x y : A) → (x ≡ y) ≃ (f x ≡ f y)
+-- embeddingToEquivOfPath {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {f = f} isemb x y = cong f , isemb x y
 
-cor11-1 : {ℓ : Level} → {x y : V⁰ {ℓ}} → (x ≡ y) ≃ (x .fst ≡ y .fst)
-cor11-1 {ℓ = ℓ} {x = x} {y = y} = embeddingToEquivOfPath (cor11 .snd) x y
+-- cor11-1 : {ℓ : Level} → {x y : V⁰ {ℓ}} → (x ≡ y) ≃ (x .fst ≡ y .fst)
+-- cor11-1 {ℓ = ℓ} {x = x} {y = y} = embeddingToEquivOfPath (cor11 .snd) x y
 
-thm12-help1 : {ℓ : Level} → {x y : V⁰ {ℓ}} → ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ (x .fst)) z ≃ fiber (tilde-∞ (y .fst)) z))
-thm12-help1 = compEquiv cor11-1 thm4
+-- thm12-help1 : {ℓ : Level} → {x y : V⁰ {ℓ}} → ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ (x .fst)) z ≃ fiber (tilde-∞ (y .fst)) z))
+-- thm12-help1 = compEquiv cor11-1 thm4
 
--- couldn't find it in the library
-isPropEquiv : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → isProp A → isProp B → isProp (A ≃ B)
-isPropEquiv _ pB = isPropΣ (isPropΠ (λ _ → pB)) isPropIsEquiv
+-- -- couldn't find it in the library
+-- isPropEquiv : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → isProp A → isProp B → isProp (A ≃ B)
+-- isPropEquiv _ pB = isPropΣ (isPropΠ (λ _ → pB)) isPropIsEquiv
 
-thm12-help2 : {ℓ : Level} → (x y : V⁰ {ℓ}) → isProp ((z : V∞) → (z ∈∞ (x .fst)) ≃ (z ∈∞ (y .fst)))
-thm12-help2 x y = isPropΠ λ z → isPropEquiv (isEmbedding→hasPropFibers (isEmbedding-tilde-∞ x) z) (isEmbedding→hasPropFibers (isEmbedding-tilde-∞ y) z)
+-- thm12-help2 : {ℓ : Level} → (x y : V⁰ {ℓ}) → isProp ((z : V∞) → (z ∈∞ (x .fst)) ≃ (z ∈∞ (y .fst)))
+-- thm12-help2 x y = isPropΠ λ z → isPropEquiv (isEmbedding→hasPropFibers (isEmbedding-tilde-∞ x) z) (isEmbedding→hasPropFibers (isEmbedding-tilde-∞ y) z)
 
-thm12 : {ℓ : Level} → isSet (V⁰ {ℓ})
-thm12 x y = isOfHLevelRespectEquiv 1 (invEquiv thm12-help1) (thm12-help2 x y)
+-- thm12 : {ℓ : Level} → isSet (V⁰ {ℓ})
+-- thm12 x y = isOfHLevelRespectEquiv 1 (invEquiv thm12-help1) (thm12-help2 x y)
 
--- sup desup
+-- -- sup desup
 
-isEmbeddingΣ→isEmbeddingFst : {ℓ ℓ' ℓ'' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {X : Type ℓ''} → (f : X → Σ[ x ∈ A ] B x) → isEmbedding f → isEmbedding (fst ∘ f)
-isEmbeddingΣ→isEmbeddingFst {ℓ} {ℓ'} {ℓ''} {A} {B} {X} f isemb = hasPropFibers→isEmbedding hpf-fst∘f
-  where
-    hpf-f : hasPropFibers f
-    hpf-f = isEmbedding→hasPropFibers isemb
-    postulate hpf-fst∘f : (z : A) → isProp (fiber (fst ∘ f) z) -- hasPropFibers (fst ∘ f)
-    -- hpf-fst∘f z (x , px) (y , py) i = {!!}
+-- isEmbeddingΣ→isEmbeddingFst : {ℓ ℓ' ℓ'' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {X : Type ℓ''} → (f : X → Σ[ x ∈ A ] B x) → isEmbedding f → isEmbedding (fst ∘ f)
+-- isEmbeddingΣ→isEmbeddingFst {ℓ} {ℓ'} {ℓ''} {A} {B} {X} f isemb = hasPropFibers→isEmbedding hpf-fst∘f
+--   where
+--     hpf-f : hasPropFibers f
+--     hpf-f = isEmbedding→hasPropFibers isemb
+--     postulate hpf-fst∘f : (z : A) → isProp (fiber (fst ∘ f) z) -- hasPropFibers (fst ∘ f)
+--     -- hpf-fst∘f z (x , px) (y , py) i = {!!}
 
-sup⁰ : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
-sup⁰ {ℓ} (A , f) .fst = sup-∞ A (fst ∘ (f .fst)) -- (λ z → f .fst z .fst)
-sup⁰ {ℓ} (A , f) .snd .fst = isEmbeddingΣ→isEmbeddingFst (f .fst) (f .snd)
-sup⁰ {ℓ} (A , f) .snd .snd = snd ∘ (f .fst) -- λ a → f .fst a .snd
-
-
-postulate desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
+-- sup⁰ : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
+-- sup⁰ {ℓ} (A , f) .fst = sup-∞ A (fst ∘ (f .fst)) -- (λ z → f .fst z .fst)
+-- sup⁰ {ℓ} (A , f) .snd .fst = isEmbeddingΣ→isEmbeddingFst (f .fst) (f .snd)
+-- sup⁰ {ℓ} (A , f) .snd .snd = snd ∘ (f .fst) -- λ a → f .fst a .snd
 
 
--- Ch. 3
-
-El⁰ : V⁰ {ℓ} → Type ℓ
-El⁰ = overline-0
-
-postulate embeddingIntoIsSet→isSet : {A : Type ℓ} {B : Type ℓ'} → A ↪ B → isSet B → isSet A
--- embeddingIntoIsSet→isSet {A} {B} (e , isemb) issetB = {!!}
-
-postulate thm17 : {ℓ : Level} → (x : V⁰ {ℓ}) → isSet (El⁰ x)
--- thm17 {ℓ} x = embeddingIntoIsSet→isSet {A = El⁰ x} {B = V⁰ {ℓ}} ({!!} , {!isEmbedding-tilde-∞!}) (thm12 {ℓ})
-
-postulate thm18 : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
-
-empty⁰ : V⁰
-empty⁰ = emptySet-∞ , (λ ()) , λ ()
-
--- isProp-isSet→isEmbedding : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → (f : A → B) → isProp A → isSet B → isEmbedding f
--- isProp-isSet→isEmbedding {A = A} {B = B} f isp iss = {!!}
-
-postulate functionFromIsProp→isEmbedding : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → (f : A → B) → isProp A → isEmbedding f
--- functionFromIsProp→isEmbedding f isprop = hasPropFibers→isEmbedding λ z x y i → (isprop (x .fst) (y .fst)) i , {!!} -- ((cong f (isprop (isprop (x .fst) (y .fst)) x)) ∙ (x .snd))
-
-unit⁰ : V⁰ {ℓ-zero}
-unit⁰ = singleton emptySet-∞ , isemb , isiterative
-  where
-    isemb : isEmbedding (λ _ → emptySet-∞)
-    isemb = functionFromIsProp→isEmbedding (λ _ → emptySet-∞) isPropUnit
-
-    isiterative : (a : Unit) → isIterativeSet emptySet-∞
-    isiterative _ = empty⁰ .snd
-
-bool⁰ : V⁰ {ℓ-zero}
-bool⁰ = unorderedPair (empty⁰ .fst) (unit⁰ .fst) , isemb , isiterative
-  where
-    postulate isemb : isEmbedding (λ b → if b then empty⁰ .fst else unit⁰ .fst)
-    -- isemb = {!!} -- idea: empty⁰ /= unit⁰
-
-    isiterative : (b : Bool) → isIterativeSet (if b then empty⁰ .fst else unit⁰ .fst)
-    isiterative false = unit⁰ .snd
-    isiterative true = empty⁰ .snd
-
-empty⁰Is⊥ : El⁰ empty⁰ ≡ ⊥
-empty⁰Is⊥ = refl
-
-unit⁰IsUnit : El⁰ unit⁰ ≡ Unit
-unit⁰IsUnit = refl
-
-bool⁰IsBool : El⁰ bool⁰ ≡ Bool
-bool⁰IsBool = refl
+-- postulate desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
 
 
---
+-- -- Ch. 3
 
-suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
-suc⁰ x = sup⁰ (overline-0 x ⊎ Unit , ϕₓ , ϕₓemb)
-  where
-    ϕₓ : (overline-0 x ⊎ Unit) → V⁰ {{!!}}
-    ϕₓ (inl a) = (tilde-0 x a) , {!x .snd!}
-    ϕₓ (fsuc a) = x
+-- El⁰ : V⁰ {ℓ} → Type ℓ
+-- El⁰ = overline-0
 
-    ϕₓemb : {!!}
-    ϕₓemb = {!!}
+-- postulate embeddingIntoIsSet→isSet : {A : Type ℓ} {B : Type ℓ'} → A ↪ B → isSet B → isSet A
+-- -- embeddingIntoIsSet→isSet {A} {B} (e , isemb) issetB = {!!}
+
+-- postulate thm17 : {ℓ : Level} → (x : V⁰ {ℓ}) → isSet (El⁰ x)
+-- -- thm17 {ℓ} x = embeddingIntoIsSet→isSet {A = El⁰ x} {B = V⁰ {ℓ}} ({!!} , {!isEmbedding-tilde-∞!}) (thm12 {ℓ})
+
+-- postulate thm18 : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
+
+-- empty⁰ : V⁰
+-- empty⁰ = emptySet-∞ , (λ ()) , λ ()
+
+-- -- isProp-isSet→isEmbedding : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → (f : A → B) → isProp A → isSet B → isEmbedding f
+-- -- isProp-isSet→isEmbedding {A = A} {B = B} f isp iss = {!!}
+
+-- postulate functionFromIsProp→isEmbedding : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → (f : A → B) → isProp A → isEmbedding f
+-- -- functionFromIsProp→isEmbedding f isprop = hasPropFibers→isEmbedding λ z x y i → (isprop (x .fst) (y .fst)) i , {!!} -- ((cong f (isprop (isprop (x .fst) (y .fst)) x)) ∙ (x .snd))
+
+-- unit⁰ : V⁰ {ℓ-zero}
+-- unit⁰ = singleton emptySet-∞ , isemb , isiterative
+--   where
+--     isemb : isEmbedding (λ _ → emptySet-∞)
+--     isemb = functionFromIsProp→isEmbedding (λ _ → emptySet-∞) isPropUnit
+
+--     isiterative : (a : Unit) → isIterativeSet emptySet-∞
+--     isiterative _ = empty⁰ .snd
+
+-- bool⁰ : V⁰ {ℓ-zero}
+-- bool⁰ = unorderedPair (empty⁰ .fst) (unit⁰ .fst) , isemb , isiterative
+--   where
+--     postulate isemb : isEmbedding (λ b → if b then empty⁰ .fst else unit⁰ .fst)
+--     -- isemb = {!!} -- idea: empty⁰ /= unit⁰
+
+--     isiterative : (b : Bool) → isIterativeSet (if b then empty⁰ .fst else unit⁰ .fst)
+--     isiterative false = unit⁰ .snd
+--     isiterative true = empty⁰ .snd
+
+-- empty⁰Is⊥ : El⁰ empty⁰ ≡ ⊥
+-- empty⁰Is⊥ = refl
+
+-- unit⁰IsUnit : El⁰ unit⁰ ≡ Unit
+-- unit⁰IsUnit = refl
+
+-- bool⁰IsBool : El⁰ bool⁰ ≡ Bool
+-- bool⁰IsBool = refl
+
+
+-- --
+
+-- suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
+-- suc⁰ x = sup⁰ (overline-0 x ⊎ Unit , ϕₓ , ϕₓemb)
+--   where
+--     ϕₓ : (overline-0 x ⊎ Unit) → V⁰ {{!!}}
+--     ϕₓ (inl a) = (tilde-0 x a) , {!x .snd!}
+--     ϕₓ (fsuc a) = x
+
+--     ϕₓemb : {!!}
+--     ϕₓemb = {!!}
     
