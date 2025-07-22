@@ -20,6 +20,8 @@ open import Cubical.Data.Unit
 open import Cubical.Data.Bool
 open import Cubical.Functions.FunExtEquiv
 open import Cubical.Foundations.HLevels
+open import Cubical.Data.Nat
+open import Cubical.Data.SumFin
 
 open import Cubical.Data.Sigma
 
@@ -62,6 +64,15 @@ _≡W'_ {B = B} (sup-W x α) (sup-W y β) = Σ[ p ∈ x ≡ y ] ((z : B x) → (
 
 _≡W_ : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → W A B → W A B → Type (ℓ-max ℓ ℓ')
 v ≡W w = (sup-W (overline-W v) (tilde-W v)) ≡W' (sup-W (overline-W w) (tilde-W w))
+
+postulate ≡W-comp : {u v w : W A B} → (u ≡W v) → (v ≡W w) → (u ≡W w)
+-- ≡W-comp p q .fst = (p .fst) ∙ (q .fst)
+-- ≡W-comp p q .snd z = {!!}
+
+postulate ≡W-refl : (w : W A B) → w ≡W' w
+-- ≡W-refl (sup-W _ _) .fst = refl
+-- ≡W-refl (sup-W _ α) .snd z = {!!}
+
 
 -- maybe try to follow https://elisabeth.stenholm.one/category-of-iterative-sets/trees.w-types.html#3487 in order
 -- ≡-equiv-≡W : {v w : W A B} → ((v ≡ w) ≃ (v ≡W w))
@@ -266,4 +277,55 @@ postulate embeddingIntoIsSet→isSet : {A : Type ℓ} {B : Type ℓ'} → A ↪ 
 postulate thm17 : {ℓ : Level} → (x : V⁰ {ℓ}) → isSet (El⁰ x)
 -- thm17 {ℓ} x = embeddingIntoIsSet→isSet {A = El⁰ x} {B = V⁰ {ℓ}} ({!!} , {!isEmbedding-tilde-∞!}) (thm12 {ℓ})
 
+postulate thm18 : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
 
+empty⁰ : V⁰
+empty⁰ = emptySet-∞ , (λ ()) , λ ()
+
+-- isProp-isSet→isEmbedding : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → (f : A → B) → isProp A → isSet B → isEmbedding f
+-- isProp-isSet→isEmbedding {A = A} {B = B} f isp iss = {!!}
+
+postulate functionFromIsProp→isEmbedding : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → (f : A → B) → isProp A → isEmbedding f
+-- functionFromIsProp→isEmbedding f isprop = hasPropFibers→isEmbedding λ z x y i → (isprop (x .fst) (y .fst)) i , {!!} -- ((cong f (isprop (isprop (x .fst) (y .fst)) x)) ∙ (x .snd))
+
+unit⁰ : V⁰ {ℓ-zero}
+unit⁰ = singleton emptySet-∞ , isemb , isiterative
+  where
+    isemb : isEmbedding (λ _ → emptySet-∞)
+    isemb = functionFromIsProp→isEmbedding (λ _ → emptySet-∞) isPropUnit
+
+    isiterative : (a : Unit) → isIterativeSet emptySet-∞
+    isiterative _ = empty⁰ .snd
+
+bool⁰ : V⁰ {ℓ-zero}
+bool⁰ = unorderedPair (empty⁰ .fst) (unit⁰ .fst) , isemb , isiterative
+  where
+    postulate isemb : isEmbedding (λ b → if b then empty⁰ .fst else unit⁰ .fst)
+    -- isemb = {!!} -- idea: empty⁰ /= unit⁰
+
+    isiterative : (b : Bool) → isIterativeSet (if b then empty⁰ .fst else unit⁰ .fst)
+    isiterative false = unit⁰ .snd
+    isiterative true = empty⁰ .snd
+
+empty⁰Is⊥ : El⁰ empty⁰ ≡ ⊥
+empty⁰Is⊥ = refl
+
+unit⁰IsUnit : El⁰ unit⁰ ≡ Unit
+unit⁰IsUnit = refl
+
+bool⁰IsBool : El⁰ bool⁰ ≡ Bool
+bool⁰IsBool = refl
+
+
+--
+
+suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
+suc⁰ x = sup⁰ (overline-0 x ⊎ Unit , ϕₓ , ϕₓemb)
+  where
+    ϕₓ : (overline-0 x ⊎ Unit) → V⁰ {{!!}}
+    ϕₓ (inl a) = (tilde-0 x a) , {!x .snd!}
+    ϕₓ (fsuc a) = x
+
+    ϕₓemb : {!!}
+    ϕₓemb = {!!}
+    
