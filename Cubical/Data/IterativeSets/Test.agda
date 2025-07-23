@@ -90,3 +90,12 @@ lem1' {ℓ} {ℓ'} {A} {B} {x = sup-W a f} {y = sup-W b g} = isoToEquiv (iso to 
 
   postulate ret : retract to from
   -- ret = {!!}
+-- 
+-- Gylterud
+
+-- lem4 : {ℓ : Level} → {x y : V∞ {ℓ}} → ((Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z))
+-- lem4 {ℓ} {x} {y} = isoToEquiv (iso to {!!} {!!} {!!})
+--   where
+--     to : (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)) → ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z)
+--     to σ z = {!!}
+
