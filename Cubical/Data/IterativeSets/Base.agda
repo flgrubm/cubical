@@ -47,7 +47,9 @@ overline-W (sup-W a f) = a
 tilde-W : (x : W A B) → B (overline-W x) → W A B
 tilde-W (sup-W a f) = f
 
--- it's not really possible to use sup-∞ as a constructor, is it still helpful to have it?
+-- why does the following not work?
+--pattern sup-∞ = sup-W
+-- in the meantime define like this
 sup-∞ : (A : Type ℓ) → (A → V∞) → V∞
 sup-∞ = sup-W
 
@@ -90,6 +92,10 @@ overline-0 = overline-∞ ∘ fst
 tilde-0 : (A : V⁰ {ℓ}) → overline-0 A → V∞ {ℓ}
 -- tilde-0 (sup-W B f , p) = f
 tilde-0 = tilde-∞ ∘ fst
+
+-- see module T00Tilde-0
+postulate tilde-0' : (A : V⁰ {ℓ}) → overline-0 A → V⁰ {ℓ}
+-- tilde-0' A y = tilde-0 A y , {!A .snd .snd y!}
 
 isEmbedding-tilde-∞ : {ℓ : Level} → (x : V⁰ {ℓ}) → isEmbedding (tilde-0 x)
 isEmbedding-tilde-∞ (sup-W A f , isitset) = isitset .fst
@@ -151,4 +157,35 @@ postulate bool⁰ : V⁰ {ℓ}
 postulate bool⁰IsBool : El⁰ bool⁰ ≡ Bool
 
 -- Proposition 20
+postulate ℕ⁰ : V⁰ {ℓ}
+postulate ℕ⁰Isℕ : El⁰ ℕ⁰ ≡ ℕ
 
+-- Proposition 21
+postulate orderedPair : (V⁰ {ℓ} × V⁰ {ℓ}) ↪ V⁰ {ℓ}
+
+-- Proposition 22
+postulate Π⁰ : (x : V⁰ {ℓ}) → (El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
+postulate Π⁰IsΠ : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Π⁰ x y) ≡ ((a : El⁰ x) → El⁰ (y a))
+
+-- Corollary 23
+_→⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
+x →⁰ y = Π⁰ x (λ _ → y)
+
+→⁰Is→ : {x y : V⁰ {ℓ}} → El⁰ (x →⁰ y) ≡ (El⁰ x → El⁰ y)
+→⁰Is→ = Π⁰IsΠ
+
+-- Proposition 24
+postulate Σ⁰ : (x : V⁰ {ℓ}) → (El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
+postulate Σ⁰IsΣ : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Σ⁰ x y) ≡ (Σ (El⁰ x) (λ a → El⁰ (y a)))
+
+-- Corollary 25
+_×⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
+x ×⁰ y = Σ⁰ x (λ _ → y)
+
+×⁰Is× : {x y : V⁰ {ℓ}} → El⁰ (x ×⁰ y) ≡ ((El⁰ x) × (El⁰ y))
+×⁰Is× = Σ⁰IsΣ
+
+
+postulate lem26 : {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} → isSet X → (x₀ : X) → (f : (X × Y) → Z) → isEmbedding f → isEmbedding (λ y → f (x₀ , y))
+
+postulate lem27 : {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} (f : X ↪ Z) → (g : Y ↪ Z) → ((x : X) (y : Y) → (f .fst x ≡ g .fst y) → ⊥) → ((X ⊎ Y) ↪ Z)
