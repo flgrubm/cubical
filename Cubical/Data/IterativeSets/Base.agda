@@ -132,7 +132,6 @@ postulate sup⁰ : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) →
 
 postulate desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
 
-
 -- Ch. 3
 
 El⁰ : V⁰ {ℓ} → Type ℓ
