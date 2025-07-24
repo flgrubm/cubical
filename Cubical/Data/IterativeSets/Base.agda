@@ -128,7 +128,10 @@ thm12-help2 x y = isPropΠ λ z → isPropEquiv (isEmbedding→hasPropFibers (is
 thm12 : {ℓ : Level} → isSet (V⁰ {ℓ})
 thm12 x y = isOfHLevelRespectEquiv 1 (invEquiv thm12-help1) (thm12-help2 x y)
 
-postulate sup⁰ : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
+sup⁰ : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
+sup⁰ {ℓ} (A , f) .fst = sup-∞ A (compEmbedding cor11 f .fst) -- λ x → f .fst x .fst
+sup⁰ {ℓ} (A , f) .snd .fst = compEmbedding cor11 f .snd
+sup⁰ {ℓ} (A , f) .snd .snd y = f .fst y .snd
 
 postulate desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
 
