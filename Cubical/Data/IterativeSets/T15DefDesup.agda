@@ -37,3 +37,13 @@ private
     ℓ ℓ' ℓ'' : Level
     A A' : Type ℓ
     B B' : A → Type ℓ
+
+test : {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''} → (f : A → B) → (g : B → C) → isEmbedding g → isEmbedding (g ∘ f) → isEmbedding f
+test = {!!}
+-- work with injections, shouldn't be too bad
+
+desup⁰' : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
+desup⁰' (sup-W A f , isitset) .fst = A
+desup⁰' (sup-W A f , isitset) .snd .fst x .fst = f x
+desup⁰' (sup-W A f , isitset) .snd .fst x .snd = isitset .snd x
+desup⁰' (sup-W A f , isitset) .snd .snd = {!!}
