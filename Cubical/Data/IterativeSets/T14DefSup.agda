@@ -36,18 +36,12 @@ private
   variable
     ℓ ℓ' ℓ'' : Level
     A A' : Type ℓ
-    B B' : A → Type ℓ
-
-isEmbeddingΣ→isEmbeddingFst : {ℓ ℓ' ℓ'' : Level} → {A : Type ℓ} → {B : A → Type ℓ'} → {X : Type ℓ''} → (f : X → Σ[ x ∈ A ] B x) → isEmbedding f → isEmbedding (fst ∘ f)
-isEmbeddingΣ→isEmbeddingFst {ℓ} {ℓ'} {ℓ''} {A} {B} {X} f isemb = hasPropFibers→isEmbedding hpf-fst∘f
-  where
-    hpf-f : hasPropFibers f
-    hpf-f = isEmbedding→hasPropFibers isemb
-    postulate hpf-fst∘f : (z : A) → isProp (fiber (fst ∘ f) z) -- hasPropFibers (fst ∘ f)
-    -- hpf-fst∘f z (x , px) (y , py) i = {!!}
+    B B' : A → Type ℓ'
+    C C' : Type ℓ''
 
 sup⁰' : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
-sup⁰' {ℓ} (A , f) .fst = sup-∞ A (fst ∘ (f .fst)) -- (λ z → f .fst z .fst)
-sup⁰' {ℓ} (A , f) .snd .fst = isEmbeddingΣ→isEmbeddingFst (f .fst) (f .snd)
-sup⁰' {ℓ} (A , f) .snd .snd = snd ∘ (f .fst) -- λ a → f .fst a .snd
+sup⁰' {ℓ} (A , f) .fst = sup-∞ A (compEmbedding cor11 f .fst) -- λ x → f .fst x .fst
+sup⁰' {ℓ} (A , f) .snd .fst = compEmbedding cor11 f .snd
+sup⁰' {ℓ} (A , f) .snd .snd y = f .fst y .snd
+
 
