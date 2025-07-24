@@ -41,4 +41,4 @@ private
 
 tilde-0'' : (A : V⁰ {ℓ}) → overline-0 A → V⁰ {ℓ}
 -- tilde-0'' A y = tilde-0 A y , {!A .snd .snd y!}
-tilde-0'' A y = tilde-0 A y , {!!}
+tilde-0'' A y = tilde-0 A y , {!map-snd (A .snd) y!}
