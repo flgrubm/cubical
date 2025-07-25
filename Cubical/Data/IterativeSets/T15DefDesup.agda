@@ -38,12 +38,27 @@ private
     A A' : Type ℓ
     B B' : A → Type ℓ
 
-test : {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''} → (f : A → B) → (g : B → C) → isEmbedding g → isEmbedding (g ∘ f) → isEmbedding f
-test = {!!}
--- work with injections, shouldn't be too bad
+-- maybe interesting to add to the library?
+isEquivEquiv : {A : Type ℓ} {B : Type ℓ'} {f : A → B} → isEquiv f → A ≃ B
+isEquivEquiv {f = f} iseq = f , iseq
+
+firstInIsEmbeddingCompIsEmbedding : {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''} → (f : A → B) → (g : B → C) → isEmbedding g → isEmbedding (g ∘ f) → isEmbedding f
+firstInIsEmbeddingCompIsEmbedding {A = A} {B = B} {C = C} f g embg emb∘ = hasPropFibers→isEmbedding hpff
+  where
+    postulate hpff : hasPropFibers f
+    -- hpff b (x , pxg) (y , pyg) = ΣPathP (p .fst , λ i → cong (invIsEq {!embg!}) (p .snd i))
+      -- where
+      --   p : Σ[ q ∈ x ≡ y ] PathP _ (cong g pxg) (cong g pyg)
+      --   p = PathPΣ (isEmbedding→hasPropFibers emb∘ (g b) (x , cong g pxg) (y , cong g pyg))
+
+-- firstInIsEmbeddingCompIsEmbedding f g embg emb∘ w x = equivIsEquiv (compEquiv (isEquivEquiv (emb∘ w x)) (invEquiv (isEquivEquiv {!embg (f w) (f x)!})))
+
+firstInInjCompIsInj : {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''} → (f : A → B) → (g : B → C) → ((w x : A) → g (f w) ≡ g (f x) → w ≡ x) → {w x : A} → f w ≡ f x → w ≡ x
+firstInInjCompIsInj f g inj∘ {w} {x} p = inj∘ w x (cong g p)
 
 desup⁰' : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
 desup⁰' (sup-W A f , isitset) .fst = A
 desup⁰' (sup-W A f , isitset) .snd .fst x .fst = f x
 desup⁰' (sup-W A f , isitset) .snd .fst x .snd = isitset .snd x
-desup⁰' (sup-W A f , isitset) .snd .snd = {!!}
+desup⁰' (sup-W A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-W A f , isitset))))
+-- desup⁰' (sup-W A f , isitset) .snd .snd = firstInIsEmbeddingCompIsEmbedding (desup⁰' (sup-W A f , isitset) .snd .fst) (cor11 .fst) (cor11 .snd) (isEmbedding-tilde-∞ (sup-W A f , isitset))

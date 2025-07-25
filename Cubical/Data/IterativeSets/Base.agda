@@ -25,8 +25,6 @@ open import Cubical.Data.SumFin
 
 open import Cubical.Data.Sigma
 
--- open import Cubical.
-
 open import Cubical.Homotopy.Base
 
 open import Cubical.Data.W.W
@@ -94,9 +92,11 @@ tilde-0 : (A : V⁰ {ℓ}) → overline-0 A → V∞ {ℓ}
 tilde-0 = tilde-∞ ∘ fst
 
 -- see module T00Tilde-0
+-- actually this is just desup⁰
 postulate tilde-0' : (A : V⁰ {ℓ}) → overline-0 A → V⁰ {ℓ}
 -- tilde-0' A y = tilde-0 A y , {!A .snd .snd y!}
 
+-- TODO: rename to isEmbedding-tilde-0
 isEmbedding-tilde-∞ : {ℓ : Level} → (x : V⁰ {ℓ}) → isEmbedding (tilde-0 x)
 isEmbedding-tilde-∞ (sup-W A f , isitset) = isitset .fst
 
@@ -133,7 +133,15 @@ sup⁰ {ℓ} (A , f) .fst = sup-∞ A (compEmbedding cor11 f .fst) -- λ x → f
 sup⁰ {ℓ} (A , f) .snd .fst = compEmbedding cor11 f .snd
 sup⁰ {ℓ} (A , f) .snd .snd y = f .fst y .snd
 
-postulate desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
+-- if f : A → B and g : B → C are functions and g ∘ f is injective, then f is injective too
+-- probably can be generalized to embeddings (potentially with assuming that g is an embedding too, but this is a WIP, see `T15DefDesup.agda`
+firstInInjCompIsInj : {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''} → (f : A → B) → (g : B → C) → ((w x : A) → g (f w) ≡ g (f x) → w ≡ x) → {w x : A} → f w ≡ f x → w ≡ x
+firstInInjCompIsInj f g inj∘ {w} {x} p = inj∘ w x (cong g p)
+
+desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
+desup⁰ (sup-W A f , isitset) .fst = A
+desup⁰ (sup-W A f , isitset) .snd .fst x = f x , isitset .snd x
+desup⁰ (sup-W A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-W A f , isitset))))
 
 -- Ch. 3
 
