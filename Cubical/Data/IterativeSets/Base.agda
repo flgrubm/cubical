@@ -91,11 +91,6 @@ tilde-0 : (A : V⁰ {ℓ}) → overline-0 A → V∞ {ℓ}
 -- tilde-0 (sup-W B f , p) = f
 tilde-0 = tilde-∞ ∘ fst
 
--- see module T00Tilde-0
--- actually this is just desup⁰
-postulate tilde-0' : (A : V⁰ {ℓ}) → overline-0 A → V⁰ {ℓ}
--- tilde-0' A y = tilde-0 A y , {!A .snd .snd y!}
-
 -- TODO: rename to isEmbedding-tilde-0
 isEmbedding-tilde-∞ : {ℓ : Level} → (x : V⁰ {ℓ}) → isEmbedding (tilde-0 x)
 isEmbedding-tilde-∞ (sup-W A f , isitset) = isitset .fst
@@ -148,7 +143,8 @@ desup⁰ (sup-W A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsI
 El⁰ : V⁰ {ℓ} → Type ℓ
 El⁰ = overline-0
 
-postulate thm17 : {ℓ : Level} → (x : V⁰ {ℓ}) → isSet (El⁰ x)
+thm17 : {ℓ : Level} → (x : V⁰ {ℓ}) → isSet (El⁰ x)
+thm17 {ℓ = ℓ} (sup-W A f , isitset) = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} (sup-W A f , isitset)} {B = V⁰ {ℓ}} (snd (desup⁰ (sup-W A f , isitset))) (thm12 {ℓ})
 
 postulate pro18 : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
 
