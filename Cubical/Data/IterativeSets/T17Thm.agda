@@ -38,14 +38,10 @@ private
     A A' : Type ℓ
     B B' : A → Type ℓ
 
--- don't need the following
-embeddingIntoIsSet→isSet : {A : Type ℓ} {B : Type ℓ'} → A ↪ B → isSet B → isSet A
-embeddingIntoIsSet→isSet = Embedding-into-isSet→isSet
-
 -- Embedding-into-isSet→isSet
 
 thm17' : {ℓ : Level} → (x : V⁰ {ℓ}) → isSet (El⁰ x)
-thm17' {ℓ = ℓ} (x , (xemb , elsit)) = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} (x , (xemb , elsit))} {B = V⁰ {ℓ}} ((λ y → tilde-0 (x , (xemb , elsit)) y , {!isit .snd!}) , {!!}) (thm12 {ℓ})
--- thm17' {ℓ = ℓ} x = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} x} {B = V⁰ {ℓ}} {!!} (thm12 {ℓ})
+thm17' {ℓ = ℓ} (sup-W A f , isitset) = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} (sup-W A f , isitset)} {B = V⁰ {ℓ}} (snd (desup⁰ (sup-W A f , isitset))) (thm12 {ℓ})
+-- thm17' {ℓ = ℓ} x = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} x} {B = V⁰ {ℓ}} (snd (desup⁰ x)) (thm12 {ℓ})
 
 
