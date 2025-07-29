@@ -37,3 +37,25 @@ private
     ℓ ℓ' ℓ'' : Level
     A A' : Type ℓ
     B B' : A → Type ℓ
+
+desup⁰' : {ℓ : Level} → (x : V⁰ {ℓ}) → (El⁰ x ↪ V⁰ {ℓ})
+desup⁰' (sup-W A f , isitset) .fst x = f x , isitset .snd x
+desup⁰' (sup-W A f , isitset) .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-W A f , isitset))))
+-- desup⁰' (sup-W A f , isitset) .snd .fst x = f x , isitset .snd x
+-- desup⁰' (sup-W A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-W A f , isitset))))
+
+pro18' : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
+pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β {!!} {!!})
+    where
+        α : A ↪ V⁰ {ℓ} → Σ[ a ∈ V⁰ ]  El⁰ a ≡ A
+        α emb = sup⁰ (A , emb) , refl
+
+        β : Σ[ a ∈ V⁰ ]  El⁰ a ≡ A → A ↪ V⁰ {ℓ}
+        β (a , p) = J {x = A} (λ _ _ → A ↪ V⁰{ℓ}) {!desup⁰' a!} (sym p)
+
+-- trying out J rule
+-- sym' : {A : Type ℓ} {x y : A} → x ≡ y → y ≡ x
+-- sym' {A = A} {x = x} {y = y} = J {x = x} (λ z _ → z ≡ x) refl
+
+-- symP' : {A : Type ℓ} {a : A} → Σ[ x ∈ A ] a ≡ x → Σ[ x ∈ A ] x ≡ a
+-- symP' {A = A} {a = a} (x , p) = J {x = a} (λ y _ → Σ[ z ∈ A ] z ≡ a) {!!} p
