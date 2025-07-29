@@ -156,8 +156,19 @@ empty⁰ = emptySet-∞ , (λ ()) , λ ()
 empty⁰Is⊥* : El⁰ {ℓ} empty⁰ ≡ ⊥* {ℓ}
 empty⁰Is⊥* = refl
 
-postulate unit⁰ : V⁰ {ℓ}
-postulate unit⁰IsUnit* : El⁰ {ℓ} unit⁰ ≡ Unit* {ℓ}
+isEmbeddingFunctionFromIsPropToIsSet : {A : Type ℓ} {B : Type ℓ'} (f : A → B) → isProp A → isSet B → isEmbedding f
+isEmbeddingFunctionFromIsPropToIsSet f propA setB = injEmbedding setB λ {w} {x} _ → propA w x
+
+unit⁰ : V⁰ {ℓ}
+unit⁰ {ℓ = ℓ} = sup⁰ (Unit* {ℓ} , f , isemb)
+    where
+        f : Unit* {ℓ} → V⁰ {ℓ}
+        f _ = empty⁰
+        isemb : isEmbedding f
+        isemb = isEmbeddingFunctionFromIsPropToIsSet f isPropUnit* thm12
+
+unit⁰IsUnit* : El⁰ {ℓ} unit⁰ ≡ Unit* {ℓ}
+unit⁰IsUnit* = refl
 
 postulate bool⁰ : V⁰ {ℓ}
 postulate bool⁰IsBool* : El⁰ bool⁰ ≡ Bool
