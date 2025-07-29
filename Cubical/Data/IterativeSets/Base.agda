@@ -15,7 +15,7 @@ open import Cubical.Foundations.Transport
 open import Cubical.Foundations.Univalence
 open import Cubical.Functions.Fibration
 open import Cubical.Functions.Embedding
-open import Cubical.Data.Empty renaming (elim to ⊥-elim)
+open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
 open import Cubical.Data.Unit
 open import Cubical.Data.Bool
 open import Cubical.Functions.FunExtEquiv
@@ -65,11 +65,11 @@ postulate thm3 : {ℓ : Level} → {x y : V∞ {ℓ}} → ((x ≡ y) ≃ (Σ[ e 
 postulate thm4 : {ℓ : Level} → {x y : V∞ {ℓ}} → ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z))
 
 -- examples
-emptySet-∞ : V∞ {ℓ-zero}
-emptySet-∞ = sup-∞ ⊥ ⊥-elim
+emptySet-∞ : V∞ {ℓ}
+emptySet-∞ = sup-∞ ⊥* ⊥*-elim
 
-singleton : V∞ → V∞
-singleton x = sup-∞ Unit λ _ → x
+singleton : V∞ {ℓ} → V∞ {ℓ}
+singleton x = sup-∞ Unit* λ _ → x
 
 unorderedPair : V∞ → V∞ → V∞
 unorderedPair x y = sup-∞ Bool (λ b → if b then x else y)
@@ -150,17 +150,17 @@ postulate pro18 : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (
 
 -- Proposition 19
 
-empty⁰ : V⁰
+empty⁰ : V⁰ {ℓ}
 empty⁰ = emptySet-∞ , (λ ()) , λ ()
 
-empty⁰Is⊥ : El⁰ empty⁰ ≡ ⊥
-empty⁰Is⊥ = refl
+empty⁰Is⊥* : El⁰ {ℓ} empty⁰ ≡ ⊥* {ℓ}
+empty⁰Is⊥* = refl
 
 postulate unit⁰ : V⁰ {ℓ}
-postulate unit⁰IsUnit : El⁰ unit⁰ ≡ Unit
+postulate unit⁰IsUnit* : El⁰ {ℓ} unit⁰ ≡ Unit* {ℓ}
 
 postulate bool⁰ : V⁰ {ℓ}
-postulate bool⁰IsBool : El⁰ bool⁰ ≡ Bool
+postulate bool⁰IsBool* : El⁰ bool⁰ ≡ Bool
 
 -- Proposition 20
 postulate ℕ⁰ : V⁰ {ℓ}
@@ -168,6 +168,9 @@ postulate ℕ⁰Isℕ : El⁰ ℕ⁰ ≡ ℕ
 
 -- Proposition 21
 postulate orderedPair : (V⁰ {ℓ} × V⁰ {ℓ}) ↪ V⁰ {ℓ}
+
+⟨_,_⟩ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
+⟨ x , y ⟩ = orderedPair .fst (x , y)
 
 -- Proposition 22
 postulate Π⁰ : (x : V⁰ {ℓ}) → (El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
