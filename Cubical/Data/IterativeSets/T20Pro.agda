@@ -20,7 +20,8 @@ open import Cubical.Data.Bool
 open import Cubical.Functions.FunExtEquiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat
-open import Cubical.Data.SumFin
+open import Cubical.Data.SumFin hiding (Fin)
+open import Cubical.Data.Fin
 
 open import Cubical.Data.Sigma
 
@@ -39,12 +40,33 @@ private
     B B' : A → Type ℓ
 
 suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
-suc⁰ x = sup⁰ (overline-0 x ⊎ Unit , ϕₓ , ϕₓemb)
-  where
-    ϕₓ : (overline-0 x ⊎ Unit) → V⁰ {{!!}}
-    ϕₓ (inl a) = (tilde-0 x a) , {!x .snd!}
-    ϕₓ (fsuc a) = x
+suc⁰ {ℓ} (sup-W A f , isitset) = sup⁰ ((overline-0 (sup-W A f , isitset) ⊎ Unit* {ℓ}) , ϕₓ , {!!})
+    where
+        ϕₓ : (overline-0 (sup-W A f , isitset) ⊎ Unit* {ℓ}) → V⁰ {ℓ}
+        ϕₓ (inl a) = f a , isitset .snd a
+        ϕₓ (inr a) = (sup-W A f , isitset)
 
-    ϕₓemb : {!!}
-    ϕₓemb = {!!}
-    
+ℕ* : Type ℓ
+ℕ* = Lift ℕ
+
+vonNeumannEncoding : ℕ* {ℓ} → V⁰ {ℓ}
+vonNeumannEncoding (lift zero) = empty⁰
+vonNeumannEncoding (lift (suc x)) = suc⁰ (vonNeumannEncoding (lift x))
+
+Fin* : ℕ* {ℓ} → Type ℓ
+Fin* (lift n) = Lift (Fin n)
+
+postulate FinEquiv→sameCard : (n m : ℕ* {ℓ}) → (Fin* n ≃ Fin* m) → n ≡ m
+postulate vonNeumannOverline≃Fin : (n : ℕ* {ℓ}) → (overline-0 (vonNeumannEncoding n) ≃ Fin* n)
+
+ℕ⁰' : V⁰ {ℓ}
+ℕ⁰' {ℓ} = sup⁰ (ℕ* {ℓ} , vonNeumannEncoding {ℓ} , isemb)
+    where
+        isinj : (w x : ℕ* {ℓ}) → vonNeumannEncoding w ≡ vonNeumannEncoding x → w ≡ x
+        isinj n m p = FinEquiv→sameCard n m (compEquiv (invEquiv (vonNeumannOverline≃Fin n)) (compEquiv (pathToEquiv (cong overline-0 p)) (vonNeumannOverline≃Fin m)))
+        
+        isemb : isEmbedding (vonNeumannEncoding {ℓ})
+        isemb = injEmbedding thm12 λ {w} {x} → isinj w x
+
+ℕ⁰Isℕ*' : El⁰ (ℕ⁰' {ℓ}) ≡ ℕ* {ℓ}
+ℕ⁰Isℕ*' = refl

@@ -43,17 +43,7 @@ postulate functionFromIsProp→isEmbedding : {ℓ ℓ' : Level} → {A : Type �
 -- functionFromIsProp→isEmbedding {A = A} {B = B} f propA w x = {!!}
 -- functionFromIsProp→isEmbedding f isprop = hasPropFibers→isEmbedding λ z x y i → (isprop (x .fst) (y .fst)) i , {!!} -- ((cong f (isprop (isprop (x .fst) (y .fst)) x)) ∙ (x .snd))
 
-unit⁰' : V⁰ {ℓ}
-unit⁰' {ℓ = ℓ} = sup⁰ (Unit* , f , isemb)
-    where
-        f : Unit* → V⁰ {ℓ}
-        f _ = empty⁰
-        isemb : isEmbedding f
-        isemb = functionFromIsProp→isEmbedding f isPropUnit*
-
-unit⁰IsUnit' : El⁰ {ℓ} unit⁰' ≡ Unit* {ℓ}
-unit⁰IsUnit' = refl
-
+-- empty⁰ and unit⁰ in Base module
 
 isEmpty : {ℓ : Level} (A : Type ℓ) → Type ℓ
 isEmpty {ℓ} A = (a : A) → ⊥* {ℓ}
@@ -96,11 +86,14 @@ bool⁰' {ℓ} = sup⁰ (Bool* {ℓ} , f , isemb)
         f (lift false) = empty⁰
         f (lift true) = unit⁰
 
+        isinj : (w x : Bool* {ℓ}) → f w ≡ f x → w ≡ x
+        isinj (lift false) (lift true) p = ⊥*-elim (empty⁰≢unit⁰ p)
+        isinj (lift true) (lift false) p = ⊥*-elim {ℓ} (unit⁰≢empty⁰ {ℓ} p)
+        isinj (lift false) (lift false) p = refl
+        isinj (lift true) (lift true) p = refl
+
         isemb : isEmbedding f
-        isemb (lift false) (lift true) = isEmptyIsEquiv _ false≢true* {!empty⁰≢unit⁰ {ℓ}!} -- why does this not work?
-        isemb (lift true) (lift false) = isEmptyIsEquiv _ true≢false* {!unit⁰≢empty⁰ {ℓ}!}
-        -- for the other cases use that El⁰ unit⁰ is a proposition (even contractible)
-        isemb x y = {!!}
+        isemb = injEmbedding thm12 λ {w} {x} → isinj w x
 
 bool⁰IsBool' : El⁰ {ℓ} bool⁰' ≡ Bool* {ℓ}
 bool⁰IsBool' = refl
