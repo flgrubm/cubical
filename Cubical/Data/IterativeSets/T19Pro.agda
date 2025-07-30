@@ -68,10 +68,10 @@ true≢false* : (lift true :> Bool* {ℓ}) ≡ (lift false :> Bool* {ℓ}) → �
 true≢false* {ℓ = ℓ} p = subst (λ {(lift true) → Unit* {ℓ} ; (lift false) → ⊥* {ℓ}}) p (lift tt)
 
 ⊥*≢Unit* : ((⊥* {ℓ} :> Type ℓ) ≡ (Unit* {ℓ} :> Type ℓ)) → ⊥* {ℓ}
-⊥*≢Unit* p = pathToEquiv (sym p) .fst (lift tt)
+⊥*≢Unit* p = transport (sym p) (lift tt)
 
 Unit*≢⊥* : ((Unit* {ℓ} :> Type ℓ) ≡ (⊥* {ℓ} :> Type ℓ)) → ⊥* {ℓ}
-Unit*≢⊥* p = pathToEquiv p .fst (lift tt)
+Unit*≢⊥* p = transport p (lift tt)
 
 empty⁰≢unit⁰ : (empty⁰ {ℓ} ≡ unit⁰ {ℓ}) → ⊥* {ℓ}
 empty⁰≢unit⁰ {ℓ} p = ⊥*≢Unit* (sym empty⁰Is⊥* ∙ (cong El⁰ p) ∙ unit⁰IsUnit*)
@@ -87,8 +87,8 @@ bool⁰' {ℓ} = sup⁰ (Bool* {ℓ} , f , isemb)
         f (lift true) = unit⁰
 
         isinj : (w x : Bool* {ℓ}) → f w ≡ f x → w ≡ x
-        isinj (lift false) (lift true) p = ⊥*-elim (empty⁰≢unit⁰ p)
-        isinj (lift true) (lift false) p = ⊥*-elim {ℓ} (unit⁰≢empty⁰ {ℓ} p)
+        isinj (lift false) (lift true) p = ⊥*-elim {ℓ} {A = λ _ → (lift false) ≡ (lift true)} (empty⁰≢unit⁰ {ℓ} p)
+        isinj (lift true) (lift false) p = ⊥*-elim {ℓ} {A = λ _ → (lift true) ≡ (lift false)} (unit⁰≢empty⁰ {ℓ} p)
         isinj (lift false) (lift false) p = refl
         isinj (lift true) (lift true) p = refl
 

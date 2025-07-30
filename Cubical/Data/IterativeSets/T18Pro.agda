@@ -45,13 +45,36 @@ desup⁰' (sup-W A f , isitset) .snd = injEmbedding thm12 (firstInInjCompIsInj _
 -- desup⁰' (sup-W A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-W A f , isitset))))
 
 pro18' : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
-pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β {!!} {!!})
+pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
     where
         α : A ↪ V⁰ {ℓ} → Σ[ a ∈ V⁰ ]  El⁰ a ≡ A
         α emb = sup⁰ (A , emb) , refl
 
-        β : Σ[ a ∈ V⁰ ]  El⁰ a ≡ A → A ↪ V⁰ {ℓ}
-        β (a , p) = J {x = A} (λ _ _ → A ↪ V⁰{ℓ}) {!desup⁰' a!} (sym p)
+        β : Σ[ a ∈ V⁰ ] El⁰ a ≡ A → A ↪ V⁰ {ℓ}
+        β (a , p) = J (λ B _ → B ↪ V⁰{ℓ}) (desup⁰' a) p
+
+        β' : Σ[ a ∈ V⁰ ] El⁰ a ≡ A → A ↪ V⁰ {ℓ}
+        β' (a , p) = compEmbedding (desup⁰' a) (Equiv→Embedding (pathToEquiv (sym p)))
+
+        sec : section α β
+        sec (a , p) = J {!λ B _ → section α!} {!!} p
+            where
+                secRefl = {!!}
+        --     where
+        --         secRefl : α (β ((a , refl) :> Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A)) ≡ ((a , refl) :> Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A)
+        --         secRefl = ?
+        -- -- sec' : section α β
+        -- sec' (a , p) =
+        --     α (β (a , p))
+        --         ≡⟨⟩
+        --     sup⁰ (A , β (a , p)) , refl
+        --         ≡⟨ {!!} ⟩
+        --     sup⁰ (A , compEmbedding (desup⁰' a) (Equiv→Embedding (pathToEquiv (sym p)))) , refl
+        --         ≡⟨ {!!} ⟩
+        --     a , p
+        --         ∎
+
+        postulate ret : retract α β
 
 -- trying out J rule
 -- sym' : {A : Type ℓ} {x y : A} → x ≡ y → y ≡ x
