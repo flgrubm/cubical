@@ -45,11 +45,7 @@ overline-W (sup-W a f) = a
 tilde-W : (x : W A B) → B (overline-W x) → W A B
 tilde-W (sup-W a f) = f
 
--- why does the following not work?
---pattern sup-∞ = sup-W
--- in the meantime define like this
-sup-∞ : (A : Type ℓ) → (A → V∞) → V∞
-sup-∞ = sup-W
+pattern sup-∞ A f = (sup-W A f)
 
 overline-∞ : V∞ {ℓ} → Type ℓ
 overline-∞ = overline-W
@@ -76,7 +72,7 @@ unorderedPair x y = sup-∞ Bool (λ b → if b then x else y)
 
 -- iterative sets
 isIterativeSet : V∞ {ℓ} → Type (ℓ-suc ℓ)
-isIterativeSet (sup-W A f) = (isEmbedding f) × ((a : A) → isIterativeSet (f a))
+isIterativeSet (sup-∞ A f) = (isEmbedding f) × ((a : A) → isIterativeSet (f a))
 -- isIterativeSet (sup-W A f) = Σ (isEmbedding f) (λ _ → (a : A) → isIterativeSet (f a))
 -- potentially don't do pattern matching, change everywhere afterwards?
 
@@ -93,19 +89,18 @@ tilde-0 = tilde-∞ ∘ fst
 
 -- TODO: rename to isEmbedding-tilde-0
 isEmbedding-tilde-∞ : {ℓ : Level} → (x : V⁰ {ℓ}) → isEmbedding (tilde-0 x)
-isEmbedding-tilde-∞ (sup-W A f , isitset) = isitset .fst
+isEmbedding-tilde-∞ (sup-∞ A f , isitset) = isitset .fst
 
 lem10 : {ℓ : Level} → (x : V∞ {ℓ}) → isProp (isIterativeSet x)
-lem10 {ℓ = ℓ} (sup-W A f) = isProp× (isPropIsEmbedding) helper where
+lem10 {ℓ = ℓ} (sup-∞ A f) = isProp× (isPropIsEmbedding) helper where
   helper : isProp ((a : A) → isIterativeSet (f a))
   helper g h i x = lem10 (f x) (g x) (h x) i
 
 cor11 : {ℓ : Level} → V⁰ {ℓ} ↪ V∞ {ℓ}
 cor11 {ℓ = ℓ} = EmbeddingΣProp lem10
 
--- maybe this is somthing for Cubical.Functions.Embedding?
-embeddingToEquivOfPath : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → {f : A → B} → isEmbedding f → (x y : A) → (x ≡ y) ≃ (f x ≡ f y)
-embeddingToEquivOfPath {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {f = f} isemb x y = cong f , isemb x y
+embeddingToEquivOfPath : {A : Type ℓ} → {B : Type ℓ'} → {f : A → B} → isEmbedding f → (x y : A) → (x ≡ y) ≃ (f x ≡ f y)
+embeddingToEquivOfPath {f = f} isemb x y = cong f , isemb x y
 
 cor11-1 : {ℓ : Level} → {x y : V⁰ {ℓ}} → (x ≡ y) ≃ (x .fst ≡ y .fst)
 cor11-1 {ℓ = ℓ} {x = x} {y = y} = embeddingToEquivOfPath (cor11 .snd) x y
@@ -134,9 +129,9 @@ firstInInjCompIsInj : {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''} → (f : A
 firstInInjCompIsInj f g inj∘ {w} {x} p = inj∘ w x (cong g p)
 
 desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
-desup⁰ (sup-W A f , isitset) .fst = A
-desup⁰ (sup-W A f , isitset) .snd .fst x = f x , isitset .snd x
-desup⁰ (sup-W A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-W A f , isitset))))
+desup⁰ (sup-∞ A f , isitset) .fst = A
+desup⁰ (sup-∞ A f , isitset) .snd .fst x = f x , isitset .snd x
+desup⁰ (sup-∞ A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-∞ A f , isitset))))
 
 -- Ch. 3
 
@@ -144,7 +139,7 @@ El⁰ : V⁰ {ℓ} → Type ℓ
 El⁰ = overline-0
 
 thm17 : {ℓ : Level} → (x : V⁰ {ℓ}) → isSet (El⁰ x)
-thm17 {ℓ = ℓ} (sup-W A f , isitset) = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} (sup-W A f , isitset)} {B = V⁰ {ℓ}} (snd (desup⁰ (sup-W A f , isitset))) (thm12 {ℓ})
+thm17 {ℓ = ℓ} (sup-∞ A f , isitset) = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} (sup-∞ A f , isitset)} {B = V⁰ {ℓ}} (snd (desup⁰ (sup-∞ A f , isitset))) (thm12 {ℓ})
 
 postulate pro18 : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
 

@@ -37,6 +37,26 @@ private
     ℓ ℓ' ℓ'' : Level
     A A' : Type ℓ
     B B' : A → Type ℓ
+ 
+
+
+
+thm3-fun' : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)
+thm3-fun' {ℓ} {x} {y} = J (λ z p → Σ[ e ∈ overline-∞ x ≃ overline-∞ z ] tilde-∞ x ∼ (tilde-∞ z ∘ e .fst)) (idEquiv (overline-∞ x) , λ a → refl)
+
+thm3-inv'' : {ℓ : Level} → {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ transport e)) → x ≡ y
+thm3-inv'' = {!!}
+
+thm3-inv' : {ℓ : Level} → {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)) → x ≡ y
+thm3-inv' = {!!}
+
+-- (λ z →
+--                                Σ-syntax (overline-∞ x ≃ overline-∞ z)
+--                                λ e → tilde-∞ x (tilde-∞ z ∘ e .fst))
+--                             {!!}) {!!}
+
+
+-- old part
 
 thm3-fun : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)
 thm3-fun {ℓ = ℓ} {x = x} {y = y} p = e , h where
