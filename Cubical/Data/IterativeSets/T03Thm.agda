@@ -32,23 +32,40 @@ open import Cubical.Data.W.W
 
 open import Cubical.Data.IterativeSets.Base
 
+open import Cubical.Foundations.CartesianKanOps
+
 private
   variable
     ℓ ℓ' ℓ'' : Level
     A A' : Type ℓ
     B B' : A → Type ℓ
  
+-- module _ (P : ∀ y → x ≡ y → Type ℓ') (d : P x refl) where
 
+--   J : (p : x ≡ y) → P y p
+--   J p = transport (λ i → P (p i) (λ j → p (i ∧ j))) d
+
+--   JRefl : J refl ≡ d
+--   JRefl = transportRefl d
+
+-- try to first define the function out of x ≡ y?? maybe not
+-- module _ {A : Type ℓ} {B : Type ℓ'} {F : A → B} {x y : A} (P : (z : A) → F x ≡ F z → Type ℓ'') (d : P x refl) where
+--     J' : (p : F x ≡ F y) → P y p
+--     J' p = transport {!!} d
+
+help : (x : V∞ {ℓ}) → (y₁ : Type ℓ) → (p : overline-∞ x ≡ y₁) → Σ[ y₂ ∈ (y₁ → V∞ {ℓ}) ] PathP (λ i → (p i) → V∞ {ℓ}) (tilde-∞ x) y₂
+help x y₁ p .fst w = tilde-∞ x (transport (sym p) w)
+help x y₁ p .snd i w = tilde-∞ x (transport (λ j → {!p (i ∧ ~ j)!}) w)
 
 
 thm3-fun' : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)
 thm3-fun' {ℓ} {x} {y} = J (λ z p → Σ[ e ∈ overline-∞ x ≃ overline-∞ z ] tilde-∞ x ∼ (tilde-∞ z ∘ e .fst)) (idEquiv (overline-∞ x) , λ a → refl)
 
-thm3-inv'' : {ℓ : Level} → {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ transport e)) → x ≡ y
-thm3-inv'' = {!!}
+-- helper : {ℓ : Level} → {x y : V∞ {ℓ}} → (e : overline-∞ x ≡ overline-∞ y) → (tilde-∞ x ∼ (tilde-∞ y ∘ transport e)) → x ≡ y
+-- helper {ℓ} {x} {y} e h = J (λ z e' → {!((tilde-∞ x ∼ (tilde-∞ z ∘ transport e)) → x ≡ z)!}) (J {!!} {!!} {!!}) e
 
-thm3-inv' : {ℓ : Level} → {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)) → x ≡ y
-thm3-inv' = {!!}
+postulate thm3-inv' : {ℓ : Level} → {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)) → x ≡ y
+-- thm3-inv' = {!!}
 
 -- (λ z →
 --                                Σ-syntax (overline-∞ x ≃ overline-∞ z)
