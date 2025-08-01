@@ -1,4 +1,3 @@
--- {-# OPTIONS --safe #-}
 module Cubical.Data.IterativeSets.Base where
 -- definitions in Base
 -- properties in Properties
