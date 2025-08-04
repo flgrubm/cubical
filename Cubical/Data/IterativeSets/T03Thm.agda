@@ -53,9 +53,9 @@ private
 --     J' : (p : F x ≡ F y) → P y p
 --     J' p = transport {!!} d
 
-help : (x : V∞ {ℓ}) → (y₁ : Type ℓ) → (p : overline-∞ x ≡ y₁) → Σ[ y₂ ∈ (y₁ → V∞ {ℓ}) ] PathP (λ i → (p i) → V∞ {ℓ}) (tilde-∞ x) y₂
-help x y₁ p .fst w = tilde-∞ x (transport (sym p) w)
-help x y₁ p .snd i w = tilde-∞ x (transport (λ j → {!p (i ∧ ~ j)!}) w)
+-- help : (x : V∞ {ℓ}) → (y₁ : Type ℓ) → (p : overline-∞ x ≡ y₁) → Σ[ y₂ ∈ (y₁ → V∞ {ℓ}) ] PathP (λ i → (p i) → V∞ {ℓ}) (tilde-∞ x) y₂
+-- help x y₁ p .fst w = tilde-∞ x (transport (sym p) w)
+-- help x y₁ p .snd i w = tilde-∞ x (transport (λ j → {!p (i ∧ ~ j)!}) w)
 
 
 thm3-fun' : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)
