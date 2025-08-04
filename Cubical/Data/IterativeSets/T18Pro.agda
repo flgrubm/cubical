@@ -56,10 +56,12 @@ pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
         β' : Σ[ a ∈ V⁰ ] El⁰ a ≡ A → A ↪ V⁰ {ℓ}
         β' (a , p) = compEmbedding (desup⁰' a) (Equiv→Embedding (pathToEquiv (sym p)))
 
+        sec' : (a : V⁰ {ℓ}) → (p : El⁰ a ≡ A) → α (β (a , p)) ≡ (a , p)
+        sec' a = J (λ B p → {!!}) {!α (β (a , refl)) ≡⟨ ? ⟩ (a , refl) ∎!}
+
         sec : section α β
-        sec (a , p) = J {!λ B _ → section α!} {!!} p
-            where
-                secRefl = {!!}
+        sec (a , p) = sec' a p -- J (λ B p' → {!section α β!}) {!α (β (a , refl)) ≡⟨ ? ⟩ (a , refl) ∎!} p
+
         --     where
         --         secRefl : α (β ((a , refl) :> Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A)) ≡ ((a , refl) :> Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A)
         --         secRefl = ?
