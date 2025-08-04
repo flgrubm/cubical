@@ -150,6 +150,8 @@ empty⁰ = emptySet-∞ , (λ ()) , λ ()
 empty⁰Is⊥* : El⁰ {ℓ} empty⁰ ≡ ⊥* {ℓ}
 empty⁰Is⊥* = refl
 
+--
+
 isEmbeddingFunctionFromIsPropToIsSet : {A : Type ℓ} {B : Type ℓ'} (f : A → B) → isProp A → isSet B → isEmbedding f
 isEmbeddingFunctionFromIsPropToIsSet f propA setB = injEmbedding setB λ {w} {x} _ → propA w x
 
@@ -164,8 +166,38 @@ unit⁰ {ℓ = ℓ} = sup⁰ (Unit* {ℓ} , f , isemb)
 unit⁰IsUnit* : El⁰ {ℓ} unit⁰ ≡ Unit* {ℓ}
 unit⁰IsUnit* = refl
 
-postulate bool⁰ : V⁰ {ℓ}
-postulate bool⁰IsBool* : El⁰ bool⁰ ≡ Bool
+-- 
+
+⊥*≢Unit* : ((⊥* {ℓ} :> Type ℓ) ≡ (Unit* {ℓ} :> Type ℓ)) → ⊥* {ℓ}
+⊥*≢Unit* p = transport (sym p) (lift tt)
+
+Unit*≢⊥* : ((Unit* {ℓ} :> Type ℓ) ≡ (⊥* {ℓ} :> Type ℓ)) → ⊥* {ℓ}
+Unit*≢⊥* p = transport p (lift tt)
+
+empty⁰≢unit⁰ : (empty⁰ {ℓ} ≡ unit⁰ {ℓ}) → ⊥* {ℓ}
+empty⁰≢unit⁰ {ℓ} p = ⊥*≢Unit* (sym empty⁰Is⊥* ∙ (cong El⁰ p) ∙ unit⁰IsUnit*)
+
+unit⁰≢empty⁰ : (unit⁰ {ℓ} ≡ empty⁰ {ℓ}) → ⊥* {ℓ}
+unit⁰≢empty⁰ {ℓ} p = Unit*≢⊥* (sym unit⁰IsUnit* ∙ (cong El⁰ p) ∙ empty⁰Is⊥*)
+
+bool⁰ : V⁰ {ℓ}
+bool⁰ {ℓ} = sup⁰ (Bool* {ℓ} , f , isemb)
+    where
+        f : Bool* {ℓ} → V⁰ {ℓ}
+        f (lift false) = empty⁰
+        f (lift true) = unit⁰
+
+        isinj : (w x : Bool* {ℓ}) → f w ≡ f x → w ≡ x
+        isinj (lift false) (lift true) p = ⊥*-elim {ℓ} {A = λ _ → (lift false) ≡ (lift true)} (empty⁰≢unit⁰ {ℓ} p)
+        isinj (lift true) (lift false) p = ⊥*-elim {ℓ} {A = λ _ → (lift true) ≡ (lift false)} (unit⁰≢empty⁰ {ℓ} p)
+        isinj (lift false) (lift false) p = refl
+        isinj (lift true) (lift true) p = refl
+
+        isemb : isEmbedding f
+        isemb = injEmbedding thm12 λ {w} {x} → isinj w x
+
+bool⁰IsBool : El⁰ {ℓ} bool⁰ ≡ Bool* {ℓ}
+bool⁰IsBool = refl
 
 -- Proposition 20
 postulate ℕ⁰ : V⁰ {ℓ}
