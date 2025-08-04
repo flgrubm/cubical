@@ -32,7 +32,7 @@ private
   variable
     ℓ ℓ' ℓ'' : Level
     A A' : Type ℓ
-    B B' : A → Type ℓ
+    B B' : A → Type ℓ'
 
 V∞ : {ℓ : Level} → Type (ℓ-suc ℓ)
 V∞ {ℓ} = W (Type ℓ) (λ x → x)
@@ -78,6 +78,7 @@ isIterativeSet (sup-∞ A f) = (isEmbedding f) × ((a : A) → isIterativeSet (f
 V⁰ : {ℓ : Level} → Type (ℓ-suc ℓ)
 V⁰ {ℓ = ℓ} = Σ[ x ∈ V∞ {ℓ} ] isIterativeSet x
 
+-- For the sake of consistency, I think it should be called overline⁰, similarly tilde⁰, or maybe even ⁻⁰, ̃⁰, idk
 overline-0 : V⁰ {ℓ} → Type ℓ
 -- overline-0 (sup-W A f , p) = A
 overline-0 = overline-∞ ∘ fst
@@ -85,6 +86,11 @@ overline-0 = overline-∞ ∘ fst
 tilde-0 : (A : V⁰ {ℓ}) → overline-0 A → V∞ {ℓ}
 -- tilde-0 (sup-W B f , p) = f
 tilde-0 = tilde-∞ ∘ fst
+
+-- TODO: refactor so that everything that uses tilde-0 now uses tilde-0' instead; afterwards change name
+tilde-0' : (A : V⁰ {ℓ}) → overline-0 A → V⁰ {ℓ}
+tilde-0' (sup-∞ _ f , _) a .fst = f a
+tilde-0' (sup-∞ _ _ , isitset) a .snd = isitset .snd a
 
 -- TODO: rename to isEmbedding-tilde-0
 isEmbedding-tilde-∞ : {ℓ : Level} → (x : V⁰ {ℓ}) → isEmbedding (tilde-0 x)
@@ -117,15 +123,18 @@ thm12-help2 x y = isPropΠ λ z → isPropEquiv (isEmbedding→hasPropFibers (is
 thm12 : {ℓ : Level} → isSet (V⁰ {ℓ})
 thm12 x y = isOfHLevelRespectEquiv 1 (invEquiv thm12-help1) (thm12-help2 x y)
 
-sup⁰ : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
-sup⁰ {ℓ} (A , f) .fst = sup-∞ A (compEmbedding cor11 f .fst) -- λ x → f .fst x .fst
-sup⁰ {ℓ} (A , f) .snd .fst = compEmbedding cor11 f .snd
-sup⁰ {ℓ} (A , f) .snd .snd y = f .fst y .snd
-
 -- if f : A → B and g : B → C are functions and g ∘ f is injective, then f is injective too
 -- probably can be generalized to embeddings (potentially with assuming that g is an embedding too, but this is a WIP, see `T15DefDesup.agda`
 firstInInjCompIsInj : {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''} → (f : A → B) → (g : B → C) → ((w x : A) → g (f w) ≡ g (f x) → w ≡ x) → {w x : A} → f w ≡ f x → w ≡ x
 firstInInjCompIsInj f g inj∘ {w} {x} p = inj∘ w x (cong g p)
+
+isEmbedding-tilde-0 : {ℓ : Level} → (x : V⁰ {ℓ}) → isEmbedding (tilde-0' x)
+isEmbedding-tilde-0 (sup-∞ A f , isitset) = injEmbedding thm12 (firstInInjCompIsInj (tilde-0' (sup-∞ A f , isitset)) fst (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-∞ A f , isitset))))
+
+sup⁰ : {ℓ : Level} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
+sup⁰ {ℓ} (A , f) .fst = sup-∞ A (compEmbedding cor11 f .fst) -- λ x → f .fst x .fst
+sup⁰ {ℓ} (A , f) .snd .fst = compEmbedding cor11 f .snd
+sup⁰ {ℓ} (A , f) .snd .snd y = f .fst y .snd
 
 desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
 desup⁰ (sup-∞ A f , isitset) .fst = A

@@ -63,30 +63,44 @@ EquivToIsProp→isProp propA equiv = Embedding-into-isProp→isProp (Equiv→Emb
 -- _∈∞_ : V∞ {ℓ} → V∞ {ℓ} → Type (ℓ-suc ℓ)
 -- x ∈∞ y = fiber (tilde-∞ y) x
 _∈⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → Type (ℓ-suc ℓ)
-x ∈⁰ y = fiber (tilde-0 y) (x .fst)
+x ∈⁰ y = fiber (tilde-0' y) (x)
 
--- new tilde-0 that maps to V⁰ instead of V∞?
+SumInl≢Inr : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} (a : A) (b : B) → inl a ≡ (inr b :> A ⊎ B) → ⊥
+SumInl≢Inr {ℓ'' = ℓ''} {A = A} {B = B} a b p = transport (cong helper p) _
+    where
+        helper : A ⊎ B → Type ℓ-zero
+        helper (inl x) = Unit
+        helper (inr y) = ⊥
 
 suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
-suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ ((overline-0 (sup-∞ A f , isitsetAf) ⊎ Unit* {ℓ}) , ϕₓ , isemb)
+suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ ((overline-0 (sup-∞ A f , isitsetAf) ⊎ Unit* {ℓ}) , ϕₓ , hasPropFibers→isEmbedding hpf)
     where
         ϕₓ : (overline-0 (sup-∞ A f , isitsetAf) ⊎ Unit* {ℓ}) → V⁰ {ℓ}
         ϕₓ (inl a) = f a , isitsetAf .snd a
         ϕₓ (inr _) = (sup-∞ A f , isitsetAf)
 
         eqFib : (z : V⁰ {ℓ}) → (fiber ϕₓ z ≃ ((z ∈⁰ (sup-∞ A f , isitsetAf)) ⊎ ((sup-∞ A f , isitsetAf) ≡ z)))
-        eqFib (sup-∞ B g , isitsetBg) = isoToEquiv (iso to from {!!} {!!})
+        eqFib (sup-∞ B g , isitsetBg) = isoToEquiv (iso to fro sec ret)
             where
                 to : fiber ϕₓ (sup-∞ B g , isitsetBg) → ((sup-∞ B g , isitsetBg) ∈⁰ (sup-∞ A f , isitsetAf)) ⊎ ((sup-∞ A f , isitsetAf) ≡ (sup-∞ B g , isitsetBg))
-                to = {!!}
-                -- to (inl a , snd) = inl (a , PathPΣ snd .fst)
-                -- to (inr _ , p) = inr p
-                from : ((sup-∞ B g , isitsetBg) ∈⁰ (sup-∞ A f , isitsetAf)) ⊎ ((sup-∞ A f , isitsetAf) ≡ (sup-∞ B g , isitsetBg)) → fiber ϕₓ (sup-∞ B g , isitsetBg)
-                from (inl (a , p)) = inl a , {!p!}
-                from (inr p) = inr _ , p
+                to (inl a , p) = inl (a , p)
+                to (inr _ , p) = inr p
+                fro : ((sup-∞ B g , isitsetBg) ∈⁰ (sup-∞ A f , isitsetAf)) ⊎ ((sup-∞ A f , isitsetAf) ≡ (sup-∞ B g , isitsetBg)) → fiber ϕₓ (sup-∞ B g , isitsetBg)
+                fro (inl (a , p)) = inl a , p
+                fro (inr p) = inr _ , p
+                sec : section to fro
+                sec (inl _) = refl
+                sec (inr _) = refl
+                ret : retract to fro
+                ret (inl _ , _) = refl
+                ret (inr _ , _) = refl
 
-        postulate isemb : isEmbedding ϕₓ
-        -- isemb = hasPropFibers→isEmbedding λ z → EquivToIsProp→isProp (isPropIsPropDisjointSum {!!} (thm12 _ _) {!!}) (invEquiv (eqFib z))
+        hpf : hasPropFibers ϕₓ
+        hpf (sup-∞ B g , isitsetBg) = EquivToIsProp→isProp (isPropIsPropDisjointSum (isEmbedding→hasPropFibers (isEmbedding-tilde-0 (sup-∞ A f , isitsetAf)) (sup-∞ B g , isitsetBg)) (thm12 _ _) ∈⁰×≡→⊥) (invEquiv (eqFib (sup-∞ B g , isitsetBg)))
+            where
+                ∈⁰×≡→⊥ : ((sup-∞ B g , isitsetBg) ∈⁰ (sup-∞ A f , isitsetAf)) × ((sup-∞ A f , isitsetAf) ≡ (sup-∞ B g , isitsetBg)) → ⊥
+                ∈⁰×≡→⊥ ((a , pa) , p) = {!!} -- SumInl≢Inr (inl (a , pa)) (inr p) {!!}
+
 
 ℕ* : Type ℓ
 ℕ* = Lift ℕ
