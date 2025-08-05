@@ -21,6 +21,7 @@ open import Cubical.Functions.FunExtEquiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat
 open import Cubical.Data.SumFin
+open import Cubical.Foundations.Path
 
 open import Cubical.Data.Sigma
 
@@ -49,15 +50,28 @@ private
 --         fam : (C : Type ℓ) → A ≡ C → (h : A → V∞ {ℓ}) → f ≡ h → Type (ℓ-suc ℓ)
 --         fam C p h p' = (sup-∞ A f) ≡ sup-∞ C {!h!}
 
--- probably need to reformulate
-u : {A : Type ℓ} → refl {x = Type ℓ} ∙ refl {x = Type ℓ} ≡ refl {x = Type ℓ}
-u {ℓ = ℓ} {A = A} = {!!}
+-- this should really be in the library, but I haven't found it there?
 
-s : {A B : Type ℓ} (p : A ≡ B) → p ∙ refl ≡ p
-s = {!!}
+refl∙refl≡refl : {A : Type ℓ} {x : A} → refl ∙ refl ≡ refl {x = x}
+refl∙refl≡refl = sym (compPath-filler refl refl)
 
-t : {A B C : Type ℓ} (x : A) (p : A ≡ B) (q : B ≡ C) → transport q (transport p x) ≡ transport (p ∙ q) x
-t x p q = {!!}
+∙refl-is-identity : {A B : Type ℓ} (p : A ≡ B) → p ∙ refl ≡ p
+∙refl-is-identity p = sym (compPath-filler p refl)
+
+∙refl-is-identity' : {A B : Type ℓ} (p : A ≡ B) → p ∙ refl ≡ p
+∙refl-is-identity' = J (λ C q → q ∙ refl ≡ q) refl∙refl≡refl
+
+refl∙-is-identity : {A B : Type ℓ} (p : A ≡ B) → refl ∙ p ≡ p
+refl∙-is-identity = J (λ C q → refl ∙ q ≡ q) refl∙refl≡refl
+
+compTransport-is-transportComp : {A B C : Type ℓ} (x : A) (p : A ≡ B) (q : B ≡ C) → transport q (transport p x) ≡ transport (p ∙ q) x
+compTransport-is-transportComp x p q = J (λ y q' → transport q' (transport p x) ≡ transport (p ∙ q') x) (transportRefl (transport p x) ∙ cong (λ r → transport r x) (sym (∙refl-is-identity p))) q
+
+Path∙symPath-cancel : {A B : Type ℓ} (p : A ≡ B) → p ∙ (sym p) ≡ refl
+Path∙symPath-cancel p = cong (λ r → p ∙ r) (sym (∙refl-is-identity (sym p))) ∙ compPathl-cancel p refl
+
+symPath∙Path-cancel : {A B : Type ℓ} (p : A ≡ B) → (sym p) ∙ p ≡ refl
+symPath∙Path-cancel p = cong (λ r → r ∙ p) (sym (refl∙-is-identity (sym p))) ∙ compPathr-cancel p refl
 
 fun' : {x y : V∞ {ℓ}} → (Σ[ p ∈ (overline-∞ x ≡ overline-∞ y) ] (tilde-∞ x ≡ (tilde-∞ y ∘ (transport p)))) → (x ≡ y)
 fun' {ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (p , q) i = sup-W (p i) (k' i)
@@ -72,4 +86,4 @@ fun' {ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (p , q) i = sup-W (p i) (k' i)
                 fpart : (a : A) → f a ≡ f (transport refl a)
                 fpart a = cong f (sym (transportRefl a))
                 gpart : (b : B) → g (transport p (transport (sym p) b)) ≡ g b
-                gpart b = {!!}
+                gpart b = cong g (compTransport-is-transportComp b (sym p) p ∙ cong (λ r → transport r b) (symPath∙Path-cancel p) ∙ transportRefl b)
