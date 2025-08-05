@@ -38,12 +38,6 @@ private
     A A' : Type ℓ
     B B' : A → Type ℓ
 
-desup⁰' : {ℓ : Level} → (x : V⁰ {ℓ}) → (El⁰ x ↪ V⁰ {ℓ})
-desup⁰' (sup-W A f , isitset) .fst x = f x , isitset .snd x
-desup⁰' (sup-W A f , isitset) .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-W A f , isitset))))
--- desup⁰' (sup-W A f , isitset) .snd .fst x = f x , isitset .snd x
--- desup⁰' (sup-W A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-W A f , isitset))))
-
 pro18' : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
 pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
     where
@@ -51,13 +45,18 @@ pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
         α emb = sup⁰ (A , emb) , refl
 
         β : Σ[ a ∈ V⁰ ] El⁰ a ≡ A → A ↪ V⁰ {ℓ}
-        β (a , p) = J (λ B _ → B ↪ V⁰{ℓ}) (desup⁰' a) p
+        β (a , p) = J (λ B _ → B ↪ V⁰ {ℓ}) (desup⁰' a) p
 
         β' : Σ[ a ∈ V⁰ ] El⁰ a ≡ A → A ↪ V⁰ {ℓ}
         β' (a , p) = compEmbedding (desup⁰' a) (Equiv→Embedding (pathToEquiv (sym p)))
 
-        sec' : (a : V⁰ {ℓ}) → (p : El⁰ a ≡ A) → α (β (a , p)) ≡ (a , p)
-        sec' a = J (λ B p → {!!}) {!α (β (a , refl)) ≡⟨ ? ⟩ (a , refl) ∎!}
+        postulate sec' : (a : V⁰ {ℓ}) → (p : El⁰ a ≡ A) → α (β (a , p)) ≡ (a , p)
+        -- -- sec' a = J fam ref
+        --     where
+        --         postulate fam : (B : Type ℓ) → El⁰ a ≡ B → Type (ℓ-suc ℓ)
+        --         -- fam = {!!}
+        --         postulate ref : fam (El⁰ a) refl
+        --         -- ref = {!!}
 
         sec : section α β
         sec (a , p) = sec' a p -- J (λ B p' → {!section α β!}) {!α (β (a , refl)) ≡⟨ ? ⟩ (a , refl) ∎!} p
@@ -77,6 +76,15 @@ pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
         --         ∎
 
         postulate ret : retract α β
+        -- ret emb =
+        --     β (α emb)
+        --         ≡⟨⟩
+        --     β (sup⁰ (A , emb) , refl)
+        --         ≡⟨ JRefl (λ B _ → B ↪ V⁰ {ℓ}) (desup⁰' (sup⁰ (A , emb))) ⟩
+        --     desup⁰' (sup⁰ (A , emb))
+        --         ≡⟨ {!!} ⟩
+        --     emb
+        --         ∎
 
 -- trying out J rule
 -- sym' : {A : Type ℓ} {x y : A} → x ≡ y → y ≡ x
