@@ -105,7 +105,8 @@ cor11 : {ℓ : Level} → V⁰ {ℓ} ↪ V∞ {ℓ}
 cor11 {ℓ = ℓ} = EmbeddingΣProp lem10
 
 embeddingToEquivOfPath : {A : Type ℓ} → {B : Type ℓ'} → {f : A → B} → isEmbedding f → (x y : A) → (x ≡ y) ≃ (f x ≡ f y)
-embeddingToEquivOfPath {f = f} isemb x y = cong f , isemb x y
+embeddingToEquivOfPath {f = f} _ _ _ .fst = cong f
+embeddingToEquivOfPath isemb x y .snd = isemb x y
 
 cor11-1 : {ℓ : Level} → {x y : V⁰ {ℓ}} → (x ≡ y) ≃ (x .fst ≡ y .fst)
 cor11-1 {ℓ = ℓ} {x = x} {y = y} = embeddingToEquivOfPath (cor11 .snd) x y
@@ -138,23 +139,42 @@ sup⁰ {ℓ} (A , f) .snd .snd y = f .fst y .snd
 
 desup⁰ : {ℓ : Level} → V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
 desup⁰ (sup-∞ A f , isitset) .fst = A
-desup⁰ (sup-∞ A f , isitset) .snd .fst x = f x , isitset .snd x
+desup⁰ (sup-∞ A f , isitset) .snd .fst x .fst = f x
+desup⁰ (sup-∞ A f , isitset) .snd .fst x .snd = isitset .snd x
 desup⁰ (sup-∞ A f , isitset) .snd .snd = injEmbedding thm12 (firstInInjCompIsInj _ (cor11 .fst) (isEmbedding→Inj (isEmbedding-tilde-∞ (sup-∞ A f , isitset))))
+
+sup⁰desup⁰≃ : {ℓ : Level} → (V⁰ {ℓ} ≃ (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}))
+sup⁰desup⁰≃ {ℓ = ℓ} = isoToEquiv (iso desup⁰ sup⁰ sec ret)
+    where
+        sec : section (desup⁰ {ℓ}) (sup⁰ {ℓ})
+        sec (A , (f , embf)) = cong (λ e → (A , (f , e))) (isPropIsEmbedding {f = f} _ embf)
+
+        ret : retract (desup⁰ {ℓ}) (sup⁰ {ℓ}) 
+        ret (sup-∞ A f , isitset) = cong fun (lem10 (sup-∞ A f) _ isitset)
+            where
+                fun : isIterativeSet (sup-∞ A f) → V⁰ {ℓ}
+                fun _ .fst = sup-∞ A f
+                fun it .snd = it
 
 -- Ch. 3
 
 El⁰ : V⁰ {ℓ} → Type ℓ
 El⁰ = overline-0
 
+desup⁰' : {ℓ : Level} → (x : V⁰ {ℓ}) → (El⁰ x ↪ V⁰ {ℓ})
+desup⁰' (sup-∞ A f , isitset) = desup⁰ (sup-∞ A f , isitset) .snd
+
 thm17 : {ℓ : Level} → (x : V⁰ {ℓ}) → isSet (El⁰ x)
-thm17 {ℓ = ℓ} (sup-∞ A f , isitset) = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} (sup-∞ A f , isitset)} {B = V⁰ {ℓ}} (snd (desup⁰ (sup-∞ A f , isitset))) (thm12 {ℓ})
+thm17 {ℓ = ℓ} (sup-∞ A f , isitset) = Embedding-into-isSet→isSet {A = El⁰ {ℓ = ℓ} (sup-∞ A f , isitset)} {B = V⁰ {ℓ}} (desup⁰' (sup-∞ A f , isitset)) (thm12 {ℓ})
 
 postulate pro18 : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
 
 -- Proposition 19
 
 empty⁰ : V⁰ {ℓ}
-empty⁰ = emptySet-∞ , (λ ()) , λ ()
+empty⁰ {ℓ = ℓ} .fst = emptySet-∞ {ℓ}
+empty⁰ .snd .fst ()
+empty⁰ .snd .snd ()
 
 empty⁰Is⊥* : El⁰ {ℓ} empty⁰ ≡ ⊥* {ℓ}
 empty⁰Is⊥* = refl
@@ -239,7 +259,6 @@ x ×⁰ y = Σ⁰ x (λ _ → y)
 
 ×⁰Is× : {x y : V⁰ {ℓ}} → El⁰ (x ×⁰ y) ≡ ((El⁰ x) × (El⁰ y))
 ×⁰Is× = Σ⁰IsΣ
-
 
 postulate lem26 : {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} → isSet X → (x₀ : X) → (f : (X × Y) → Z) → isEmbedding f → isEmbedding (λ y → f (x₀ , y))
 
