@@ -40,12 +40,36 @@ private
     A A' : Type ℓ
     B B' : A → Type ℓ'
 
-try : {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ transport e)
-try {x = x} {y = y} = J (λ z p → Σ[ e ∈ overline-∞ x ≡ overline-∞ z ] tilde-∞ x ∼ (tilde-∞ z ∘ transport e)) (refl , λ a → sym (cong (λ b → tilde-∞ x b) (transportRefl a)))
+-- try : {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ transport e)
+-- try {x = x} {y = y} = J (λ z p → Σ[ e ∈ overline-∞ x ≡ overline-∞ z ] tilde-∞ x ∼ (tilde-∞ z ∘ transport e)) (refl , λ a → sym (cong (tilde-∞ x) (transportRefl a)))
 
-tryInv : {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ≡ (tilde-∞ y ∘ transport e)) → x ≡ y
-tryInv {ℓ = ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (P , H) = J2 fam refl P H 
+-- tryInv : {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ≡ (tilde-∞ y ∘ transport e)) → x ≡ y
+-- tryInv {ℓ = ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (P , H) = J2 fam refl P H 
+--     where
+--         fam : (C : Type ℓ) → A ≡ C → (h : A → V∞ {ℓ}) → f ≡ h → Type (ℓ-suc ℓ)
+--         fam C p h p' = (sup-∞ A f) ≡ sup-∞ C {!h!}
+
+-- probably need to reformulate
+u : {A : Type ℓ} → refl {x = Type ℓ} ∙ refl {x = Type ℓ} ≡ refl {x = Type ℓ}
+u {ℓ = ℓ} {A = A} = {!!}
+
+s : {A B : Type ℓ} (p : A ≡ B) → p ∙ refl ≡ p
+s = {!!}
+
+t : {A B C : Type ℓ} (x : A) (p : A ≡ B) (q : B ≡ C) → transport q (transport p x) ≡ transport (p ∙ q) x
+t x p q = {!!}
+
+fun' : {x y : V∞ {ℓ}} → (Σ[ p ∈ (overline-∞ x ≡ overline-∞ y) ] (tilde-∞ x ≡ (tilde-∞ y ∘ (transport p)))) → (x ≡ y)
+fun' {ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (p , q) i = sup-W (p i) (k' i)
     where
-        fam : (C : Type ℓ) → A ≡ C → (h : A → V∞ {ℓ}) → f ≡ h → Type (ℓ-suc ℓ)
-        fam C p h p' = (sup-∞ A f) ≡ sup-∞ C {!h!}
+        -- k : (j : I) → p j → V∞ {ℓ}
+        k : PathP (λ j → p j → V∞ {ℓ}) (f ∘ (transport refl)) (g ∘ (transport p) ∘ (transport (sym p)))
+        k j z = q j (transport (λ k → p (j ∧ ~ k)) z)
 
+        k' : PathP (λ j → p j → V∞ {ℓ}) f g
+        k' = funExt fpart ◁ k ▷ funExt gpart
+            where
+                fpart : (a : A) → f a ≡ f (transport refl a)
+                fpart a = cong f (sym (transportRefl a))
+                gpart : (b : B) → g (transport p (transport (sym p) b)) ≡ g b
+                gpart b = {!!}
