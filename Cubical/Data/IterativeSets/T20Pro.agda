@@ -24,6 +24,7 @@ open import Cubical.Data.SumFin
 open import Cubical.Data.Fin as Fin
 
 open import Cubical.Data.Sigma
+open import Cubical.Data.Nat.Order
 
 -- open import Cubical.
 
@@ -60,10 +61,27 @@ EquivToIsProp→isProp propA equiv = Embedding-into-isProp→isProp (Equiv→Emb
 --         x
 --             ∎
 
--- _∈∞_ : V∞ {ℓ} → V∞ {ℓ} → Type (ℓ-suc ℓ)
--- x ∈∞ y = fiber (tilde-∞ y) x
+-- this might be something for the library?
+
+_∈W_ : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} (x y : W A B) → Type (ℓ-max ℓ ℓ')
+x ∈W y = fiber (tilde-W y) x
+
+∈W-irrefl : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} (x : W A B) → (x ∈W x) → ⊥
+∈W-irrefl {A = A} {B = B} = WInd A B _ step
+    where
+        step : {s : A} {f : B s → W A B} → ((p : B s) → f p ∈W f p → ⊥) → sup-∞ s f ∈W sup-∞ s f → ⊥
+        step {s = s} {f = f} ih (b , p) = ih b (transport (cong (λ r → r ∈W r) (sym p)) (b , p))
+
+
+∈∞-irrefl : {ℓ : Level} (x : V∞ {ℓ}) → (x ∈∞ x) → ⊥
+∈∞-irrefl = ∈W-irrefl
+
 _∈⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → Type (ℓ-suc ℓ)
 x ∈⁰ y = fiber (tilde-0' y) (x)
+
+∈⁰-irrefl : {ℓ : Level} (x : V⁰ {ℓ}) → (x ∈⁰ x) → ⊥
+∈⁰-irrefl (sup-∞ A f , isitset) (a , p) = ∈∞-irrefl (sup-∞ A f) (a , cong fst p)
+
 
 SumInl≢Inr : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} (a : A) (b : B) → inl a ≡ (inr b :> A ⊎ B) → ⊥
 SumInl≢Inr {ℓ'' = ℓ''} {A = A} {B = B} a b p = transport (cong helper p) _
@@ -72,8 +90,9 @@ SumInl≢Inr {ℓ'' = ℓ''} {A = A} {B = B} a b p = transport (cong helper p) _
         helper (inl x) = Unit
         helper (inr y) = ⊥
 
+
 suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
-suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ ((overline-0 (sup-∞ A f , isitsetAf) ⊎ Unit* {ℓ}) , ϕₓ , hasPropFibers→isEmbedding hpf)
+suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ (A ⊎ Unit* {ℓ} , ϕₓ , hasPropFibers→isEmbedding hpf)
     where
         ϕₓ : (overline-0 (sup-∞ A f , isitsetAf) ⊎ Unit* {ℓ}) → V⁰ {ℓ}
         ϕₓ (inl a) = f a , isitsetAf .snd a
@@ -99,8 +118,7 @@ suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ ((overline-0 (sup-∞ A f , isit
         hpf (sup-∞ B g , isitsetBg) = EquivToIsProp→isProp (isPropIsPropDisjointSum (isEmbedding→hasPropFibers (isEmbedding-tilde-0 (sup-∞ A f , isitsetAf)) (sup-∞ B g , isitsetBg)) (thm12 _ _) ∈⁰×≡→⊥) (invEquiv (eqFib (sup-∞ B g , isitsetBg)))
             where
                 ∈⁰×≡→⊥ : ((sup-∞ B g , isitsetBg) ∈⁰ (sup-∞ A f , isitsetAf)) × ((sup-∞ A f , isitsetAf) ≡ (sup-∞ B g , isitsetBg)) → ⊥
-                ∈⁰×≡→⊥ ((a , pa) , p) = {!!} -- SumInl≢Inr (inl (a , pa)) (inr p) {!!}
-
+                ∈⁰×≡→⊥ ((a , pa) , p) = ∈⁰-irrefl (sup-∞ B g , isitsetBg) (transport (cong (λ r → ((sup-∞ B g , isitsetBg) ∈⁰ r)) p) (a , pa))
 
 ℕ* : Type ℓ
 ℕ* = Lift ℕ
@@ -109,6 +127,23 @@ vonNeumannEncoding : ℕ* {ℓ} → V⁰ {ℓ}
 vonNeumannEncoding (lift zero) = empty⁰
 vonNeumannEncoding (lift (suc x)) = suc⁰ (vonNeumannEncoding (lift x))
 
+_ : overline-0 {ℓ} (vonNeumannEncoding (lift zero)) ≡ ⊥*
+_ = refl
+
+_ : overline-0 {ℓ} (vonNeumannEncoding (lift (suc zero))) ≡ ⊥* ⊎ Unit*
+_ = refl
+
+_ : overline-0 {ℓ} (vonNeumannEncoding (lift (suc (suc zero)))) ≡ (⊥* ⊎ Unit*) ⊎ Unit*
+_ = refl
+
+overline-0-suc⁰≡overline-0⊎Unit* : {x : V⁰ {ℓ}} → overline-0 {ℓ} (suc⁰ x) ≡ (overline-0 x ⊎ Unit* {ℓ})
+-- overline-0-suc⁰≡overline-0⊎Unit* = refl -- doesn't work
+overline-0-suc⁰≡overline-0⊎Unit* {x = (sup-∞ _ _ , _)} = refl
+
+overline-0-vNE-suc≡overline-0-vNE⊎Unit* : (n : ℕ) → overline-0 {ℓ} (vonNeumannEncoding (lift (suc n))) ≡ (overline-0 {ℓ} (vonNeumannEncoding (lift n))) ⊎ Unit* {ℓ}
+-- overline-0-vNE-suc≡overline-0-vNE⊎Unit* _ = refl -- doesn't work
+overline-0-vNE-suc≡overline-0-vNE⊎Unit* n = overline-0-suc⁰≡overline-0⊎Unit* {x = vonNeumannEncoding (lift n)}
+
 vonNeumannOverline≃Fin : (n : ℕ) → (overline-0 (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin.Fin n)
 vonNeumannOverline≃Fin {ℓ} zero = isoToEquiv (iso f g sec ret)
     where
@@ -116,12 +151,20 @@ vonNeumannOverline≃Fin {ℓ} zero = isoToEquiv (iso f g sec ret)
         f ()
         g : Fin.Fin zero → overline-0 (vonNeumannEncoding (lift zero))
         g = ⊥-elim {A = λ _ → overline-0 (vonNeumannEncoding (lift zero))} ∘ ¬Fin0
-
-        postulate sec : section f g
-        -- sec a = ⊥-elim {ℓ-zero} {A = λ _ → {!section f g!}} (¬Fin0 a)
-        postulate ret : retract f g
-vonNeumannOverline≃Fin (suc n) = placeholder
+        sec : section f g
+        sec a = ⊥-elim {A = λ _ → f (g a) ≡ a} (¬Fin0 a)
+        ret : retract f g
+        ret ()
+vonNeumannOverline≃Fin {ℓ} (suc n) = isoToEquiv (iso f g sec ret)
     where
+        postulate f : overline-0 (vonNeumannEncoding (lift (suc n))) → Fin.Fin (suc n)
+        -- f n = {!!}
+        postulate g : Fin.Fin (suc n) → overline-0 (vonNeumannEncoding (lift (suc n)))
+        -- g (zero , _) = {!inr tt*!}
+        -- g (suc m , sucm<sucn) = {!inl (g (m , pred-≤-pred sucm<sucn))!} -- actually this should be something like `invEq (vonNeumannOverline≃Fin n)` and mapping m into Fin n
+        postulate sec : section f g
+        postulate ret : retract f g
+        
         postulate placeholder : (overline-0 (vonNeumannEncoding {ℓ} (lift (suc n))) ≃ Fin.Fin (suc n))
 
 ℕ⁰' : V⁰ {ℓ}
