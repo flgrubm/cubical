@@ -39,10 +39,10 @@ V∞ {ℓ} = W (Type ℓ) (λ x → x)
 
 -- Gylterud 2020
 overline-W : (x : W A B) → A
-overline-W (sup-W a f) = a
+overline-W (sup-W a _) = a
 
 tilde-W : (x : W A B) → B (overline-W x) → W A B
-tilde-W (sup-W a f) = f
+tilde-W (sup-W _ f) = f
 
 pattern sup-∞ A f = (sup-W A f)
 
