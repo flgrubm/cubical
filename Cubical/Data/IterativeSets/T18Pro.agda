@@ -51,6 +51,7 @@ pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
         β' (a , p) = compEmbedding (desup⁰' a) (Equiv→Embedding (pathToEquiv (sym p)))
 
         postulate sec' : (a : V⁰ {ℓ}) → (p : El⁰ a ≡ A) → α (β (a , p)) ≡ (a , p)
+        -- sec' a p = J ((λ B q → α (β (a , {!!})) ≡ (a , {!!}))) {!path!} (p)
         -- -- sec' a = J fam ref
         --     where
         --         postulate fam : (B : Type ℓ) → El⁰ a ≡ B → Type (ℓ-suc ℓ)
@@ -74,17 +75,20 @@ pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
         --         ≡⟨ {!!} ⟩
         --     a , p
         --         ∎
-
-        postulate ret : retract α β
-        -- ret emb =
-        --     β (α emb)
-        --         ≡⟨⟩
-        --     β (sup⁰ (A , emb) , refl)
-        --         ≡⟨ JRefl (λ B _ → B ↪ V⁰ {ℓ}) (desup⁰' (sup⁰ (A , emb))) ⟩
-        --     desup⁰' (sup⁰ (A , emb))
-        --         ≡⟨ {!!} ⟩
-        --     emb
-        --         ∎
+        ret : retract α β
+        ret emb = JRefl (λ B _ → B ↪ V⁰ {ℓ}) (desup⁰' (sup⁰ (A , emb))) ∙ cong snd (secEq sup⁰desup⁰≃ (A , emb))
+            -- β (α emb)
+            --     ≡⟨⟩
+            -- β (sup⁰ (A , emb) , refl)
+            --     ≡⟨ JRefl (λ B _ → B ↪ V⁰ {ℓ}) (desup⁰' (sup⁰ (A , emb))) ⟩
+            -- desup⁰' (sup⁰ (A , emb))
+            --     ≡⟨⟩
+            -- desup⁰ (sup⁰ (A , emb)) .snd
+            --     ≡⟨ cong snd (secEq sup⁰desup⁰≃ (A , emb)) ⟩
+            -- --(A , emb) .snd
+            -- --     ≡⟨⟩
+            -- emb
+            --     ∎
 
 -- trying out J rule
 -- sym' : {A : Type ℓ} {x y : A} → x ≡ y → y ≡ x
@@ -92,3 +96,4 @@ pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
 
 -- symP' : {A : Type ℓ} {a : A} → Σ[ x ∈ A ] a ≡ x → Σ[ x ∈ A ] x ≡ a
 -- symP' {A = A} {a = a} (x , p) = J {x = a} (λ y _ → Σ[ z ∈ A ] z ≡ a) {!!} p
+
