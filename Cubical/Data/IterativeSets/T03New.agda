@@ -73,8 +73,8 @@ Path∙symPath-cancel p = cong (λ r → p ∙ r) (sym (∙refl-is-identity (sym
 symPath∙Path-cancel : {A B : Type ℓ} (p : A ≡ B) → (sym p) ∙ p ≡ refl
 symPath∙Path-cancel p = cong (λ r → r ∙ p) (sym (refl∙-is-identity (sym p))) ∙ compPathr-cancel p refl
 
-fun' : {x y : V∞ {ℓ}} → (Σ[ p ∈ (overline-∞ x ≡ overline-∞ y) ] (tilde-∞ x ≡ (tilde-∞ y ∘ (transport p)))) → (x ≡ y)
-fun' {ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (p , q) i = sup-W (p i) (k' i)
+finv' : {x y : V∞ {ℓ}} → (Σ[ p ∈ (overline-∞ x ≡ overline-∞ y) ] (tilde-∞ x ≡ (tilde-∞ y ∘ (transport p)))) → (x ≡ y)
+finv' {ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (p , q) i = sup-W (p i) (k' i)
     where
         -- k : (j : I) → p j → V∞ {ℓ}
         k : PathP (λ j → p j → V∞ {ℓ}) (f ∘ (transport refl)) (g ∘ (transport p) ∘ (transport (sym p)))
@@ -87,3 +87,46 @@ fun' {ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (p , q) i = sup-W (p i) (k' i)
                 fpart a = cong f (sym (transportRefl a))
                 gpart : (b : B) → g (transport p (transport (sym p) b)) ≡ g b
                 gpart b = cong g (compTransport-is-transportComp b (sym p) p ∙ cong (λ r → transport r b) (symPath∙Path-cancel p) ∙ transportRefl b)
+
+
+
+f : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (x ≡ y) → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p)))))
+f {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .fst = cong overline-W p
+f {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .snd z i = tilde-W (p i) (transport-filler (cong (B ∘ overline-W) p) z i)
+
+
+finv : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p))))) → (x ≡ y)
+finv {A = A} {B = B} {x = sup-W x α} {y = sup-W y β} (p , q) i = sup-∞ (p i) (k' i)
+    where
+        k : PathP (λ j → B (p j) → W A B) (α ∘ (transport refl)) (β ∘ (transport (cong B p)) ∘ (transport (sym (cong B p))))
+        k j z = (funExt q) j (transport (cong B (λ k → p (j ∧ ~ k))) z)
+
+        k' : PathP (λ j → B (p j) → W A B) α β
+        k' = funExt αpart ◁ k ▷ funExt βpart
+            where
+                αpart : (a : B x) → α a ≡ α (transport refl a)
+                αpart a = cong α (sym (transportRefl a))
+                βpart : (b : B y) → β (transport (cong B p) (transport (sym (cong B p)) b)) ≡ β b
+                βpart b = (cong β (compTransport-is-transportComp b (sym (cong B p)) (cong B p))
+                    ∙ cong (λ r → β (transport r b)) (symPath∙Path-cancel (cong B p))
+                    ∙ cong β (transportRefl b))
+
+-- ret : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → retract (f {x = x} {y = y}) (finv {x = x} {y = y})
+-- ret {x = x} {y = y} = J (λ z p → {!retract (f {x = sup-W x α} {y = z}) (finv {x = sup-W y β} {y = z})!}) {!!}
+--     where
+--         fam : (z : W A B) → (x ≡ z) → Type ?
+--         fam z _ = retract (f {x = x} {y = z}) (finv {x = x} {y = z})
+
+sup-W-overline-tilde : {x : W A B} → x ≡ sup-W (overline-W x) (tilde-W x)
+sup-W-overline-tilde {x = sup-W x α} = refl
+
+-- ret : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → retract (f {x = x} {y = y}) (finv {x = x} {y = y})
+-- ret {B = B} {x = sup-W x α} {y = sup-W y β} p =
+--     finv (f p)
+--         ≡⟨⟩
+--     finv (cong overline-W p , λ z i → tilde-W (p i) (transport-filler (cong (B ∘ overline-W) p) z i))
+--         ≡⟨⟩
+--     λ i → sup-W (cong overline-W p i) (? i)
+--         ≡⟨ {!!} ⟩
+--     p
+--         ∎
