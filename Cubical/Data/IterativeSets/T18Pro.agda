@@ -35,8 +35,6 @@ open import Cubical.Data.IterativeSets.Base
 private
   variable
     ℓ ℓ' ℓ'' : Level
-    A A' : Type ℓ
-    B B' : A → Type ℓ
 
 pro18' : {ℓ : Level} → {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
 pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
@@ -50,14 +48,21 @@ pro18' {ℓ = ℓ} {A = A} = isoToEquiv (iso α β sec ret)
         β' : Σ[ a ∈ V⁰ ] El⁰ a ≡ A → A ↪ V⁰ {ℓ}
         β' (a , p) = compEmbedding (desup⁰' a) (Equiv→Embedding (pathToEquiv (sym p)))
 
-        postulate sec' : (a : V⁰ {ℓ}) → (p : El⁰ a ≡ A) → α (β (a , p)) ≡ (a , p)
-        -- sec' a p = J ((λ B q → α (β (a , {!!})) ≡ (a , {!!}))) {!path!} (p)
-        -- -- sec' a = J fam ref
-        --     where
-        --         postulate fam : (B : Type ℓ) → El⁰ a ≡ B → Type (ℓ-suc ℓ)
-        --         -- fam = {!!}
-        --         postulate ref : fam (El⁰ a) refl
-        --         -- ref = {!!}
+        sec' : (a : V⁰ {ℓ}) → (p : El⁰ a ≡ A) → α (β (a , p)) ≡ (a , p)
+        sec' a p = J P d p
+            where
+                P : (B : Type ℓ) → El⁰ a ≡ B → Type (ℓ-suc ℓ)
+                P B q = α (β (a , {!q!})) ≡ (a , {!!})
+                d : P (El⁰ a) refl
+                d = {!!}
+
+        sec'-sym : (a : V⁰ {ℓ}) → (p : El⁰ a ≡ A) → α (β (a , p)) ≡ (a , p)
+        sec'-sym a p = J P d (sym p)
+            where
+                P : (B : Type ℓ) → A ≡ B → Type (ℓ-suc ℓ)
+                P B q = α (β (a , {!!})) ≡ (a , {!!})
+                d : P (A) refl
+                d = {!!}
 
         sec : section α β
         sec (a , p) = sec' a p -- J (λ B p' → {!section α β!}) {!α (β (a , refl)) ≡⟨ ? ⟩ (a , refl) ∎!} p

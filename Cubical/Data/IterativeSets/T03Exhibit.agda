@@ -1,4 +1,4 @@
-module Cubical.Data.IterativeSets.T03New where
+module Cubical.Data.IterativeSets.T03Exhibit where
 -- definitions in Base
 -- properties in Properties
 
@@ -33,24 +33,15 @@ open import Cubical.Data.W.W
 
 open import Cubical.Data.IterativeSets.Base
 
-open import Cubical.Foundations.CartesianKanOps
-
 private
   variable
     ℓ ℓ' ℓ'' : Level
     A A' : Type ℓ
     B B' : A → Type ℓ'
 
--- try : {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ transport e)
--- try {x = x} {y = y} = J (λ z p → Σ[ e ∈ overline-∞ x ≡ overline-∞ z ] tilde-∞ x ∼ (tilde-∞ z ∘ transport e)) (refl , λ a → sym (cong (tilde-∞ x) (transportRefl a)))
+-- Version without J
 
--- tryInv : {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ≡ (tilde-∞ y ∘ transport e)) → x ≡ y
--- tryInv {ℓ = ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (P , H) = J2 fam refl P H 
---     where
---         fam : (C : Type ℓ) → A ≡ C → (h : A → V∞ {ℓ}) → f ≡ h → Type (ℓ-suc ℓ)
---         fam C p h p' = (sup-∞ A f) ≡ sup-∞ C {!h!}
-
--- this should really be in the library, but I haven't found it there?
+-- these should really be in the library, but I haven't found it there?
 
 refl∙refl≡refl : {A : Type ℓ} {x : A} → refl ∙ refl ≡ refl {x = x}
 refl∙refl≡refl = sym (compPath-filler refl refl)
@@ -73,30 +64,12 @@ Path∙symPath-cancel p = cong (λ r → p ∙ r) (sym (∙refl-is-identity (sym
 symPath∙Path-cancel : {A B : Type ℓ} (p : A ≡ B) → (sym p) ∙ p ≡ refl
 symPath∙Path-cancel p = cong (λ r → r ∙ p) (sym (refl∙-is-identity (sym p))) ∙ compPathr-cancel p refl
 
-finvV∞ : {x y : V∞ {ℓ}} → (Σ[ p ∈ (overline-∞ x ≡ overline-∞ y) ] (tilde-∞ x ≡ (tilde-∞ y ∘ (transport p)))) → (x ≡ y)
-finvV∞ {ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (p , q) i = sup-W (p i) (k' i)
-    where
-        -- k : (j : I) → p j → V∞ {ℓ}
-        k : PathP (λ j → p j → V∞ {ℓ}) (f ∘ (transport refl)) (g ∘ (transport p) ∘ (transport (sym p)))
-        k j z = q j (transport (λ k → p (j ∧ ~ k)) z)
+f-w/oJ : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (x ≡ y) → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p)))))
+f-w/oJ {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .fst = cong overline-W p
+f-w/oJ {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .snd z i = tilde-W (p i) (transport-filler (cong (B ∘ overline-W) p) z i)
 
-        k' : PathP (λ j → p j → V∞ {ℓ}) f g
-        k' = funExt fpart ◁ k ▷ funExt gpart
-            where
-                fpart : (a : A) → f a ≡ f (transport refl a)
-                fpart a = cong f (sym (transportRefl a))
-                gpart : (b : B) → g (transport p (transport (sym p) b)) ≡ g b
-                gpart b = cong g (compTransport-is-transportComp b (sym p) p ∙ cong (λ r → transport r b) (symPath∙Path-cancel p) ∙ transportRefl b)
-
-
-
-f : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (x ≡ y) → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p)))))
-f {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .fst = cong overline-W p
-f {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .snd z i = tilde-W (p i) (transport-filler (cong (B ∘ overline-W) p) z i)
-
-
-finv : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p))))) → (x ≡ y)
-finv {A = A} {B = B} {x = sup-W x α} {y = sup-W y β} (p , q) i = sup-∞ (p i) (k' i)
+f-w/oJ-inv : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p))))) → (x ≡ y)
+f-w/oJ-inv {A = A} {B = B} {x = sup-W x α} {y = sup-W y β} (p , q) i = sup-∞ (p i) (k' i)
     where
         k : PathP (λ j → B (p j) → W A B) (α ∘ (transport refl)) (β ∘ (transport (cong B p)) ∘ (transport (sym (cong B p))))
         k j z = (funExt q) j (transport (cong B (λ k → p (j ∧ ~ k))) z)
@@ -110,6 +83,22 @@ finv {A = A} {B = B} {x = sup-W x α} {y = sup-W y β} (p , q) i = sup-∞ (p i)
                 βpart b = (cong β (compTransport-is-transportComp b (sym (cong B p)) (cong B p))
                     ∙ cong (λ r → β (transport r b)) (symPath∙Path-cancel (cong B p))
                     ∙ cong β (transportRefl b))
+
+-- version specifically for V∞ {ℓ}
+f-V∞-w/oJ-inv : {x y : V∞ {ℓ}} → (Σ[ p ∈ (overline-∞ x ≡ overline-∞ y) ] (tilde-∞ x ≡ (tilde-∞ y ∘ (transport p)))) → (x ≡ y)
+f-V∞-w/oJ-inv {ℓ} {x = sup-∞ A f} {y = sup-∞ B g} (p , q) i = sup-W (p i) (k' i)
+    where
+        -- k : (j : I) → p j → V∞ {ℓ}
+        k : PathP (λ j → p j → V∞ {ℓ}) (f ∘ (transport refl)) (g ∘ (transport p) ∘ (transport (sym p)))
+        k j z = q j (transport (λ k → p (j ∧ ~ k)) z)
+
+        k' : PathP (λ j → p j → V∞ {ℓ}) f g
+        k' = funExt fpart ◁ k ▷ funExt gpart
+            where
+                fpart : (a : A) → f a ≡ f (transport refl a)
+                fpart a = cong f (sym (transportRefl a))
+                gpart : (b : B) → g (transport p (transport (sym p) b)) ≡ g b
+                gpart b = cong g (compTransport-is-transportComp b (sym p) p ∙ cong (λ r → transport r b) (symPath∙Path-cancel p) ∙ transportRefl b)
 
 -- ret : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → retract (f {x = x} {y = y}) (finv {x = x} {y = y})
 -- ret {x = x} {y = y} = J (λ z p → {!retract (f {x = sup-W x α} {y = z}) (finv {x = sup-W y β} {y = z})!}) {!!}
@@ -130,3 +119,30 @@ sup-W-overline-tilde {x = sup-W x α} = refl
 --         ≡⟨ {!!} ⟩
 --     p
 --         ∎
+
+
+-- With J
+
+f-w/J : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (x ≡ y) → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p)))))
+f-w/J {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {x = x} {y = y} = J P d
+    where
+        P : (z : W A B) → x ≡ z → Type (ℓ-max ℓ ℓ')
+        P z p = Σ[ p ∈ (overline-W x ≡ overline-W z) ] (tilde-W x ∼ (tilde-W z ∘ (transport (cong B p))))
+        d : P x refl
+        d .fst = refl
+        d .snd b = cong (tilde-W x) (sym (transportRefl b))
+
+f-V∞-w/J : {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ transport e)
+f-V∞-w/J {x = x} {y = y} = J (λ z p → Σ[ e ∈ overline-∞ x ≡ overline-∞ z ] tilde-∞ x ∼ (tilde-∞ z ∘ transport e)) (refl , (λ a → cong (tilde-∞ x) (sym (transportRefl a))))
+
+f-w/J-inv : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p))))) → (x ≡ y)
+f-w/J-inv {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {x = sup-W x α} {y = sup-W y β} (p , h) = J2 Q r p (funExt h)
+    where
+        Q : (y' : A) (p' : x ≡ y') (β' : (b : B x) → W A B) → α ≡ β' → Type (ℓ-max ℓ ℓ')
+        Q y' p' β' h' = sup-W x α ≡ sup-W y' f
+            where
+                f : B y' → W A B
+                f b = {!β' (transport (cong B (sym p')) b)!}
+                -- f b = {!α (transport (cong B (sym p')) b)!}
+        r : Q _ refl _ refl
+        r = refl
