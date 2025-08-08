@@ -184,13 +184,14 @@ empty⁰Is⊥* = refl
 isEmbeddingFunctionFromIsPropToIsSet : {A : Type ℓ} {B : Type ℓ'} (f : A → B) → isProp A → isSet B → isEmbedding f
 isEmbeddingFunctionFromIsPropToIsSet f propA setB = injEmbedding setB λ {w} {x} _ → propA w x
 
+singleton⁰ : V⁰ {ℓ} → V⁰ {ℓ}
+singleton⁰ x = sup⁰ (Unit* , (λ _ → x) , isEmbeddingFunctionFromIsPropToIsSet _ isPropUnit* thm12)
+
+El⁰singleton⁰IsUnit* : {x : V⁰ {ℓ}} → El⁰ {ℓ} (singleton⁰ x) ≡ Unit* {ℓ}
+El⁰singleton⁰IsUnit* = refl
+
 unit⁰ : V⁰ {ℓ}
-unit⁰ {ℓ = ℓ} = sup⁰ (Unit* {ℓ} , f , isemb)
-    where
-        f : Unit* {ℓ} → V⁰ {ℓ}
-        f _ = empty⁰
-        isemb : isEmbedding f
-        isemb = isEmbeddingFunctionFromIsPropToIsSet f isPropUnit* thm12
+unit⁰ = singleton⁰ empty⁰
 
 unit⁰IsUnit* : El⁰ {ℓ} unit⁰ ≡ Unit* {ℓ}
 unit⁰IsUnit* = refl
@@ -233,10 +234,15 @@ postulate ℕ⁰ : V⁰ {ℓ}
 postulate ℕ⁰Isℕ : El⁰ ℕ⁰ ≡ ℕ
 
 -- Proposition 21
-postulate orderedPair : (V⁰ {ℓ} × V⁰ {ℓ}) ↪ V⁰ {ℓ}
+
+postulate orderedPair : (V⁰ {ℓ} × V⁰ {ℓ}) → V⁰ {ℓ}
 
 ⟨_,_⟩ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
-⟨ x , y ⟩ = orderedPair .fst (x , y)
+⟨ x , y ⟩ = orderedPair (x , y)
+
+postulate isEmbOrderedPair' : (V⁰ {ℓ} × V⁰ {ℓ}) ↪ V⁰ {ℓ}
+
+-- ⟨ x , y ⟩ = orderedPair .fst (x , y)
 
 -- Proposition 22
 postulate Π⁰ : (x : V⁰ {ℓ}) → (El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
