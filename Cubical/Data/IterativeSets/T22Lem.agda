@@ -42,4 +42,5 @@ graph⁰ x y .snd = {!!}
 Π⁰' : {ℓ : Level} (x : V⁰ {ℓ}) (y : El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
 Π⁰' x y = sup⁰ (((a : El⁰ x) → El⁰ (y a)) , (graph⁰ x y))
 
--- Π⁰IsΠ : {ℓ : Level}
+Π⁰IsΠ' : {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Π⁰' x y) ≡ ((a : El⁰ x) → El⁰ (y a))
+Π⁰IsΠ' = refl
