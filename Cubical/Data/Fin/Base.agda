@@ -45,6 +45,7 @@ fsuc : Fin k → Fin (suc k)
 fsuc (k , l) = (suc k , suc-≤-suc l)
 
 finj : Fin k → Fin (suc k)
+-- finj {k} (n , l) = n , ≤-trans l (≤-suc (≤-refl {m = k}))
 finj (k , l) = k , ≤-trans l (1 , refl)
 
 -- predecessors too
