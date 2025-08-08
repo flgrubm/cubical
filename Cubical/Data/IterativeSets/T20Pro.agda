@@ -20,11 +20,11 @@ open import Cubical.Data.Bool
 open import Cubical.Functions.FunExtEquiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat
-open import Cubical.Data.SumFin
 open import Cubical.Data.Fin as Fin
 
 open import Cubical.Data.Sigma
 open import Cubical.Data.Nat.Order
+open import Cubical.Data.Sum using (_⊎_; inl; inr; ⊎-IdL-⊥*-≃) public
 
 -- open import Cubical.
 
@@ -39,6 +39,12 @@ private
     ℓ ℓ' ℓ'' : Level
     A A' : Type ℓ
     B B' : A → Type ℓ
+
+⊥*∼⊥ : ⊥* {ℓ} ≃ ⊥
+⊥*∼⊥ = isoToEquiv (iso (λ ()) (λ ()) (λ ()) λ ())
+
+Unit*≃Unit : Unit* {ℓ} ≃ Unit
+Unit*≃Unit = isoToEquiv (iso (λ {(lift _) → _}) (λ _ → lift _) (λ _ → refl) λ {(lift _) → refl})
 
 isPropIsPropDisjointSum : {A : Type ℓ} {B : Type ℓ} → isProp A → isProp B → (A × B → ⊥) → isProp (A ⊎ B)
 isPropIsPropDisjointSum propA propB disj (inl a₁) (inl a₂) = cong inl (propA a₁ a₂)
@@ -127,46 +133,80 @@ vonNeumannEncoding : ℕ* {ℓ} → V⁰ {ℓ}
 vonNeumannEncoding (lift zero) = empty⁰
 vonNeumannEncoding (lift (suc x)) = suc⁰ (vonNeumannEncoding (lift x))
 
-_ : overline-0 {ℓ} (vonNeumannEncoding (lift zero)) ≡ ⊥*
+_ : El⁰ {ℓ} (vonNeumannEncoding (lift zero)) ≡ ⊥*
 _ = refl
 
-_ : overline-0 {ℓ} (vonNeumannEncoding (lift (suc zero))) ≡ ⊥* ⊎ Unit*
+_ : El⁰ {ℓ} (vonNeumannEncoding (lift (suc zero))) ≡ ⊥* ⊎ Unit*
 _ = refl
 
-_ : overline-0 {ℓ} (vonNeumannEncoding (lift (suc (suc zero)))) ≡ (⊥* ⊎ Unit*) ⊎ Unit*
+_ : El⁰ {ℓ} (vonNeumannEncoding (lift (suc (suc zero)))) ≡ (⊥* ⊎ Unit*) ⊎ Unit*
 _ = refl
 
-overline-0-suc⁰≡overline-0⊎Unit* : {x : V⁰ {ℓ}} → overline-0 {ℓ} (suc⁰ x) ≡ (overline-0 x ⊎ Unit* {ℓ})
--- overline-0-suc⁰≡overline-0⊎Unit* = refl -- doesn't work
-overline-0-suc⁰≡overline-0⊎Unit* {x = (sup-∞ _ _ , _)} = refl
+El⁰-suc⁰≡El⁰⊎Unit* : {x : V⁰ {ℓ}} → El⁰ {ℓ} (suc⁰ x) ≡ (El⁰ x ⊎ Unit* {ℓ})
+-- El⁰-suc⁰≡El⁰⊎Unit* = refl -- doesn't work
+El⁰-suc⁰≡El⁰⊎Unit* {x = (sup-∞ _ _ , _)} = refl
 
-overline-0-vNE-suc≡overline-0-vNE⊎Unit* : (n : ℕ) → overline-0 {ℓ} (vonNeumannEncoding (lift (suc n))) ≡ (overline-0 {ℓ} (vonNeumannEncoding (lift n))) ⊎ Unit* {ℓ}
--- overline-0-vNE-suc≡overline-0-vNE⊎Unit* _ = refl -- doesn't work
-overline-0-vNE-suc≡overline-0-vNE⊎Unit* n = overline-0-suc⁰≡overline-0⊎Unit* {x = vonNeumannEncoding (lift n)}
+El⁰-vNE-suc≡El⁰-vNE⊎Unit* : (n : ℕ) → El⁰ {ℓ} (vonNeumannEncoding (lift (suc n))) ≡ (El⁰ {ℓ} (vonNeumannEncoding (lift n))) ⊎ Unit* {ℓ}
+-- El⁰-vNE-suc≡El⁰-vNE⊎Unit* _ = refl -- doesn't work
+El⁰-vNE-suc≡El⁰-vNE⊎Unit* n = El⁰-suc⁰≡El⁰⊎Unit* {x = vonNeumannEncoding (lift n)}
 
-vonNeumannOverline≃Fin : (n : ℕ) → (overline-0 (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin.Fin n)
-vonNeumannOverline≃Fin {ℓ} zero = isoToEquiv (iso f g sec ret)
+El⁰-vNE-suc≃El⁰-vNE⊎Unit* : (n : ℕ) → El⁰ {ℓ} (vonNeumannEncoding (lift (suc n))) ≃ (El⁰ {ℓ} (vonNeumannEncoding (lift n))) ⊎ Unit* {ℓ}
+El⁰-vNE-suc≃El⁰-vNE⊎Unit* = pathToEquiv ∘ El⁰-vNE-suc≡El⁰-vNE⊎Unit*
+
++1≡suc : (n : ℕ) → (n + 1 ≡ suc n)
++1≡suc n = +-comm n 1
+
+vonNeumannOverline≃Fin : (n : ℕ) → (El⁰ (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin.Fin n)
+vonNeumannOverline≃Fin {ℓ} zero = uninhabEquiv (λ ()) ¬Fin0
+vonNeumannOverline≃Fin {ℓ} (suc zero) = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1
+vonNeumannOverline≃Fin {ℓ} (suc (suc n)) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
     where
-        f : overline-0 (vonNeumannEncoding (lift zero)) → Fin.Fin zero
-        f ()
-        g : Fin.Fin zero → overline-0 (vonNeumannEncoding (lift zero))
-        g = ⊥-elim {A = λ _ → overline-0 (vonNeumannEncoding (lift zero))} ∘ ¬Fin0
-        sec : section f g
-        sec a = ⊥-elim {A = λ _ → f (g a) ≡ a} (¬Fin0 a)
-        ret : retract f g
-        ret ()
-vonNeumannOverline≃Fin {ℓ} (suc n) = isoToEquiv (iso f g sec ret)
-    where
-        postulate f : overline-0 (vonNeumannEncoding (lift (suc n))) → Fin.Fin (suc n)
-        -- f n = {!!}
-        postulate g : Fin.Fin (suc n) → overline-0 (vonNeumannEncoding (lift (suc n)))
-        -- g (zero , _) = {!inr tt*!}
-        -- g (suc m , sucm<sucn) = {!inl (g (m , pred-≤-pred sucm<sucn))!} -- actually this should be something like `invEq (vonNeumannOverline≃Fin n)` and mapping m into Fin n
+        f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin.Fin (suc (suc n))
+        f (inr _) .fst = suc n
+        f (inr _) .snd = ≤-refl
+        f (inl x) = Fin.finj (vonNeumannOverline≃Fin (suc n) .fst x)
+        g : Fin.Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
+        g (m , zero , sucm≡sucsucn) = inr _
+        g (m , suc k , suc+sucm≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin (suc n)) {!!})
         postulate sec : section f g
         postulate ret : retract f g
-        
-        postulate placeholder : (overline-0 (vonNeumannEncoding {ℓ} (lift (suc n))) ≃ Fin.Fin (suc n))
+        -- the following commented out stuff is correct (just replace n with suc n), I just need to figure out how to make Agda realize that the above terminates
+-- vonNeumannOverline≃Fin {ℓ} (suc n) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* n) (isoToEquiv (iso f g sec ret))
+--     where
+--         f : El⁰ (vonNeumannEncoding (lift n)) ⊎ Unit* → Fin.Fin (suc n)
+--         f (inr _) .fst = n
+--         f (inr _) .snd = ≤-refl
+--         f (inl x) = Fin.finj (vonNeumannOverline≃Fin n .fst x)
 
+--         g : Fin.Fin (suc n) → El⁰ (vonNeumannEncoding (lift n)) ⊎ Unit*
+--         g (m , zero , sucm≡sucn) = inr _
+--         g (m , suc k , suck+sucm≡sucn) = inl (invEq (vonNeumannOverline≃Fin n) (record {fst = m; snd = record {fst = k; snd = injSuc suck+sucm≡sucn {- : k + suc m ≡ n-}}}))
+
+--         test : (a : ℕ) → (p : zero + a ≡ a) → p ≡ refl {x = a}
+--         test a p = isSetℕ a a p refl
+
+--         predFin' : Fin.Fin (suc n) → Fin.Fin n
+--         predFin' (zero , prf) = zero , {!!}
+--         predFin' (suc m , prf) = {!!}
+
+--         sec : section f g
+--         sec (m , zero , sucm≡sucn) = Fin-fst-≡ (sym (injSuc sucm≡sucn))
+--         sec (m , suc k , suck+sucm≡sucn) = Fin-fst-≡ (cong (λ x → fst (Fin.finj x)) (secEq (vonNeumannOverline≃Fin n) _))
+        
+--         ret : retract f g
+--         ret (inr _) = refl
+--         ret (inl x) = {!!}
+--             -- g (f (inl x))
+--             --     ≡⟨⟩
+--             -- g (Fin.finj (vonNeumannOverline≃Fin n .fst x .fst , vonNeumannOverline≃Fin n .fst x .snd .fst , (λ i → vonNeumannOverline≃Fin n .fst x .snd .snd i)))
+--             --     ≡⟨⟩
+--             -- g (vonNeumannOverline≃Fin n .fst x .fst , vonNeumannOverline≃Fin n .fst x .snd .fst + 1 , _)
+--             --     ≡⟨ cong (λ x → g (_ , x , _)) (+1≡suc _) ⟩
+--             -- g (vonNeumannOverline≃Fin n .fst x .fst , suc (vonNeumannOverline≃Fin n .fst x .snd .fst) , _)
+--             --     ≡⟨ {!!} ⟩
+--             -- inl x
+--             --     ∎
+        
 ℕ⁰' : V⁰ {ℓ}
 ℕ⁰' {ℓ} = sup⁰ (ℕ* {ℓ} , vonNeumannEncoding {ℓ} , isemb)
     where
@@ -177,3 +217,8 @@ vonNeumannOverline≃Fin {ℓ} (suc n) = isoToEquiv (iso f g sec ret)
 
 ℕ⁰Isℕ*' : El⁰ (ℕ⁰' {ℓ}) ≡ ℕ* {ℓ}
 ℕ⁰Isℕ*' = refl
+
+ℕ-≢0→is-suc : (n : ℕ) → (n ≡ 0 → ⊥) → Σ[ m ∈ ℕ ] n ≡ suc m
+ℕ-≢0→is-suc zero n≢0 = ⊥-elim (n≢0 refl)
+ℕ-≢0→is-suc (suc m) _ .fst = m
+ℕ-≢0→is-suc (suc _) _ .snd = refl
