@@ -69,25 +69,6 @@ EquivToIsProp→isProp propA equiv = Embedding-into-isProp→isProp (Equiv→Emb
 
 -- this might be something for the library?
 
-_∈W_ : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} (x y : W A B) → Type (ℓ-max ℓ ℓ')
-x ∈W y = fiber (tilde-W y) x
-
-∈W-irrefl : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} (x : W A B) → (x ∈W x) → ⊥
-∈W-irrefl {A = A} {B = B} = WInd A B _ step
-    where
-        step : {s : A} {f : B s → W A B} → ((p : B s) → f p ∈W f p → ⊥) → sup-∞ s f ∈W sup-∞ s f → ⊥
-        step {s = s} {f = f} ih (b , p) = ih b (transport (cong (λ r → r ∈W r) (sym p)) (b , p))
-
-
-∈∞-irrefl : {ℓ : Level} (x : V∞ {ℓ}) → (x ∈∞ x) → ⊥
-∈∞-irrefl = ∈W-irrefl
-
-_∈⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → Type (ℓ-suc ℓ)
-x ∈⁰ y = fiber (tilde-0' y) (x)
-
-∈⁰-irrefl : {ℓ : Level} (x : V⁰ {ℓ}) → (x ∈⁰ x) → ⊥
-∈⁰-irrefl (sup-∞ A f , isitset) (a , p) = ∈∞-irrefl (sup-∞ A f) (a , cong fst p)
-
 
 SumInl≢Inr : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} (a : A) (b : B) → inl a ≡ (inr b :> A ⊎ B) → ⊥
 SumInl≢Inr {ℓ'' = ℓ''} {A = A} {B = B} a b p = transport (cong helper p) _
