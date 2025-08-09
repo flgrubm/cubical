@@ -139,18 +139,31 @@ El⁰-vNE-suc≃El⁰-vNE⊎Unit* = pathToEquiv ∘ El⁰-vNE-suc≡El⁰-vNE⊎
 
 vonNeumannOverline≃Fin : (n : ℕ) → (El⁰ (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin.Fin n)
 vonNeumannOverline≃Fin {ℓ} zero = uninhabEquiv (λ ()) ¬Fin0
-vonNeumannOverline≃Fin {ℓ} (suc zero) = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1
-vonNeumannOverline≃Fin {ℓ} (suc (suc n)) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
+vonNeumannOverline≃Fin {ℓ} (suc n) with n
+...                                 | zero = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1
+...                                 | suc m = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc m)) (isoToEquiv (iso f g sec ret))
     where
-        f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin.Fin (suc (suc n))
-        f (inr _) .fst = suc n
+        f : El⁰ (vonNeumannEncoding (lift (suc m))) ⊎ Unit* → Fin.Fin (suc (suc m))
+        f (inr _) .fst = suc m
         f (inr _) .snd = ≤-refl
-        f (inl x) = Fin.finj (vonNeumannOverline≃Fin (suc n) .fst x)
-        g : Fin.Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
-        g (m , zero , sucm≡sucsucn) = inr _
-        g (m , suc k , suc+sucm≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin (suc n)) {!!})
+        f (inl x) = Fin.finj (vonNeumannOverline≃Fin (suc m) .fst x)
+        g : Fin.Fin (suc (suc m)) → El⁰ (vonNeumannEncoding (lift (suc m))) ⊎ Unit*
+        g (l , zero , sucl≡sucsucm) = inr _
+        g (l , suc k , suck+sucl≡sucsucm) = inl (invEq (vonNeumannOverline≃Fin (suc m)) (predFin m (l , suc k , suck+sucl≡sucsucm)))
         postulate sec : section f g
         postulate ret : retract f g
+-- vonNeumannOverline≃Fin {ℓ} (suc zero) = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1
+-- vonNeumannOverline≃Fin {ℓ} (suc (suc n)) = {!!} -- compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
+    -- where
+    --     f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin.Fin (suc (suc n))
+    --     f (inr _) .fst = suc n
+    --     f (inr _) .snd = ≤-refl
+    --     f (inl x) = Fin.finj (vonNeumannOverline≃Fin (suc n) .fst x)
+    --     g : Fin.Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
+    --     g (m , zero , sucm≡sucsucn) = inr _
+    --     g (m , suc k , suc+sucm≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin (suc n)) {!!})
+    --     postulate sec : section f g
+    --     postulate ret : retract f g
         -- the following commented out stuff is correct (just replace n with suc n), I just need to figure out how to make Agda realize that the above terminates
 -- vonNeumannOverline≃Fin {ℓ} (suc n) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* n) (isoToEquiv (iso f g sec ret))
 --     where
