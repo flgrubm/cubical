@@ -156,117 +156,57 @@ ret-finj' {n} (zero , _) = Fin-fst-≡ refl
 ret-finj' {n} (suc m , k , prf) = Fin-fst-≡ refl
 
 vonNeumannOverline≃Fin : (n : ℕ) → (El⁰ (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin.Fin n)
-vonNeumannOverline≃Fin {ℓ} zero = uninhabEquiv (λ ()) ¬Fin0
-vonNeumannOverline≃Fin {ℓ} (suc zero) = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1 
-vonNeumannOverline≃Fin {ℓ} (suc (suc n)) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
+vonNeumannOverline≃Fin {ℓ} = elim+2 case0 case1 caseSuc
     where
-        f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin (suc (suc n))
-        f (inr _) .fst = suc n
-        f (inr _) .snd = ≤-refl
-        f (inl x) = finj' (vonNeumannOverline≃Fin {ℓ = ℓ} (suc n) .fst x)
+        case0 : El⁰ (vonNeumannEncoding (lift 0)) ≃ Fin 0
+        case0 = uninhabEquiv (λ ()) ¬Fin0
+        case1 : El⁰ (vonNeumannEncoding (lift 1)) ≃ Fin 1
+        case1 = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1 
+        caseSuc : (n : ℕ) → El⁰ (vonNeumannEncoding (lift (suc n))) ≃ Fin (suc n) → El⁰ (vonNeumannEncoding (lift (suc (suc n)))) ≃ Fin (suc (suc n))
+        caseSuc n indHyp = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
+            where
+                f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin (suc (suc n))
+                f (inr _) .fst = suc n
+                f (inr _) .snd = ≤-refl
+                f (inl x) = finj' (indHyp .fst x)
+                g : Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
+                g (l , zero , sucl≡susucn) = inr _
+                g (l , suc k , suck+sucl≡sucsucn) = inl (invEq indHyp (finj'-ret (l , suc k , suck+sucl≡sucsucn)))
+                sec : section f g
+                sec (suc l , zero , sucsucl≡sucsucn) = Fin-fst-≡ (sym (injSuc sucsucl≡sucsucn))
+                sec (zero , zero , prf) = ⊥-elim {A = λ _ → f (g (zero , zero , prf)) ≡ (zero , zero , prf)} (znots (injSuc prf))
+                sec (zero , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq indHyp fzero))
+                sec (suc l , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq indHyp (suc l , k , injSuc prf)))
+                ret : retract f g
+                ret (inr _) = refl
+                ret (inl x) = cong (inl ∘ (invEq indHyp)) (ret-finj' (indHyp .fst x)) ∙
+                                cong inl (retEq indHyp x)
 
-        g : Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
-        g (l , zero , sucl≡susucn) = inr _
-        g (l , suc k , suck+sucl≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin {ℓ = ℓ} (suc n)) (finj'-ret (l , suc k , suck+sucl≡sucsucn)))
-
-        sec : section f g
-        sec (suc l , zero , sucsucl≡sucsucn) = Fin-fst-≡ (sym (injSuc sucsucl≡sucsucn))
-        sec (zero , zero , prf) = ⊥-elim {A = λ _ → f (g (zero , zero , prf)) ≡ (zero , zero , prf)} (znots (injSuc prf))
-        sec (zero , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin (suc n)) fzero))
-        sec (suc l , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin {ℓ = ℓ} (suc n)) (suc l , k , injSuc prf)))
-
-        ret : retract f g
-        ret (inr _) = refl
-        ret (inl x) = cong (inl ∘ (invEq (vonNeumannOverline≃Fin (suc n)))) (ret-finj' (vonNeumannOverline≃Fin {ℓ = ℓ} (suc n) .fst x)) ∙
-                        cong inl (retEq (vonNeumannOverline≃Fin (suc n)) x)
-
---             g (f (inl x))
---                 ≡⟨⟩
---             g (finj' (vonNeumannOverline≃Fin (suc n) .fst x))
---                 ≡⟨⟩
---             inl (invEq (vonNeumannOverline≃Fin (suc n)) (finj'-ret (finj' (vonNeumannOverline≃Fin (suc n) .fst x))))
---                 ≡⟨ cong (inl ∘ (invEq (vonNeumannOverline≃Fin (suc n)))) (ret-finj' (vonNeumannOverline≃Fin (suc n) .fst x)) ⟩
---             inl (invEq (vonNeumannOverline≃Fin (suc n)) (vonNeumannOverline≃Fin (suc n) .fst x))
---                 ≡⟨ cong inl (retEq (vonNeumannOverline≃Fin (suc n)) x) ⟩
---             inl x
---                 ∎
--- -- ...                                 | zero = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1
--- ...                                 | suc m = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc m)) (isoToEquiv (iso f g sec ret))
+-- for some reason the following doesn't termination check
+-- vonNeumannOverline≃Fin' : (n : ℕ) → (El⁰ (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin.Fin n)
+-- vonNeumannOverline≃Fin' {ℓ} zero = uninhabEquiv (λ ()) ¬Fin0
+-- vonNeumannOverline≃Fin' {ℓ} (suc zero) = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1 
+-- vonNeumannOverline≃Fin' {ℓ} (suc (suc n)) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
 --     where
---         f : El⁰ (vonNeumannEncoding (lift (suc m))) ⊎ Unit* → Fin.Fin (suc (suc m))
---         f (inr _) .fst = suc m
+--         f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin (suc (suc n))
+--         f (inr _) .fst = suc n
 --         f (inr _) .snd = ≤-refl
---         f (inl x) = finj' (vonNeumannOverline≃Fin (suc m) .fst x)
+--         f (inl x) = finj' (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n) .fst x)
 
---         g : Fin.Fin (suc (suc m)) → El⁰ (vonNeumannEncoding (lift (suc m))) ⊎ Unit*
---         g (l , zero , sucl≡sucsucm) = inr _
---         g (l , suc k , suck+sucl≡sucsucm) = inl (invEq (vonNeumannOverline≃Fin (suc m)) (finj'-ret (l , suc k , suck+sucl≡sucsucm)))
+--         g : Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
+--         g (l , zero , sucl≡susucn) = inr _
+--         g (l , suc k , suck+sucl≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) (finj'-ret (l , suc k , suck+sucl≡sucsucn)))
 
 --         sec : section f g
---         sec (l , zero , sucl≡sucsucm) = Fin-fst-≡ (sym (injSuc sucl≡sucsucm))
---         sec (l , suc k , suck+sucl≡sucsucm) = Fin-fst-≡ (cong (fst ∘ finj') (secEq {!vonNeumannOverline≃Fin (suc m)!} (l , k , injSuc suck+sucl≡sucsucm)))
-            -- f (g (l , suc k , suck+sucl≡sucsucm)) .fst
-            --     ≡⟨⟩
-            -- f (inl (invEq (vonNeumannOverline≃Fin (suc m)) (finj'-ret (l , suc k , suck+sucl≡sucsucm)))) .fst
-            --     ≡⟨⟩
-            -- finj' (vonNeumannOverline≃Fin (suc m) .fst (invEq (vonNeumannOverline≃Fin (suc m)) (finj'-ret (l , suc k , suck+sucl≡sucsucm)))) .fst
-            --     ≡⟨⟩
-            -- finj' (vonNeumannOverline≃Fin (suc m) .fst (invEq (vonNeumannOverline≃Fin (suc m)) (l , k , injSuc suck+sucl≡sucsucm))) .fst
-            --     ≡⟨ cong finj'  ⟩
-            -- finj' (l , k , injSuc suck+sucl≡sucsucm) .fst
-            --     ≡⟨ {!!} ⟩
-            -- l
-            --     ∎)
+--         sec (suc l , zero , sucsucl≡sucsucn) = Fin-fst-≡ (sym (injSuc sucsucl≡sucsucn))
+--         sec (zero , zero , prf) = ⊥-elim {A = λ _ → f (g (zero , zero , prf)) ≡ (zero , zero , prf)} (znots (injSuc prf))
+--         sec (zero , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) fzero))
+--         sec (suc l , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) (suc l , k , injSuc prf)))
 
-        -- postulate ret : retract f g
--- vonNeumannOverline≃Fin {ℓ} (suc zero) = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1
--- vonNeumannOverline≃Fin {ℓ} (suc (suc n)) = {!!} -- compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
-    -- where
-    --     f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin.Fin (suc (suc n))
-    --     f (inr _) .fst = suc n
-    --     f (inr _) .snd = ≤-refl
-    --     f (inl x) = Fin.finj (vonNeumannOverline≃Fin (suc n) .fst x)
-    --     g : Fin.Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
-    --     g (m , zero , sucm≡sucsucn) = inr _
-    --     g (m , suc k , suc+sucm≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin (suc n)) {!!})
-    --     postulate sec : section f g
-    --     postulate ret : retract f g
-        -- the following commented out stuff is correct (just replace n with suc n), I just need to figure out how to make Agda realize that the above terminates
--- vonNeumannOverline≃Fin {ℓ} (suc n) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* n) (isoToEquiv (iso f g sec ret))
---     where
---         f : El⁰ (vonNeumannEncoding (lift n)) ⊎ Unit* → Fin.Fin (suc n)
---         f (inr _) .fst = n
---         f (inr _) .snd = ≤-refl
---         f (inl x) = Fin.finj (vonNeumannOverline≃Fin n .fst x)
-
---         g : Fin.Fin (suc n) → El⁰ (vonNeumannEncoding (lift n)) ⊎ Unit*
---         g (m , zero , sucm≡sucn) = inr _
---         g (m , suc k , suck+sucm≡sucn) = inl (invEq (vonNeumannOverline≃Fin n) (record {fst = m; snd = record {fst = k; snd = injSuc suck+sucm≡sucn {- : k + suc m ≡ n-}}}))
-
---         test : (a : ℕ) → (p : zero + a ≡ a) → p ≡ refl {x = a}
---         test a p = isSetℕ a a p refl
-
---         predFin' : Fin.Fin (suc n) → Fin.Fin n
---         predFin' (zero , prf) = zero , {!!}
---         predFin' (suc m , prf) = {!!}
-
---         sec : section f g
---         sec (m , zero , sucm≡sucn) = Fin-fst-≡ (sym (injSuc sucm≡sucn))
---         sec (m , suc k , suck+sucm≡sucn) = Fin-fst-≡ (cong (λ x → fst (Fin.finj x)) (secEq (vonNeumannOverline≃Fin n) _))
-        
 --         ret : retract f g
 --         ret (inr _) = refl
---         ret (inl x) = {!!}
---             -- g (f (inl x))
---             --     ≡⟨⟩
---             -- g (Fin.finj (vonNeumannOverline≃Fin n .fst x .fst , vonNeumannOverline≃Fin n .fst x .snd .fst , (λ i → vonNeumannOverline≃Fin n .fst x .snd .snd i)))
---             --     ≡⟨⟩
---             -- g (vonNeumannOverline≃Fin n .fst x .fst , vonNeumannOverline≃Fin n .fst x .snd .fst + 1 , _)
---             --     ≡⟨ cong (λ x → g (_ , x , _)) (+1≡suc _) ⟩
---             -- g (vonNeumannOverline≃Fin n .fst x .fst , suc (vonNeumannOverline≃Fin n .fst x .snd .fst) , _)
---             --     ≡⟨ {!!} ⟩
---             -- inl x
---             --     ∎
+--         ret (inl x) = cong (inl ∘ (invEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)))) (ret-finj' (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n) .fst x)) ∙
+--                         cong inl (retEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) x)
         
 ℕ⁰' : V⁰ {ℓ}
 ℕ⁰' {ℓ} = sup⁰ (ℕ* {ℓ} , vonNeumannEncoding {ℓ} , isemb)
