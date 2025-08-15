@@ -1,3 +1,4 @@
+-- {-# OPTIONS --no-termination-check #-}
 module Cubical.Data.IterativeSets.T20Pro where
 -- definitions in Base
 -- properties in Properties
@@ -162,21 +163,21 @@ vonNeumannOverline≃Fin {ℓ} (suc (suc n)) = compEquiv (El⁰-vNE-suc≃El⁰-
         f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin (suc (suc n))
         f (inr _) .fst = suc n
         f (inr _) .snd = ≤-refl
-        f (inl x) = finj' (vonNeumannOverline≃Fin (suc n) .fst x)
+        f (inl x) = finj' (vonNeumannOverline≃Fin {ℓ = ℓ} (suc n) .fst x)
 
         g : Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
         g (l , zero , sucl≡susucn) = inr _
-        g (l , suc k , suck+sucl≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin (suc n)) (finj'-ret (l , suc k , suck+sucl≡sucsucn)))
+        g (l , suc k , suck+sucl≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin {ℓ = ℓ} (suc n)) (finj'-ret (l , suc k , suck+sucl≡sucsucn)))
 
         sec : section f g
         sec (suc l , zero , sucsucl≡sucsucn) = Fin-fst-≡ (sym (injSuc sucsucl≡sucsucn))
         sec (zero , zero , prf) = ⊥-elim {A = λ _ → f (g (zero , zero , prf)) ≡ (zero , zero , prf)} (znots (injSuc prf))
         sec (zero , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin (suc n)) fzero))
-        sec (suc l , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin (suc n)) (suc l , k , injSuc prf)))
+        sec (suc l , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin {ℓ = ℓ} (suc n)) (suc l , k , injSuc prf)))
 
         ret : retract f g
         ret (inr _) = refl
-        ret (inl x) = cong (inl ∘ (invEq (vonNeumannOverline≃Fin (suc n)))) (ret-finj' (vonNeumannOverline≃Fin (suc n) .fst x)) ∙
+        ret (inl x) = cong (inl ∘ (invEq (vonNeumannOverline≃Fin (suc n)))) (ret-finj' (vonNeumannOverline≃Fin {ℓ = ℓ} (suc n) .fst x)) ∙
                         cong inl (retEq (vonNeumannOverline≃Fin (suc n)) x)
 
 --             g (f (inl x))

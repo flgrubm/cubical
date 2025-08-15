@@ -35,6 +35,9 @@ private
     A A' : Type ℓ
     B B' : A → Type ℓ'
 
+¬_ : Type ℓ → Type ℓ
+¬ A = A → ⊥
+
 -- probably move to Cubical.Data.W
 
 -- due to Gylterud 2020
@@ -206,8 +209,11 @@ empty⁰ {ℓ = ℓ} .fst = emptySet-∞ {ℓ}
 empty⁰ .snd .fst ()
 empty⁰ .snd .snd ()
 
-empty⁰Is⊥* : El⁰ {ℓ} empty⁰ ≡ ⊥* {ℓ}
-empty⁰Is⊥* = refl
+El⁰empty⁰Is⊥* : El⁰ {ℓ} empty⁰ ≡ ⊥* {ℓ}
+El⁰empty⁰Is⊥* = refl
+
+empty⁰-is-empty : {x : V⁰ {ℓ}} → ¬ (x ∈⁰ empty⁰)
+empty⁰-is-empty (⊥-inh , _) = ⊥*-elim ⊥-inh
 
 --
 
@@ -220,15 +226,31 @@ singleton⁰ x = sup⁰ (Unit* , (λ _ → x) , isEmbeddingFunctionFromIsPropToI
 El⁰singleton⁰IsUnit* : {x : V⁰ {ℓ}} → El⁰ {ℓ} (singleton⁰ x) ≡ Unit* {ℓ}
 El⁰singleton⁰IsUnit* = refl
 
+singleton⁰-is-singleton : {x z : V⁰ {ℓ}} → ((z ∈⁰ (singleton⁰ x)) ≃ (x ≡ z))
+singleton⁰-is-singleton {x = x} {z = z} = isoToEquiv (iso f g sec ret)
+    where
+        f : z ∈⁰ singleton⁰ x → x ≡ z
+        f (_ , p) = p
+        g : x ≡ z → z ∈⁰ singleton⁰ x
+        g p .fst = _
+        g p .snd = p
+        sec : section f g
+        sec _ = refl
+        ret : retract f g
+        ret _ = refl
+
 unit⁰ : V⁰ {ℓ}
 unit⁰ = singleton⁰ empty⁰
 
-unit⁰IsUnit* : El⁰ {ℓ} unit⁰ ≡ Unit* {ℓ}
-unit⁰IsUnit* = refl
+El⁰unit⁰IsUnit* : El⁰ {ℓ} unit⁰ ≡ Unit* {ℓ}
+El⁰unit⁰IsUnit* = refl
+
+unit⁰-is-singleton-empty⁰ : {z : V⁰ {ℓ}} → ((z ∈⁰ unit⁰) ≃ (empty⁰ ≡ z))
+unit⁰-is-singleton-empty⁰ = singleton⁰-is-singleton
 
 -- 
 
-unorderedPair⁰ : (x y : V⁰ {ℓ}) → (x ≡ y → ⊥) → V⁰ {ℓ}
+unorderedPair⁰ : (x y : V⁰ {ℓ}) → ¬ (x ≡ y) → V⁰ {ℓ}
 unorderedPair⁰ {ℓ} x y x≢y = sup⁰ emb
     where
         emb : Σ[ A ∈ Type ℓ ] A ↪ V⁰
@@ -242,8 +264,6 @@ unorderedPair⁰ {ℓ} x y x≢y = sup⁰ emb
                 inj {lift true} {lift false} p = ⊥-elim (x≢y (sym p))
                 inj {lift false} {lift false} _ = refl
                 inj {lift true} {lift true} _ = refl
-
--- postulate thm4 : {ℓ : Level} → {x y : V∞ {ℓ}} → ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z))
 
 isProp-∈⁰-Equiv : {ℓ : Level} → (x y : V⁰ {ℓ}) → isProp ((z : V⁰) → (z ∈⁰ x) ≃ (z ∈⁰ y))
 isProp-∈⁰-Equiv x y = isPropΠ λ z → isPropEquiv (isProp∈⁰ {x = x} {z = z}) (isProp∈⁰ {x = y} {z = z})
@@ -277,7 +297,7 @@ thm4' : {ℓ : Level} {x y : V⁰ {ℓ}} → ((x ≡ y) ≃ ((z : V⁰ {ℓ}) �
 thm4' {x = x} {y = y} = compEquiv cor11-1 (compEquiv thm4 (thm4'-helper {x = x} {y = y}))
 
 -- {x , y} ≡ {y , x}
-unorderedUnorderedPair⁰ : {x y : V⁰ {ℓ}} {p : x ≡ y → ⊥} {q : y ≡ x → ⊥} → unorderedPair⁰ x y p ≡ unorderedPair⁰ y x q
+unorderedUnorderedPair⁰ : {x y : V⁰ {ℓ}} {p : ¬ (x ≡ y)} {q : ¬ (y ≡ x)} → unorderedPair⁰ x y p ≡ unorderedPair⁰ y x q
 unorderedUnorderedPair⁰ {ℓ} {x} {y} {p} {q} = invEq thm4' fibEq
     where
         fibEq : (z : V⁰ {ℓ}) → (z ∈⁰ unorderedPair⁰ x y p) ≃ (z ∈⁰ unorderedPair⁰ y x q)
@@ -295,8 +315,26 @@ unorderedUnorderedPair⁰ {ℓ} {x} {y} {p} {q} = invEq thm4' fibEq
                 g (lift true , prf) .snd = prf
 
 -- {x , y} ≡ {y , x} where the proof q : ¬ (y ≡ x) is literally just the reversed version of p
-unorderedUnorderedPair⁰' : {x y : V⁰ {ℓ}} {p : x ≡ y → ⊥} → unorderedPair⁰ x y p ≡ unorderedPair⁰ y x λ p' → p (sym p')
+unorderedUnorderedPair⁰' : {x y : V⁰ {ℓ}} {p : ¬ (x ≡ y)} → unorderedPair⁰ x y p ≡ unorderedPair⁰ y x λ p' → p (sym p')
 unorderedUnorderedPair⁰' {ℓ} {x} {y} {p} = unorderedUnorderedPair⁰
+
+unorderedPair⁰-is-unordered-pair : {x y z : V⁰ {ℓ}} {p : ¬ (x ≡ y)} → ((z ∈⁰ (unorderedPair⁰ x y p)) ≃ ((x ≡ z) ⊎ (y ≡ z)))
+unorderedPair⁰-is-unordered-pair {x = x} {y = y} {z = z} = isoToEquiv (iso f g sec ret)
+    where
+        f : z ∈⁰ unorderedPair⁰ x y _ → (x ≡ z) ⊎ (y ≡ z)
+        f (lift false , q) = inl q
+        f (lift true , q) = inr q
+        g : (x ≡ z) ⊎ (y ≡ z) → z ∈⁰ unorderedPair⁰ x y _
+        g (inl _) .fst = lift false
+        g (inl q) .snd = q
+        g (inr _) .fst = lift true
+        g (inr q) .snd = q
+        sec : section f g
+        sec (inl _) = refl
+        sec (inr _) = refl
+        ret : retract f g
+        ret (lift false , _) = refl
+        ret (lift true , _) = refl
 
 ⊥*≢Unit* : ((⊥* {ℓ} :> Type ℓ) ≡ (Unit* {ℓ} :> Type ℓ)) → ⊥
 ⊥*≢Unit* p = ⊥*-elim {A = λ _ → ⊥} (transport (sym p) (lift tt))
@@ -305,10 +343,10 @@ Unit*≢⊥* : ((Unit* {ℓ} :> Type ℓ) ≡ (⊥* {ℓ} :> Type ℓ)) → ⊥
 Unit*≢⊥* p = ⊥*-elim {A = λ _ → ⊥} (transport p (lift tt))
 
 empty⁰≢unit⁰ : (empty⁰ {ℓ} ≡ unit⁰ {ℓ}) → ⊥
-empty⁰≢unit⁰ {ℓ} p = ⊥*≢Unit* (sym empty⁰Is⊥* ∙ (cong El⁰ p) ∙ unit⁰IsUnit*)
+empty⁰≢unit⁰ {ℓ} p = ⊥*≢Unit* (sym El⁰empty⁰Is⊥* ∙ (cong El⁰ p) ∙ El⁰unit⁰IsUnit*)
 
 unit⁰≢empty⁰ : (unit⁰ {ℓ} ≡ empty⁰ {ℓ}) → ⊥
-unit⁰≢empty⁰ {ℓ} p = Unit*≢⊥* (sym unit⁰IsUnit* ∙ (cong El⁰ p) ∙ empty⁰Is⊥*)
+unit⁰≢empty⁰ {ℓ} p = Unit*≢⊥* (sym El⁰unit⁰IsUnit* ∙ (cong El⁰ p) ∙ El⁰empty⁰Is⊥*)
 
 bool⁰ : V⁰ {ℓ}
 bool⁰ {ℓ} = unorderedPair⁰ empty⁰ unit⁰ empty⁰≢unit⁰
