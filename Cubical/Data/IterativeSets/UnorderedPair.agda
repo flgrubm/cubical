@@ -50,3 +50,14 @@ injectiveNeg→injective f injNeg x y = {!!}
 
 -- unorderedPair⁰ : (x y : V⁰ {ℓ}) → ((x ≡ y) → ⊥) → V⁰ {ℓ}
 -- unorderedPair⁰ {ℓ} x y x≢y = sup⁰ (Bool* , {!!})
+
+unorderedPair⁰≡unorderedPair⁰ : {x y a b : V⁰ {ℓ}} {p : ¬ (x ≡ y)} {q : ¬ (a ≡ b)} → ((unorderedPair⁰ x y p ≡ unorderedPair⁰ a b q) ≃ (((x ≡ a) × (y ≡ b)) ⊎ ((x ≡ b) × (y ≡ a))))
+unorderedPair⁰≡unorderedPair⁰ {ℓ = ℓ} {x = x} {y = y} {a = a} {b = b} {p = p} {q = q} = isoToEquiv (iso f g sec ret)
+    where
+        postulate f : unorderedPair⁰ x y p ≡ unorderedPair⁰ a b q → ((x ≡ a) × (y ≡ b)) ⊎ ((x ≡ b) × (y ≡ a))
+        -- f p = {!!}
+        g : ((x ≡ a) × (y ≡ b)) ⊎ ((x ≡ b) × (y ≡ a)) → unorderedPair⁰ x y p ≡ unorderedPair⁰ a b q
+        g (inl (x≡a , y≡b)) = cong (λ (r : V⁰ {ℓ}) → unorderedPair⁰ r y {!!}) x≡a ∙ {!!}
+        g (inr r) = {!!}
+        postulate sec : section f g
+        postulate ret : retract f g
