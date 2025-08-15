@@ -1,5 +1,5 @@
 -- {-# OPTIONS --no-termination-check #-}
-module Cubical.Data.IterativeSets.T20Pro where
+module Cubical.Data.IterativeSets.Nat where
 -- definitions in Base
 -- properties in Properties
 
@@ -27,13 +27,12 @@ open import Cubical.Data.Sigma
 open import Cubical.Data.Nat.Order
 open import Cubical.Data.Sum using (_⊎_; inl; inr; ⊎-IdL-⊥*-≃) public
 
--- open import Cubical.
-
 open import Cubical.Homotopy.Base
 
-open import Cubical.Data.W.W
-
+open import Cubical.Data.IterativeMultisets.Base
 open import Cubical.Data.IterativeSets.Base
+open import Cubical.Data.IterativeSets.Empty
+
 
 private
   variable
@@ -106,7 +105,7 @@ suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ (A ⊎ Unit* {ℓ} , ϕₓ , has
         hpf (sup-∞ B g , isitsetBg) = EquivToIsProp→isProp (isPropIsPropDisjointSum (isEmbedding→hasPropFibers (isEmbedding-tilde-0 (sup-∞ A f , isitsetAf)) (sup-∞ B g , isitsetBg)) (thm12 _ _) ∈⁰×≡→⊥) (invEquiv (eqFib (sup-∞ B g , isitsetBg)))
             where
                 ∈⁰×≡→⊥ : ((sup-∞ B g , isitsetBg) ∈⁰ (sup-∞ A f , isitsetAf)) × ((sup-∞ A f , isitsetAf) ≡ (sup-∞ B g , isitsetBg)) → ⊥
-                ∈⁰×≡→⊥ ((a , pa) , p) = ∈⁰-irrefl (sup-∞ B g , isitsetBg) (transport (cong (λ r → ((sup-∞ B g , isitsetBg) ∈⁰ r)) p) (a , pa))
+                ∈⁰×≡→⊥ ((a , pa) , p) = ∈⁰-irrefl {x = (sup-∞ B g , isitsetBg)} (transport (cong (λ r → ((sup-∞ B g , isitsetBg) ∈⁰ r)) p) (a , pa))
 
 ℕ* : Type ℓ
 ℕ* = Lift ℕ
@@ -114,15 +113,6 @@ suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ (A ⊎ Unit* {ℓ} , ϕₓ , has
 vonNeumannEncoding : ℕ* {ℓ} → V⁰ {ℓ}
 vonNeumannEncoding (lift zero) = empty⁰
 vonNeumannEncoding (lift (suc x)) = suc⁰ (vonNeumannEncoding (lift x))
-
-_ : El⁰ {ℓ} (vonNeumannEncoding (lift zero)) ≡ ⊥*
-_ = refl
-
-_ : El⁰ {ℓ} (vonNeumannEncoding (lift (suc zero))) ≡ ⊥* ⊎ Unit*
-_ = refl
-
-_ : El⁰ {ℓ} (vonNeumannEncoding (lift (suc (suc zero)))) ≡ (⊥* ⊎ Unit*) ⊎ Unit*
-_ = refl
 
 El⁰-suc⁰≡El⁰⊎Unit* : {x : V⁰ {ℓ}} → El⁰ {ℓ} (suc⁰ x) ≡ (El⁰ x ⊎ Unit* {ℓ})
 -- El⁰-suc⁰≡El⁰⊎Unit* = refl -- doesn't work
@@ -208,17 +198,18 @@ vonNeumannOverline≃Fin {ℓ} = elim+2 case0 case1 caseSuc
 --         ret (inl x) = cong (inl ∘ (invEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)))) (ret-finj' (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n) .fst x)) ∙
 --                         cong inl (retEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) x)
         
-ℕ⁰' : V⁰ {ℓ}
-ℕ⁰' {ℓ} = sup⁰ (ℕ* {ℓ} , vonNeumannEncoding {ℓ} , isemb)
+ℕ⁰ : V⁰ {ℓ}
+ℕ⁰ {ℓ} = sup⁰ (ℕ* {ℓ} , vonNeumannEncoding {ℓ} , isemb)
     where
         isinj : (w x : ℕ* {ℓ}) → vonNeumannEncoding w ≡ vonNeumannEncoding x → w ≡ x
         isinj (lift n) (lift m) p = liftExt (Fin-inj n m (ua (compEquiv (invEquiv (vonNeumannOverline≃Fin n)) (compEquiv (pathToEquiv (cong overline-0 p)) (vonNeumannOverline≃Fin m)))))
         isemb : isEmbedding (vonNeumannEncoding {ℓ})
         isemb = injEmbedding thm12 λ {w} {x} → isinj w x
 
-ℕ⁰Isℕ*' : El⁰ (ℕ⁰' {ℓ}) ≡ ℕ* {ℓ}
-ℕ⁰Isℕ*' = refl
+ℕ⁰Isℕ* : El⁰ (ℕ⁰ {ℓ}) ≡ ℕ* {ℓ}
+ℕ⁰Isℕ* = refl
 
+-- TODO: remove or add somewhere else
 ℕ-≢0→is-suc : (n : ℕ) → (n ≡ 0 → ⊥) → Σ[ m ∈ ℕ ] n ≡ suc m
 ℕ-≢0→is-suc zero n≢0 = ⊥-elim (n≢0 refl)
 ℕ-≢0→is-suc (suc m) _ .fst = m
