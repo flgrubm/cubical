@@ -23,6 +23,7 @@ private
   module _ where
     ¬_ : Type ℓ → Type ℓ
     ¬ A = A → ⊥
+    {-# INLINE ¬_ #-}
 
 -- TODO: (possibly) rename and move
 -- TODO: maybe remove inlining
