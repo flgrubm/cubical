@@ -12,18 +12,13 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Bool
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty renaming (elim to ⊥-elim)
+open import Cubical.Relation.Nullary using (¬_)
 
 open import Cubical.Data.IterativeSets.Base
 
 private
   variable
     ℓ : Level
-
-private
-  module _ where
-    ¬_ : Type ℓ → Type ℓ
-    ¬ A = A → ⊥
-    {-# INLINE ¬_ #-}
 
 -- TODO: (possibly) rename and move
 -- TODO: maybe remove inlining
