@@ -32,3 +32,24 @@ singleton⁰-is-singleton {x = x} {z = z} = isoToEquiv (iso f g sec ret)
         sec _ = refl
         ret : retract f g
         ret _ = refl
+
+singleton⁰-is-singleton-sym : {x z : V⁰ {ℓ}} → ((z ∈⁰ (singleton⁰ x)) ≃ (z ≡ x))
+singleton⁰-is-singleton-sym {x = x} {z = z} = isoToEquiv (iso f g sec ret)
+    where
+        f : z ∈⁰ singleton⁰ x → z ≡ x
+        f (_ , p) = sym p
+        g : z ≡ x → z ∈⁰ singleton⁰ x
+        g p .fst = _
+        g p .snd = sym p
+        sec : section f g
+        sec _ = refl
+        ret : retract f g
+        ret _ = refl
+
+singleton⁰≡singleton⁰ : {x y : V⁰ {ℓ}} → ((x ≡ y) ≃ (singleton⁰ x ≡ singleton⁰ y))
+singleton⁰≡singleton⁰ {ℓ} {x} {y} = propBiimpl→Equiv (thm12 _ _) (thm12 _ _) (cong singleton⁰) g
+    where
+        thm4'-singleton⁰ : (singleton⁰ x ≡ singleton⁰ y) ≃ ((z : V⁰) → (z ≡ x) ≃ (z ≡ y))
+        thm4'-singleton⁰ = compEquiv thm4' (equivΠCod (λ z → equivComp singleton⁰-is-singleton-sym singleton⁰-is-singleton-sym))
+        g : singleton⁰ x ≡ singleton⁰ y → x ≡ y
+        g p = thm4'-singleton⁰ .fst p x .fst refl
