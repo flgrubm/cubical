@@ -33,6 +33,7 @@ open import Cubical.Data.IterativeMultisets.Base
 open import Cubical.Data.IterativeSets.Base
 open import Cubical.Data.IterativeSets.Empty
 
+-- TODO: think about whether to switch to using Data.SumFin
 
 private
   variable
