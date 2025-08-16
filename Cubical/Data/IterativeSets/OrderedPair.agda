@@ -5,6 +5,8 @@ open import Cubical.Foundations.Prelude
 
 open import Cubical.Functions.Embedding
 open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Function
+open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty renaming (elim to ⊥-elim)
 open import Cubical.Data.Sum
@@ -50,15 +52,23 @@ unorderedPair⁰≢singleton⁰ p = Bool*≢Unit* (cong El⁰ p)
 ⟨ x , y ⟩⁰ = unorderedPair⁰ (unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰) (singleton⁰ (singleton⁰ y)) unorderedPair⁰≢singleton⁰
 
 orderedPair⁰ : (V⁰ {ℓ} × V⁰ {ℓ}) → V⁰ {ℓ}
-orderedPair⁰ (x , y) = ⟨ x , y ⟩⁰
+orderedPair⁰ = uncurry ⟨_,_⟩⁰
 
 isEmbOrderedPair⁰ : isEmbedding (orderedPair⁰ {ℓ})
 isEmbOrderedPair⁰ {ℓ} = injEmbedding thm12 inj
     where
         inj : {s t : V⁰ {ℓ} × V⁰ {ℓ}} → orderedPair⁰ s ≡ orderedPair⁰ t → s ≡ t
-        inj {s = x , y} {t = a , b} p = {!!}
+        inj {s = x , y} {t = a , b} p = ΣPathP (helper (unorderedPair⁰≡unorderedPair⁰ .fst p)) -- x≡a,y≡b
             where
-                helper : ((unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰ ≡ unorderedPair⁰ (singleton⁰ a) empty⁰ singleton⁰≢empty⁰) × (singleton⁰ (singleton⁰ y) ≡ singleton⁰ (singleton⁰ b))) ⊎ ((unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰ ≡ singleton⁰ (singleton⁰ b)) × (singleton⁰ (singleton⁰ y) ≡ unorderedPair⁰ (singleton⁰ a) empty⁰ singleton⁰≢empty⁰)) → (((unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰ ≡ unorderedPair⁰ (singleton⁰ a) empty⁰ singleton⁰≢empty⁰)) × ((singleton⁰ (singleton⁰ y) ≡ singleton⁰ (singleton⁰ b))))
-                helper (inl x) = x
-                helper (inr (p , _)) = ⊥-elim (unorderedPair⁰≢singleton⁰ p) -- impossible case (unorderedPair⁰≢singleton⁰)
-                -- unorderedPair⁰≡unorderedPair⁰ {x = unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰} {y = singleton⁰ (singleton⁰ y)} {a = unorderedPair⁰ (singleton⁰ a) empty⁰ singleton⁰≢empty⁰} {b = singleton⁰ (singleton⁰ b)} .fst p
+                x≡a-helper : ((singleton⁰ x ≡ singleton⁰ a) × (empty⁰ {ℓ} ≡ empty⁰ {ℓ})) ⊎ ((singleton⁰ x ≡ empty⁰) × (empty⁰ ≡ singleton⁰ a)) → x ≡ a
+                x≡a-helper (inl (p , _)) = invEq singleton⁰≡singleton⁰ p
+                x≡a-helper (inr (p , _)) = ⊥-elim (singleton⁰≢empty⁰ p)
+                helper : ((unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰ ≡ unorderedPair⁰ (singleton⁰ a) empty⁰ singleton⁰≢empty⁰) × (singleton⁰ (singleton⁰ y) ≡ singleton⁰ (singleton⁰ b))) ⊎ ((unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰ ≡ singleton⁰ (singleton⁰ b)) × (singleton⁰ (singleton⁰ y) ≡ unorderedPair⁰ (singleton⁰ a) empty⁰ singleton⁰≢empty⁰)) → ((x ≡ a) × (y ≡ b))
+                helper (inl (u , s)) .fst = x≡a-helper (unorderedPair⁰≡unorderedPair⁰ .fst u)
+                helper (inl (u , s)) .snd = invEq singleton⁰≡singleton⁰ (invEq singleton⁰≡singleton⁰ s)
+                helper (inr (p , _)) = ⊥-elim {A = λ _ → (x ≡ a) × (y ≡ b)} (unorderedPair⁰≢singleton⁰ p)
+                -- x≡a,y≡b : (x ≡ a) × (y ≡ b)
+                -- x≡a,y≡b = helper (unorderedPair⁰≡unorderedPair⁰ .fst p)
+
+orderedPair⁰≡orderedPair⁰ : {x y a b : V⁰ {ℓ}} → ((⟨ x , y ⟩⁰ ≡ ⟨ a , b ⟩⁰) ≃ ((x ≡ a) × (y ≡ b)))
+orderedPair⁰≡orderedPair⁰ {x = x} {y = y} {a = a} {b = b} = propBiimpl→Equiv (thm12 _ _) (isProp× (thm12 _ _) (thm12 _ _)) (PathPΣ ∘ (isEmbedding→Inj isEmbOrderedPair⁰ (x , y) (a , b))) (λ (x≡a , y≡b) → cong ⟨_, y ⟩⁰ x≡a ∙ cong ⟨ a ,_⟩⁰ y≡b)
