@@ -10,9 +10,10 @@ open import Cubical.Functions.Embedding
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 
--- TODO: remove ⊥*-elim, Data.Unit, Data.SumFin once the statements that need them have found their way to a better place
+-- TODO: remove ⊥*-elim, Data.Unit, Data.Bool Data.SumFin once the statements that need them have found their way to a better place
 open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
 open import Cubical.Data.Unit
+open import Cubical.Data.Bool
 open import Cubical.Data.SumFin
 
 open import Cubical.Data.IterativeMultisets.Base
@@ -184,6 +185,49 @@ thm4' {x = x} {y = y} = compEquiv cor11-1 (compEquiv thm4 (thm4'-helper {x = x} 
 
 Unit*≢⊥* : ((Unit* {ℓ} :> Type ℓ) ≡ (⊥* {ℓ} :> Type ℓ)) → ⊥
 Unit*≢⊥* p = ⊥*-elim {A = λ _ → ⊥} (transport p (lift tt))
+
+-- this should be somewhere else, but I couldn't find it in the library for some reason
+≡-from-isOfHLevel→isOfHLevel : {ℓ : Level} {A B : Type ℓ} {n : HLevel} → A ≡ B → isOfHLevel n A → isOfHLevel n B
+≡-from-isOfHLevel→isOfHLevel {n = n} A≡B = transport (cong (isOfHLevel n) A≡B)
+
+≡-to-isOfHLevel→isOfHLevel : {ℓ : Level} {A B : Type ℓ} {n : HLevel} → A ≡ B → isOfHLevel n B → isOfHLevel n A
+≡-to-isOfHLevel→isOfHLevel {n = n} A≡B = transport (cong (isOfHLevel n) (sym A≡B))
+
+≡-to-isContr→isContr : {ℓ : Level} {A B : Type ℓ} → A ≡ B → isContr B → isContr A
+≡-to-isContr→isContr = ≡-to-isOfHLevel→isOfHLevel {n = 0}
+
+≡-from-isContr→isContr : {ℓ : Level} {A B : Type ℓ} → A ≡ B → isContr A → isContr B
+≡-from-isContr→isContr = ≡-from-isOfHLevel→isOfHLevel {n = 0}
+
+≡-to-isProp→isProp : {ℓ : Level} {A B : Type ℓ} → A ≡ B → isProp B → isProp A
+≡-to-isProp→isProp = ≡-to-isOfHLevel→isOfHLevel {n = 1}
+
+≡-from-isProp→isProp : {ℓ : Level} {A B : Type ℓ} → A ≡ B → isProp A → isProp B
+≡-from-isProp→isProp = ≡-from-isOfHLevel→isOfHLevel {n = 1}
+
+≡-to-isSet→isSet : {ℓ : Level} {A B : Type ℓ} → A ≡ B → isSet B → isSet A
+≡-to-isSet→isSet = ≡-to-isOfHLevel→isOfHLevel {n = 2}
+
+≡-from-isSet→isSet : {ℓ : Level} {A B : Type ℓ} → A ≡ B → isSet A → isSet B
+≡-from-isSet→isSet = ≡-from-isOfHLevel→isOfHLevel {n = 2}
+
+Unit≢Bool : ¬ (Unit ≡ Bool)
+Unit≢Bool p = false≢true (≡-from-isProp→isProp p isPropUnit false true)
+
+Bool≢Unit : ¬ (Bool ≡ Unit)
+Bool≢Unit p = false≢true (≡-to-isProp→isProp p isPropUnit false true)
+
+false*≢true* : ¬ (false* {ℓ} ≡ true* {ℓ})
+false*≢true* p = subst (λ b → if b .lower then Unit else ⊥) (sym p) tt
+
+true*≢false* : ¬ (true* {ℓ} ≡ false* {ℓ})
+true*≢false* p = subst (λ b → if b .lower then Unit else ⊥) p tt
+
+Unit*≢Bool* : ¬ (Unit* {ℓ} ≡ Bool* {ℓ})
+Unit*≢Bool* p = false*≢true* (≡-from-isProp→isProp p isPropUnit* false* true*)
+
+Bool*≢Unit* : ¬ (Bool* {ℓ} ≡ Unit* {ℓ})
+Bool*≢Unit* p = false*≢true* (≡-to-isProp→isProp p isPropUnit* false* true*)
 
 -- probably also move to some better place in the library
 postulate lem26 : {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} → isSet X → (x₀ : X) → (f : (X × Y) → Z) → isEmbedding f → isEmbedding (λ y → f (x₀ , y))
