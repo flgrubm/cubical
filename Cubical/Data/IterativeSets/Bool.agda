@@ -29,14 +29,15 @@ private
     ¬_ : Type ℓ → Type ℓ
     ¬ A = A → ⊥
 
+-- TODO: maybe move to some better place together with empty⁰≢singleton⁰
+empty⁰≢unit⁰ : ¬ (empty⁰ {ℓ} ≡ unit⁰ {ℓ})
+empty⁰≢unit⁰ {ℓ} p = ⊥*≢Unit* (cong El⁰ p)
+
+unit⁰≢empty⁰ : ¬ (unit⁰ {ℓ} ≡ empty⁰ {ℓ})
+unit⁰≢empty⁰ {ℓ} p = Unit*≢⊥* (cong El⁰ p)
+
 bool⁰ : V⁰ {ℓ}
 bool⁰ {ℓ} = unorderedPair⁰ empty⁰ unit⁰ empty⁰≢unit⁰
 
 bool⁰IsBool : El⁰ {ℓ} bool⁰ ≡ Bool* {ℓ}
 bool⁰IsBool = refl
-
-empty⁰≢unit⁰ : (empty⁰ {ℓ} ≡ unit⁰ {ℓ}) → ⊥
-empty⁰≢unit⁰ {ℓ} p = ⊥*≢Unit* (sym El⁰empty⁰Is⊥* ∙ (cong El⁰ p) ∙ El⁰unit⁰IsUnit*)
-
-unit⁰≢empty⁰ : (unit⁰ {ℓ} ≡ empty⁰ {ℓ}) → ⊥
-unit⁰≢empty⁰ {ℓ} p = Unit*≢⊥* (sym El⁰unit⁰IsUnit* ∙ (cong El⁰ p) ∙ El⁰empty⁰Is⊥*)
