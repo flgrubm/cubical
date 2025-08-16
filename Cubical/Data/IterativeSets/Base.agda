@@ -9,6 +9,7 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Functions.Embedding
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
+open import Cubical.Relation.Nullary using (¬_)
 
 -- TODO: remove ⊥*-elim, Data.Unit, Data.Bool Data.SumFin once the statements that need them have found their way to a better place
 open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
@@ -21,11 +22,6 @@ open import Cubical.Data.IterativeMultisets.Base
 private
   variable
     ℓ : Level
-
-private
-  module _ where
-    ¬_ : Type ℓ → Type ℓ
-    ¬ A = A → ⊥
 
 -- TODO: potentially don't do pattern matching, change everywhere afterwards?
 isIterativeSet : V∞ {ℓ} → Type (ℓ-suc ℓ)
@@ -56,7 +52,7 @@ tilde-0' (sup-∞ _ _ , isitset) a .snd = isitset .snd a
 _∈⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → Type (ℓ-suc ℓ)
 x ∈⁰ y = fiber (tilde-0' y) (x)
 
-∈⁰-irrefl : (x ∈⁰ x) → ⊥
+∈⁰-irrefl : ¬ x ∈⁰ x
 ∈⁰-irrefl {x = sup-∞ A f , isitset} (a , p) = ∈∞-irrefl {x = sup-∞ A f} (a , cong fst p)
 
 -- TODO: rename to isEmbedding-tilde-0
@@ -176,7 +172,7 @@ thm4'-helper {x = sup-∞ x α , itsetx} {y = sup-∞ y β , itsety} = propBiimp
                        z⁰ .fst = z
                        z⁰ .snd = transport (cong isIterativeSet p) (itsetu .snd a)
 
-thm4' : ((x ≡ y) ≃ ((z : V⁰ {ℓ}) → fiber (tilde-0' x) z ≃ fiber (tilde-0' y) z))
+thm4' : (x ≡ y) ≃ ((z : V⁰ {ℓ}) → (z ∈⁰ x) ≃ (z ∈⁰ y))
 thm4' {x = x} {y = y} = compEquiv cor11-1 (compEquiv thm4 (thm4'-helper {x = x} {y = y}))
 
 -- move to better place
@@ -231,4 +227,4 @@ Bool*≢Unit* p = false*≢true* (≡-to-isProp→isProp p isPropUnit* false* tr
 
 -- probably also move to some better place in the library
 postulate lem26 : {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} → isSet X → (x₀ : X) → (f : (X × Y) → Z) → isEmbedding f → isEmbedding (λ y → f (x₀ , y))
-postulate lem27 : {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} (f : X ↪ Z) → (g : Y ↪ Z) → ((x : X) (y : Y) → (f .fst x ≡ g .fst y) → ⊥) → ((X ⊎ Y) ↪ Z)
+postulate lem27 : {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} (f : X ↪ Z) → (g : Y ↪ Z) → ((x : X) (y : Y) → ¬ f .fst x ≡ g .fst y) → ((X ⊎ Y) ↪ Z)
