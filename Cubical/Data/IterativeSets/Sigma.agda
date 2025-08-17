@@ -9,6 +9,7 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Equiv.Fiberwise
 open import Cubical.Homotopy.Base
 open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Path
 
 open import Cubical.Data.Sigma
 
@@ -32,6 +33,30 @@ private
 
         postulate orderedPair⁰≡orderedPair⁰ : {x y a b : V⁰ {ℓ}} → ((⟨ x , y ⟩⁰ ≡ ⟨ a , b ⟩⁰) ≃ ((x ≡ a) × (y ≡ b)))
 
+-- TODO: move somewhere else
+private
+    module _ where
+        refl∙refl≡refl : {A : Type ℓ} {x : A} → refl ∙ refl ≡ refl {x = x}
+        refl∙refl≡refl = sym (compPath-filler refl refl)
+
+        ∙refl-is-identity : {A B : Type ℓ} (p : A ≡ B) → p ∙ refl ≡ p
+        ∙refl-is-identity p = sym (compPath-filler p refl)
+
+        ∙refl-is-identity' : {A B : Type ℓ} (p : A ≡ B) → p ∙ refl ≡ p
+        ∙refl-is-identity' = J (λ C q → q ∙ refl ≡ q) refl∙refl≡refl
+
+        refl∙-is-identity : {A B : Type ℓ} (p : A ≡ B) → refl ∙ p ≡ p
+        refl∙-is-identity = J (λ C q → refl ∙ q ≡ q) refl∙refl≡refl
+
+        compTransport-is-transportComp : {A B C : Type ℓ} (x : A) (p : A ≡ B) (q : B ≡ C) → transport q (transport p x) ≡ transport (p ∙ q) x
+        compTransport-is-transportComp x p q = J (λ y q' → transport q' (transport p x) ≡ transport (p ∙ q') x) (transportRefl (transport p x) ∙ cong (λ r → transport r x) (sym (∙refl-is-identity p))) q
+
+        Path∙symPath-cancel : {A B : Type ℓ} (p : A ≡ B) → p ∙ (sym p) ≡ refl
+        Path∙symPath-cancel p = cong (λ r → p ∙ r) (sym (∙refl-is-identity (sym p))) ∙ compPathl-cancel p refl
+
+        symPath∙Path-cancel : {A B : Type ℓ} (p : A ≡ B) → (sym p) ∙ p ≡ refl
+        symPath∙Path-cancel p = cong (λ r → r ∙ p) (sym (refl∙-is-identity (sym p))) ∙ compPathr-cancel p refl
+
 -- TODO: this should go somewhere in the library
 private
     module _ where
@@ -53,7 +78,17 @@ private
             Σfun-base s .snd = s .snd
 
             -- might need J rule again...
-            postulate fiber≃Σfun-base-fiber : (t : Σ C D) → fiber f (t .fst) ≃ fiber Σfun-base t
+            fiber≃Σfun-base-fiber : (t : Σ C D) → fiber f (t .fst) ≃ fiber Σfun-base t
+            fiber≃Σfun-base-fiber (c , d) = isoToEquiv isom
+                where
+                    isom : Iso (fiber f c) (fiber Σfun-base (c , d))
+                    isom .Iso.fun (a , p) = subst (fiber Σfun-base) sigmaPath {!!} -- J (λ c' q → fiber Σfun-base (c' , subst D (sym p ∙ q) d)) {!cong (transport-refl!} p
+                        where
+                            sigmaPath : (f a , subst D (sym p) d) ≡ (c , d)
+                            sigmaPath = (λ i → (p i , subst-filler D p (subst D (sym p) d) i )) ∙ λ i → (c , {!compTransport-is-transportComp d (cong D p)!}) -- (λ i → (c , transportRefl d i))
+                    isom .Iso.inv = {!!}
+                    isom .Iso.rightInv = {!!}
+                    isom .Iso.leftInv = {!!}
 
             isEmbedding-Σfun-base : isEmbedding f → isEmbedding Σfun-base
             isEmbedding-Σfun-base embf = hasPropFibers→isEmbedding (λ z → isOfHLevelRespectEquiv 1 (fiber≃Σfun-base-fiber z) (isEmbedding→hasPropFibers embf (z .fst)))
