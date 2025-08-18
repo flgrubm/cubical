@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Cubical.Data.IterativeSets.Base where
 
 open import Cubical.Core.Everything
@@ -15,7 +16,7 @@ open import Cubical.Relation.Nullary using (¬_)
 open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
 open import Cubical.Data.Unit
 open import Cubical.Data.Bool
-open import Cubical.Data.SumFin
+open import Cubical.Data.Sum renaming (rec to ⊎-rec)
 
 open import Cubical.Data.IterativeMultisets.Base
 
@@ -226,5 +227,64 @@ Bool*≢Unit* : ¬ (Bool* {ℓ} ≡ Unit* {ℓ})
 Bool*≢Unit* p = false*≢true* (≡-to-isProp→isProp p isPropUnit* false* true*)
 
 -- probably also move to some better place in the library
-postulate lem26 : {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} → isSet X → (x₀ : X) → (f : (X × Y) → Z) → isEmbedding f → isEmbedding (λ y → f (x₀ , y))
-postulate lem27 : {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} (f : X ↪ Z) → (g : Y ↪ Z) → ((x : X) (y : Y) → ¬ f .fst x ≡ g .fst y) → ((X ⊎ Y) ↪ Z)
+
+module _ {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} (setX : isSet X) (x₀ : X) (f : (X × Y) → Z) (embf : isEmbedding f) where
+    postulate lem26 : isEmbedding (curry f x₀)
+
+private
+    module _ {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} (f : A → B) where
+        uninhabIsEquiv : ¬ A → ¬ B → isEquiv f
+        uninhabIsEquiv ¬A ¬B = isoToIsEquiv isom
+            where
+                open Iso
+                isom : Iso A B
+                isom .fun = f
+                isom .inv = ⊥-elim ∘ ¬B
+                isom .rightInv b = ⊥-elim {A = λ _ → f (isom .inv b) ≡ b} (¬B b)
+                isom .leftInv a = ⊥-elim {A = λ _ → isom .inv (f a) ≡ a} (¬A a)
+
+    module _ {ℓA ℓB ℓC : Level} {A : Type ℓA} {B : Type ℓB} {C : Type ℓC} (f : A → B) (g : B → C) (h : A → C) (equivf : isEquiv f) (equivh : isEquiv h) (h≡g∘f : h ≡ g ∘ f) where
+        B≃C : B ≃ C
+        B≃C = compEquiv (invEquiv (f , equivf)) (h , equivh)
+
+        g' : B → C
+        g' = B≃C .fst
+
+        equivg' : isEquiv g'
+        equivg' = B≃C .snd
+
+        g'≡g : g' ≡ g
+        g'≡g = funExt λ b → funExt⁻ h≡g∘f _ ∙ cong g (secIsEq equivf b)
+            -- g' b
+            --     ≡⟨⟩
+            -- h (invIsEq equivf b)
+            --     ≡⟨ funExt⁻ h≡g∘f _ ⟩
+            -- g (f (invIsEq equivf b))
+            --     ≡⟨ cong g (secIsEq equivf b) ⟩
+            -- g b
+            --     ∎
+        second-in-isEquiv-comp→isEquiv : isEquiv g
+        second-in-isEquiv-comp→isEquiv = transport (cong isEquiv g'≡g) equivg'
+
+SumInl≢Inr : {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} (a : A) (b : B) → ¬ (inl a :> A ⊎ B) ≡ (inr b :> A ⊎ B)
+SumInl≢Inr {A = A} {B = B} a b p = transport (cong helper p) _
+    where
+        helper : A ⊎ B → Type ℓ-zero
+        helper (inl _) = Unit
+        helper (inr _) = ⊥
+
+module _ {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} (f : X → Z) (g : Y → Z) where
+    f+g : (X ⊎ Y) → Z
+    f+g = ⊎-rec f g
+
+    cong-f+g∘inl : {x x' : X} → x ≡ x' → f x ≡ f x'
+    cong-f+g∘inl {x = x} {x' = x'} = cong (f+g ∘ inl)
+
+    cong-f+g∘inr : {y y' : Y} → y ≡ y' → g y ≡ g y'
+    cong-f+g∘inr {y = y} {y' = y'} = cong (f+g ∘ inr)
+    
+    lem27 : isEmbedding f → isEmbedding g → ((x : X) (y : Y) → ¬ f x ≡ g y) → isEmbedding f+g
+    lem27 embf embg fx≢gy (inl x) (inl x') = second-in-isEquiv-comp→isEquiv (cong inl) (cong f+g) cong-f+g∘inl (isEmbedding-inl x x') (embf x x') refl
+    lem27 embf embg fx≢gy (inl x) (inr y') = uninhabIsEquiv (cong f+g) (SumInl≢Inr x y') (fx≢gy x y')
+    lem27 embf embg fx≢gy (inr y) (inl x') = uninhabIsEquiv (cong f+g) (λ eq → SumInl≢Inr x' y (sym eq)) λ eq → fx≢gy x' y (sym eq)
+    lem27 embf embg fx≢gy (inr y) (inr y') = second-in-isEquiv-comp→isEquiv (cong inr) (cong f+g) cong-f+g∘inr (isEmbedding-inr y y') (embg y y') refl
