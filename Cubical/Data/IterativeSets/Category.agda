@@ -14,6 +14,7 @@ open import Cubical.Categories.Category
 open import Cubical.Categories.Limits.Initial
 open import Cubical.Categories.Limits.Terminal
 open import Cubical.Categories.Limits.BinCoproduct
+open import Cubical.Categories.Limits.BinProduct
 
 open import Cubical.Data.Empty
 open import Cubical.Data.Unit
@@ -23,6 +24,7 @@ open import Cubical.Data.IterativeSets.Base
 open import Cubical.Data.IterativeSets.Empty
 open import Cubical.Data.IterativeSets.Unit
 open import Cubical.Data.IterativeSets.Sum
+open import Cubical.Data.IterativeSets.Sigma
 
 V : {ℓ : Level} → Category (ℓ-suc ℓ) ℓ
 V {ℓ} .Category.ob = V⁰ {ℓ}
@@ -70,7 +72,7 @@ binary-coproducts x y .BinCoproduct.binCoprodInj₂ = inr
 binary-coproducts x y .BinCoproduct.univProp f g .fst .fst = ⊎-rec f g
 binary-coproducts x y .BinCoproduct.univProp f g .fst .snd .fst = refl
 binary-coproducts x y .BinCoproduct.univProp f g .fst .snd .snd = refl
-binary-coproducts x y .BinCoproduct.univProp f g .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (thm17 _) _ f) (isSet→ (thm17 _) _ g)) (funExt helper)
+binary-coproducts x y .BinCoproduct.univProp {z} f g .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (thm17 z) _ f) (isSet→ (thm17 z) _ g)) (funExt helper)
     where
         helper : (a : El⁰ x ⊎ El⁰ y) → ⊎-rec f g a ≡ E .fst a
         helper (inl a) = funExt⁻ (sym (E .snd .fst)) a
@@ -78,3 +80,20 @@ binary-coproducts x y .BinCoproduct.univProp f g .snd E = Σ≡Prop (λ _ → is
 
 binary-coproducts-coincide : {ℓ : Level} {x y : V .Category.ob} → Functor-V-SET {ℓ} .Functor.F-ob (binary-coproducts x y .BinCoproduct.binCoprodOb) .fst ≡ (Functor-V-SET {ℓ} .Functor.F-ob x .fst ⊎ Functor-V-SET {ℓ} .Functor.F-ob y .fst )
 binary-coproducts-coincide = refl
+
+binary-products : {ℓ : Level} → BinProducts (V {ℓ})
+binary-products x y .BinProduct.binProdOb = x ×⁰ y
+binary-products x y .BinProduct.binProdPr₁ = fst
+binary-products x y .BinProduct.binProdPr₂ = snd
+binary-products x y .BinProduct.univProp f g .fst .fst c .fst = f c
+binary-products x y .BinProduct.univProp f g .fst .fst c .snd = g c
+binary-products x y .BinProduct.univProp f g .fst .snd .fst = refl
+binary-products x y .BinProduct.univProp f g .fst .snd .snd = refl
+binary-products x y .BinProduct.univProp {z} f g .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (thm17 x) _ f) (isSet→ (thm17 y) _ g)) (funExt helper)
+    where
+        -- TODO: maybe rewrite since it seems like actually using both funExt and funExt⁻ is unnecessary, seeing that we don't need to pattern match on c anyway
+        helper : (c : El⁰ z) → (f c , g c) ≡ E .fst c
+        helper c = ≡-× (funExt⁻ (sym (E .snd .fst)) c) (funExt⁻ (sym (E .snd .snd)) c)
+
+binary-products-coincide : {ℓ : Level} {x y : V .Category.ob} → Functor-V-SET {ℓ} .Functor.F-ob (binary-products x y .BinProduct.binProdOb) .fst ≡ (Functor-V-SET {ℓ} .Functor.F-ob x .fst × Functor-V-SET {ℓ} .Functor.F-ob y .fst )
+binary-products-coincide = refl
