@@ -30,9 +30,21 @@ private
     postulate orderedPair⁰≡orderedPair⁰ : {x y a b : V⁰ {ℓ}} → ((⟨ x , y ⟩⁰ ≡ ⟨ a , b ⟩⁰) ≃ ((x ≡ a) × (y ≡ b)))
 
 private
-    module _ where
-        postulate fiberwise≡→≡ : {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} {f g : A → B} → ((z : B) → fiber f z ≡ fiber g z) → f ≡ g
-        -- fiberwise≡→≡ {A = A} {B = B} {f = f} {g = g} fibeq = funExt λ a → let
+    module _ {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} {f g : A → B} (fibeq : (z : B) → fiber f z ≡ fiber g z) where
+        t : (a : A) → Σ[ a' ∈ A ] g a' ≡ f a
+        t a = transport (fibeq (f a)) (a , refl)
+
+        q : (a : A) → PathP (λ i → fibeq (f a) i) (a , refl) (t a)
+        q a = transport-filler (fibeq (f a)) (a , refl)
+
+        -- s : (a : A) → {!!}
+        -- s a = PathPΣ (q a)
+
+        helper : (a : A) → f a ≡ g a
+        helper a = {!!}
+
+        fiberwise≡→≡ : f ≡ g
+        fiberwise≡→≡ = funExt helper
 
 module _ {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} where
     private
