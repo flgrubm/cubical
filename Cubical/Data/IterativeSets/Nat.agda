@@ -22,6 +22,7 @@ open import Cubical.Functions.FunExtEquiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat
 open import Cubical.Data.Fin as Fin
+open import Cubical.Relation.Nullary using (¬_)
 
 open import Cubical.Data.Sigma
 open import Cubical.Data.Nat.Order
@@ -47,7 +48,7 @@ private
 Unit*≃Unit : Unit* {ℓ} ≃ Unit
 Unit*≃Unit = isoToEquiv (iso (λ {(lift _) → _}) (λ _ → lift _) (λ _ → refl) λ {(lift _) → refl})
 
-isPropIsPropDisjointSum : {A : Type ℓ} {B : Type ℓ} → isProp A → isProp B → (A × B → ⊥) → isProp (A ⊎ B)
+isPropIsPropDisjointSum : {A : Type ℓ} {B : Type ℓ} → isProp A → isProp B → ¬ A × B → isProp (A ⊎ B)
 isPropIsPropDisjointSum propA propB disj (inl a₁) (inl a₂) = cong inl (propA a₁ a₂)
 isPropIsPropDisjointSum propA propB disj (inr b₁) (inr b₂) = cong inr (propB b₁ b₂)
 isPropIsPropDisjointSum propA propB disj (inl a) (inr b) = ⊥-elim (disj (a , b))
@@ -70,13 +71,6 @@ EquivToIsProp→isProp propA equiv = Embedding-into-isProp→isProp (Equiv→Emb
 
 -- this might be something for the library?
 
-
-SumInl≢Inr : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} (a : A) (b : B) → inl a ≡ (inr b :> A ⊎ B) → ⊥
-SumInl≢Inr {ℓ'' = ℓ''} {A = A} {B = B} a b p = transport (cong helper p) _
-    where
-        helper : A ⊎ B → Type ℓ-zero
-        helper (inl x) = Unit
-        helper (inr y) = ⊥
 
 
 suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
