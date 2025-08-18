@@ -81,14 +81,14 @@ private
             fiber≃Σfun-base-fiber : (t : Σ C D) → fiber f (t .fst) ≃ fiber Σfun-base t
             fiber≃Σfun-base-fiber (c , d) = isoToEquiv isom
                 where
-                    isom : Iso (fiber f c) (fiber Σfun-base (c , d))
-                    isom .Iso.fun (a , p) = subst (fiber Σfun-base) sigmaPath {!!} -- J (λ c' q → fiber Σfun-base (c' , subst D (sym p ∙ q) d)) {!cong (transport-refl!} p
-                        where
-                            sigmaPath : (f a , subst D (sym p) d) ≡ (c , d)
-                            sigmaPath = (λ i → (p i , subst-filler D p (subst D (sym p) d) i )) ∙ λ i → (c , {!compTransport-is-transportComp d (cong D p)!}) -- (λ i → (c , transportRefl d i))
-                    isom .Iso.inv = {!!}
-                    isom .Iso.rightInv = {!!}
-                    isom .Iso.leftInv = {!!}
+                    postulate isom : Iso (fiber f c) (fiber Σfun-base (c , d))
+                    -- isom .Iso.fun (a , p) = subst (fiber Σfun-base) sigmaPath {!!} -- J (λ c' q → fiber Σfun-base (c' , subst D (sym p ∙ q) d)) {!cong (transport-refl!} p
+                    --     where
+                    --         sigmaPath : (f a , subst D (sym p) d) ≡ (c , d)
+                    --         sigmaPath = (λ i → (p i , subst-filler D p (subst D (sym p) d) i )) ∙ λ i → (c , {!compTransport-is-transportComp d (cong D p)!}) -- (λ i → (c , transportRefl d i))
+                    -- isom .Iso.inv = {!!}
+                    -- isom .Iso.rightInv = {!!}
+                    -- isom .Iso.leftInv = {!!}
 
             isEmbedding-Σfun-base : isEmbedding f → isEmbedding Σfun-base
             isEmbedding-Σfun-base embf = hasPropFibers→isEmbedding (λ z → isOfHLevelRespectEquiv 1 (fiber≃Σfun-base-fiber z) (isEmbedding→hasPropFibers embf (z .fst)))
