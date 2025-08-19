@@ -1,3 +1,5 @@
+{-# OPTIONS --lossy-unification #-}
+
 module Cubical.Data.IterativeSets.Sum where
 
 open import Cubical.Core.Everything
@@ -13,23 +15,12 @@ open import Cubical.Relation.Nullary using (¬_)
 open import Cubical.Data.IterativeSets.Base
 open import Cubical.Data.IterativeSets.Empty
 open import Cubical.Data.IterativeSets.Unit
+open import Cubical.Data.IterativeSets.OrderedPair
 
 private
     variable
         ℓ : Level
         
--- TODO: remove private module once the performance issues with ordered and unordered pairs have been resolved
-private
-    module _ where
-        postulate ⟨_,_⟩⁰ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
-
-        orderedPair⁰ : (V⁰ {ℓ} × V⁰ {ℓ}) → V⁰ {ℓ}
-        orderedPair⁰ = uncurry ⟨_,_⟩⁰
-
-        postulate isEmbOrderedPair⁰ : isEmbedding (orderedPair⁰ {ℓ})
-
-        postulate orderedPair⁰≡orderedPair⁰ : {x y a b : V⁰ {ℓ}} → ((⟨ x , y ⟩⁰ ≡ ⟨ a , b ⟩⁰) ≃ ((x ≡ a) × (y ≡ b)))
-
 private
     module _ where
         empty⁰≢unit⁰ : ¬ empty⁰ {ℓ} ≡ unit⁰ {ℓ}
