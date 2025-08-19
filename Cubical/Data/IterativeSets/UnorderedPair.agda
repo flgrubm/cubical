@@ -1,3 +1,5 @@
+{-# OPTIONS --lossy-unification #-}
+
 module Cubical.Data.IterativeSets.UnorderedPair where
 
 open import Cubical.Core.Everything

@@ -1,3 +1,5 @@
+{-# OPTIONS --lossy-unification #-}
+
 module Cubical.Data.IterativeSets.OrderedPair where
 
 open import Cubical.Core.Everything
@@ -16,7 +18,6 @@ open import Cubical.Data.IterativeSets.Base
 open import Cubical.Data.IterativeSets.Empty
 open import Cubical.Data.IterativeSets.Singleton
 
--- TODO: Deal with the following after efficiency gain
 open import Cubical.Data.IterativeSets.UnorderedPair
 
 private

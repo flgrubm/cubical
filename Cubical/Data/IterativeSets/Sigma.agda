@@ -1,3 +1,4 @@
+{-# OPTIONS --lossy-unification #-}
 module Cubical.Data.IterativeSets.Sigma where
 
 open import Cubical.Core.Everything
@@ -14,6 +15,7 @@ open import Cubical.Foundations.Path
 open import Cubical.Data.Sigma
 
 open import Cubical.Data.IterativeSets.Base
+open import Cubical.Data.IterativeSets.OrderedPair
 
 private
   variable
@@ -21,17 +23,6 @@ private
     x : V⁰ {ℓ}
     y : El⁰ x → V⁰ {ℓ}
 
--- TODO: remove private module once the performance issues with ordered and unordered pairs have been resolved
-private
-    module _ where
-        postulate ⟨_,_⟩⁰ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
-
-        orderedPair⁰ : (V⁰ {ℓ} × V⁰ {ℓ}) → V⁰ {ℓ}
-        orderedPair⁰ = uncurry ⟨_,_⟩⁰
-
-        postulate isEmbOrderedPair⁰ : isEmbedding (orderedPair⁰ {ℓ})
-
-        postulate orderedPair⁰≡orderedPair⁰ : {x y a b : V⁰ {ℓ}} → ((⟨ x , y ⟩⁰ ≡ ⟨ a , b ⟩⁰) ≃ ((x ≡ a) × (y ≡ b)))
 
 -- TODO: move somewhere else
 private

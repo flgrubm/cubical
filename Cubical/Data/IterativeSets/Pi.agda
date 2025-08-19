@@ -1,3 +1,5 @@
+{-# OPTIONS --lossy-unification #-}
+
 module Cubical.Data.IterativeSets.Pi where
 
 open import Cubical.Core.Everything
@@ -11,23 +13,14 @@ open import Cubical.Homotopy.Base
 
 open import Cubical.Data.IterativeMultisets.Base
 open import Cubical.Data.IterativeSets.Base
+open import Cubical.Data.IterativeSets.OrderedPair
+
 
 private
   variable
     ℓ : Level
     x : V⁰ {ℓ}
     y : El⁰ x → V⁰ {ℓ}
-
-private
-  module _ where
-    postulate ⟨_,_⟩⁰ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
-
-    orderedPair⁰ : (V⁰ {ℓ} × V⁰ {ℓ}) → V⁰ {ℓ}
-    orderedPair⁰ = uncurry ⟨_,_⟩⁰
-
-    postulate isEmbOrderedPair⁰ : isEmbedding (orderedPair⁰ {ℓ})
-
-    postulate orderedPair⁰≡orderedPair⁰ : {x y a b : V⁰ {ℓ}} → ((⟨ x , y ⟩⁰ ≡ ⟨ a , b ⟩⁰) ≃ ((x ≡ a) × (y ≡ b)))
 
 private
     module _ {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} {f g : A → B} (fibeq : (z : B) → fiber f z ≡ fiber g z) where
