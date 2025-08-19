@@ -9,6 +9,7 @@ open import Cubical.Categories.Instances.Sets
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Homotopy.Base
 open import Cubical.Data.Sigma
+open import Cubical.Foundations.Function
 
 open import Cubical.Categories.Category
 open import Cubical.Categories.Limits.Initial
@@ -26,6 +27,7 @@ open import Cubical.Data.IterativeSets.Empty
 open import Cubical.Data.IterativeSets.Unit
 open import Cubical.Data.IterativeSets.Sum
 open import Cubical.Data.IterativeSets.Sigma
+open import Cubical.Data.IterativeSets.Fiber
 
 V : {ℓ : Level} → Category (ℓ-suc ℓ) ℓ
 V {ℓ} .Category.ob = V⁰ {ℓ}
@@ -103,6 +105,12 @@ binary-products-coincide = refl
 
 --pullbacks
 
-
+pullback-V : {ℓ : Level} → Pullbacks (V {ℓ})
+pullback-V (cospan l m r s₁ s₂) .Pullback.pbOb = Σ⁰ m (λ a → fiber⁰ {x = l} {y = m} s₁ a ×⁰ fiber⁰ {x = r} {y = m} s₂ a)
+pullback-V (cospan l m r s₁ s₂) .Pullback.pbPr₁ = fst ∘ fst ∘ snd
+pullback-V (cospan l m r s₁ s₂) .Pullback.pbPr₂ = fst ∘ snd ∘ snd
+pullback-V (cospan l m r s₁ s₂) .Pullback.pbCommutes = funExt λ a → a .snd .fst .snd ∙ sym (a .snd .snd .snd)
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst = {!!}
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .snd = {!!}
 
 -- pushout 
