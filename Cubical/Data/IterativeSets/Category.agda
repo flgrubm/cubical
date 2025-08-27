@@ -10,6 +10,7 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Homotopy.Base
 open import Cubical.Data.Sigma
 open import Cubical.Foundations.Function
+open import Cubical.Foundations.Equiv
 
 open import Cubical.Categories.Category
 open import Cubical.Categories.Limits.Initial
@@ -105,12 +106,33 @@ binary-products-coincide = refl
 
 --pullbacks
 
+private
+    module _ {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} (f : A → B) (b₁ b₂ : B) where
+        ≡-implies-fiber-≡ : b₁ ≡ b₂ → fiber f b₁ ≡ fiber f b₂
+        ≡-implies-fiber-≡ = cong (fiber f)
+    module _ {ℓ ℓ' : Level} {B : I → Type ℓ} {C : I → Type ℓ'} {x : B i0 × C i0} {y : B i1 × C i1} (P : PathP B (x .fst) (y .fst)) (Q : PathP C (x .snd) (y .snd)) where
+        ×-PathP : PathP (λ i → B i × C i) x y
+        ×-PathP i .fst = P i
+        ×-PathP i .snd = Q i
+        
+        
+
 pullback-V : {ℓ : Level} → Pullbacks (V {ℓ})
 pullback-V (cospan l m r s₁ s₂) .Pullback.pbOb = Σ⁰ m (λ a → fiber⁰ {x = l} {y = m} s₁ a ×⁰ fiber⁰ {x = r} {y = m} s₂ a)
 pullback-V (cospan l m r s₁ s₂) .Pullback.pbPr₁ = fst ∘ fst ∘ snd
 pullback-V (cospan l m r s₁ s₂) .Pullback.pbPr₂ = fst ∘ snd ∘ snd
-pullback-V (cospan l m r s₁ s₂) .Pullback.pbCommutes = funExt λ a → a .snd .fst .snd ∙ sym (a .snd .snd .snd)
-pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst = {!!}
-pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .snd = {!!}
-
+pullback-V (cospan l m r s₁ s₂) .Pullback.pbCommutes = funExt λ x → x .snd .fst .snd ∙ sym (x .snd .snd .snd)
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .fst x .fst = s₁ (h x)
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .fst x .snd .fst .fst = h x
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .fst x .snd .fst .snd = refl
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .fst x .snd .snd .fst = k x
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .fst x .snd .snd .snd = funExt⁻ (sym H) x
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .snd .fst = refl
+pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .snd .snd = refl
+pullback-V {ℓ} (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (thm17 l) h _) (isSet→ (thm17 r) k _)) (funExt (λ x → ΣPathP (helper' x)))
+    where
+        helper' : (x : El⁰ d) → Σ[ p ∈ s₁ (h x) ≡ E .fst x .fst ] PathP (λ i → (fiber s₁ (p i) × fiber s₂ (p i))) ((h x , refl) , (k x , funExt⁻ (sym H) x)) (E .fst x .snd)
+        helper' x .fst = cong s₁ (funExt⁻ (E .snd .fst) x) ∙ E .fst x .snd .fst .snd
+        helper' x .snd = ×-PathP {!!} {!!}
+        
 -- pushout 
