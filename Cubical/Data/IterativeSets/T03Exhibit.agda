@@ -31,6 +31,7 @@ open import Cubical.Homotopy.Base
 
 open import Cubical.Data.W.W
 
+open import Cubical.Data.IterativeMultisets.Base
 open import Cubical.Data.IterativeSets.Base
 
 private
@@ -66,7 +67,8 @@ symPath∙Path-cancel p = cong (λ r → r ∙ p) (sym (refl∙-is-identity (sym
 
 f-w/oJ : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (x ≡ y) → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p)))))
 f-w/oJ {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .fst = cong overline-W p
-f-w/oJ {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .snd z i = tilde-W (p i) (transport-filler (cong (B ∘ overline-W) p) z i)
+f-w/oJ {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .snd z i = tilde-W (p i) (subst-filler (B ∘ overline-W) p z i)
+-- f-w/oJ {A = A} {B = B} {x = sup-∞ x α} {y = sup-∞ y β} p .snd z i = tilde-W (p i) (transport-filler (cong (B ∘ overline-W) p) z i)
 
 f-w/oJ-inv : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p))))) → (x ≡ y)
 f-w/oJ-inv {A = A} {B = B} {x = sup-W x α} {y = sup-W y β} (p , q) i = sup-∞ (p i) (k' i)
@@ -123,8 +125,11 @@ sup-W-overline-tilde {x = sup-W x α} = refl
 
 -- With J
 
-f-w/J : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (x ≡ y) → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p)))))
-f-w/J {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {x = x} {y = y} = J P d
+f-V∞-w/J : {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ transport e)
+f-V∞-w/J {x = x} {y = y} = J (λ z p → Σ[ e ∈ overline-∞ x ≡ overline-∞ z ] tilde-∞ x ∼ (tilde-∞ z ∘ transport e)) (refl , (λ a → cong (tilde-∞ x) (sym (transportRefl a))))
+
+f-w/J : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} (x y : W A B) → (x ≡ y) → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p)))))
+f-w/J {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} x y = J P d
     where
         P : (z : W A B) → x ≡ z → Type (ℓ-max ℓ ℓ')
         P z p = Σ[ p ∈ (overline-W x ≡ overline-W z) ] (tilde-W x ∼ (tilde-W z ∘ (transport (cong B p))))
@@ -132,17 +137,40 @@ f-w/J {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {x = x} {y = y} = J P d
         d .fst = refl
         d .snd b = cong (tilde-W x) (sym (transportRefl b))
 
-f-V∞-w/J : {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ transport e)
-f-V∞-w/J {x = x} {y = y} = J (λ z p → Σ[ e ∈ overline-∞ x ≡ overline-∞ z ] tilde-∞ x ∼ (tilde-∞ z ∘ transport e)) (refl , (λ a → cong (tilde-∞ x) (sym (transportRefl a))))
-
-f-w/J-inv : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (transport (cong B p))))) → (x ≡ y)
-f-w/J-inv {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {x = sup-W x α} {y = sup-W y β} (p , h) = J2 Q r p (funExt h)
+helper1 : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} (x : W A B) → f-w/J x x refl ≡ (refl , λ b → cong (tilde-W x) (sym (transportRefl b)))
+helper1 {ℓ} {ℓ'} {A} {B} x = JRefl P d
     where
-        Q : (y' : A) (p' : x ≡ y') (β' : (b : B x) → W A B) → α ≡ β' → Type (ℓ-max ℓ ℓ')
-        Q y' p' β' h' = sup-W x α ≡ sup-W y' f
-            where
-                f : B y' → W A B
-                f b = {!β' (transport (cong B (sym p')) b)!}
-                -- f b = {!α (transport (cong B (sym p')) b)!}
-        r : Q _ refl _ refl
-        r = refl
+        P : (z : W A B) → x ≡ z → Type (ℓ-max ℓ ℓ')
+        P z p = Σ[ p ∈ (overline-W x ≡ overline-W z) ] (tilde-W x ∼ (tilde-W z ∘ (transport (cong B p))))
+        d : P x refl
+        d .fst = refl
+        d .snd b = cong (tilde-W x) (sym (transportRefl b))
+-- JRefl (λ z p → Σ[ p ∈ (overline-W x ≡ overline-W z) ] (tilde-W x ∼ (tilde-W z ∘ (transport (cong B p)))))
+
+test : (A : Type ℓ) (B : A → Type ℓ') (x : A) (α : B x → W A B) (y : A) (p : x ≡ y) (β : B y → W A B) (h : (a : B x) → α a ≡ β (subst B p a)) → sup-W x α ≡ sup-W y β
+test A B x α = J> (λ β h → cong (sup-W x) (funExt (λ a → h a ∙ cong β (substRefl {B = B} a))))
+-- maybe rewrite as normal J rule
+-- test A B x y α β p h = cong₂ sup-W p (funExtNonDep (λ {a b} z → h a ∙ cong β (fromPathP z)))
+
+f-w/J-inv : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} (x y : W A B) → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (subst B p) {-(transport (cong B p))-}))) → (x ≡ y)
+f-w/J-inv {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} (sup-W x α) (sup-W y β) (p , h) = test A B x α y p β h
+
+-- sec : {A : Type ℓ} {B : A → Type ℓ'} (x y : W A B) → section (f-w/J x y) (f-w/J-inv x y)
+-- sec (sup-W x α) (sup-W y β) (p , h) = ΣPathP ({!!} , {!!})
+
+ret : {A : Type ℓ} {B : A → Type ℓ'} (x y : W A B) → retract (f-w/J x y) (f-w/J-inv x y)
+ret {A = A} {B = B} (sup-∞ x α) = J> cong₂ (λ m n → test A B x α x m α n) (cong fst (helper1 (sup-W x α)) ) (cong snd (helper1 (sup-W x α))) ∙ {!!} -- JRefl with helper lemma (for `test`)
+
+-- test A B x y α β p h -- J2 Q r p (funExt h)
+    -- where
+    --     Q : (y' : A) (p' : x ≡ y') (β' : (b : B x) → W A B) → α ≡ β' → Type (ℓ-max ℓ ℓ')
+    --     Q y' p' β' h' = sup-W x α ≡ sup-W y' f
+    --         where
+    --             f : B y' → W A B
+    --             f b = {!β' (transport (cong B (sym p')) b)!}
+    --             -- f b = {!α (transport (cong B (sym p')) b)!}
+    --     r : Q _ refl _ refl
+    --     r = refl
+
+-- f-w/J-inv' : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (Σ[ p ∈ (overline-W x ≡ overline-W y) ] (tilde-W x ∼ (tilde-W y ∘ (subst B p) {-(transport (cong B p))-}))) → (x ≡ y)
+-- f-w/J-inv' {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {B = B} {x = sup-W x α} {y = sup-W y β} (p , h) = {!!}

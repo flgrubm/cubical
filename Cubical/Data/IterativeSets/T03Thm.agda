@@ -30,6 +30,7 @@ open import Cubical.Homotopy.Base
 
 open import Cubical.Data.W.W
 
+open import Cubical.Data.IterativeMultisets.Base
 open import Cubical.Data.IterativeSets.Base
 
 open import Cubical.Foundations.CartesianKanOps
@@ -74,6 +75,8 @@ postulate thm3-inv' : {ℓ : Level} → {x y : V∞ {ℓ}} → (Σ[ e ∈ overli
 
 
 -- old part
+
+-- thm3-fun : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → Σ[ p ∈ overline-∞ x ≡ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ (transport p)
 
 thm3-fun : {ℓ : Level} → {x y : V∞ {ℓ}} → x ≡ y → Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)
 thm3-fun {ℓ = ℓ} {x = x} {y = y} p = e , h where
