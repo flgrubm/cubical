@@ -22,6 +22,7 @@ private
     x : V⁰ {ℓ}
     y : El⁰ x → V⁰ {ℓ}
 
+-- maybe require isSet or so
 private
     module _ {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} {f g : A → B} (fibeq : (z : B) → fiber f z ≡ fiber g z) where
         t : (a : A) → Σ[ a' ∈ A ] g a' ≡ f a
