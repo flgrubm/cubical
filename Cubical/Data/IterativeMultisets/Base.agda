@@ -12,10 +12,17 @@ open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
 open import Cubical.Data.Unit
 open import Cubical.Data.Bool
 open import Cubical.Relation.Nullary using (¬_)
+open import Cubical.Data.Sigma
+open import Cubical.Foundations.Transport
+open import Cubical.Foundations.GroupoidLaws
 
 open import Cubical.Data.W.W
 
 -- probably move to module Cubical.Data.W (or the corresponding .Properties)
+
+module _ where
+    -- first define substP
+    postulate substCompositeP : ∀ {ℓ ℓ'} {A : Type ℓ} → (B : A → Type ℓ') → {x y z : A} (p : x ≡ y) (q : y ≡ z) (u : B x) → subst B (p ∙ q) u ≡ subst B q (subst B p u)
 
 module _ where
     private
@@ -59,6 +66,31 @@ module _ where
 
             ret : (u v : W A B) → retract (f u v) (g u v)
             ret (sup-W _ _) = J> refl
+
+    _≡fib_ : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} → W A B → W A B → Type (ℓ-max ℓ ℓ')
+    _≡fib_ {A = A} {B = B} x y = (z : W A B) → (fiber (tilde-W x) z) ≃ (fiber (tilde-W y) z)
+
+    ≡W≃≡fib : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {x y : W A B} → (x ≡W y) ≃ (x ≡fib y)
+    ≡W≃≡fib {A = A} {B = B} {x = x} {y = y} = isoToEquiv (iso f g sec ret)
+        where
+            f : x ≡W y → x ≡fib y
+            f (p , q) z = isoToEquiv isom
+                where
+                    isom : Iso (fiber (tilde-W x) z) (fiber (tilde-W y) z)
+                    isom .Iso.fun (ax , _) .fst = subst B p ax
+                    isom .Iso.fun (ax , sx) .snd = subst (_≡ z) (λ i → q i (subst-filler B p ax i)) sx
+                    isom .Iso.inv (ay , sy) .fst = subst B (sym p) ay
+                    isom .Iso.inv (ay , sy) .snd = subst (_≡ z) (λ i → q (~ i) (subst-filler B (sym p) ay i)) sy
+                    isom .Iso.rightInv (ay , sy) = ΣPathP ((
+                        subst B p (subst B (sym p) ay) ≡⟨ sym (substComposite B (sym p) (p) ay) ⟩
+                        subst B (sym p ∙ p) ay         ≡⟨ cong (λ s → subst B s ay) (lCancel p) ⟩
+                        subst B refl ay                ≡⟨ substRefl {B = B} ay ⟩
+                        ay                             ∎)
+                        , {!!})
+                    isom .Iso.leftInv = {!!}
+            postulate g : x ≡fib y → x ≡W y
+            postulate sec : section f g
+            postulate ret : retract f g
 
 -- V∞ specific
 
