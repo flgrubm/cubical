@@ -70,16 +70,42 @@ private
 
             -- might need J rule again...
             fiber≃Σfun-base-fiber : (t : Σ C D) → fiber f (t .fst) ≃ fiber Σfun-base t
-            fiber≃Σfun-base-fiber (c , d) = isoToEquiv isom
+            fiber≃Σfun-base-fiber (c , d) = isoToEquiv (iso to from sec ret)
                 where
-                    postulate isom : Iso (fiber f c) (fiber Σfun-base (c , d))
-                    -- isom .Iso.fun (a , p) = subst (fiber Σfun-base) sigmaPath {!!} -- J (λ c' q → fiber Σfun-base (c' , subst D (sym p ∙ q) d)) {!cong (transport-refl!} p
-                    --     where
-                    --         sigmaPath : (f a , subst D (sym p) d) ≡ (c , d)
-                    --         sigmaPath = (λ i → (p i , subst-filler D p (subst D (sym p) d) i )) ∙ λ i → (c , {!compTransport-is-transportComp d (cong D p)!}) -- (λ i → (c , transportRefl d i))
-                    -- isom .Iso.inv = {!!}
-                    -- isom .Iso.rightInv = {!!}
-                    -- isom .Iso.leftInv = {!!}
+                    to : fiber f c → fiber Σfun-base (c , d)
+                    to (a , p) .fst .fst = a
+                    to (a , p) .fst .snd = subst D (sym p) d
+                    to (a , p) .snd i .fst = p i
+                    to (a , p) .snd i .snd = subst-filler D (sym p) d (~ i)
+                    -- to (a , p) .snd = ΣPathP (p , λ i → subst-filler D (sym p) d (~ i))
+                    from : fiber Σfun-base (c , d) → fiber f c
+                    from ((a , d') , p) .fst = a
+                    from ((a , d') , p) .snd i = p i .fst
+                    postulate sec : section to from
+                    -- sec ((a , d') , p) =
+                    --     to (from ((a , d') , p))
+                    --         ≡⟨⟩
+                    --     to (a , λ i → p i .fst)
+                    --         ≡⟨⟩
+                    --     -- (a , subst D _ d) , λ i → (p i , subst-filler D _ d (~ i))
+                    --     {!!}
+                    --         ≡⟨ {!!} ⟩
+                    --     (a , d') , p
+                    --         ∎
+                    postulate ret : retract to from
+
+            fiber≃Σfun-base-fiber' : (t : Σ C D) → fiber f (t .fst) ≃ fiber Σfun-base t
+            fiber≃Σfun-base-fiber' t = isoToEquiv (iso (to t) (from t) {!!} {!!})
+                where
+                    to : (t' : Σ C D) → fiber f (t' .fst) → fiber Σfun-base t'
+                    to (c , d) (a , p) .fst .fst = a
+                    to (c , d) (a , p) .fst .snd = subst D (sym p) d
+                    to (c , d) (a , p) .snd i .fst = p i
+                    to (c , d) (a , p) .snd i .snd = subst-filler D (sym p) d (~ i)
+                    from : (t' : Σ C D) → fiber Σfun-base t → fiber f (t .fst)
+                    from (c , d) ((a , d') , p) .fst = a
+                    from (c , d) ((a , d') , p) .snd = cong fst p
+            
 
             isEmbedding-Σfun-base : isEmbedding f → isEmbedding Σfun-base
             isEmbedding-Σfun-base embf = hasPropFibers→isEmbedding (λ z → isOfHLevelRespectEquiv 1 (fiber≃Σfun-base-fiber z) (isEmbedding→hasPropFibers embf (z .fst)))
