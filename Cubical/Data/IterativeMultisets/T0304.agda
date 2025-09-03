@@ -34,8 +34,7 @@ module _ where
             x y : W A B
 
     _≡W_ : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} → W A B → W A B → Type (ℓ-max ℓ ℓ')
-    _≡W_ {A = A} {B = B} x y = Σ[ p ∈ overline-W x ≡ overline-W y ]
-                                PathP (λ i → B (p i) → W A B) (tilde-W x) (tilde-W y)
+    _≡W_ {A = A} {B = B} x y = Σ[ p ∈ overline-W x ≡ overline-W y ] PathP (λ i → B (p i) → W A B) (tilde-W x) (tilde-W y)
 
     ≡≃≡W : (x ≡ y) ≃ (x ≡W y)
     ≡≃≡W {x = x} {y = y} = isoToEquiv (iso (f x y) (g x y) (sec x y) (ret x y))
@@ -44,14 +43,49 @@ module _ where
             f _ _ p .fst = cong overline-W p
             f _ _ p .snd = cong tilde-W p
 
+            f' : (u v : W A B) → u ≡ v → u ≡W v
+            f' _ = J> (refl , refl)
+
+            f'' : (u v : W A B) → u ≡ v → u ≡W v
+            f'' {A = A} {B = B} u v = J (λ v' _ → u ≡W v') (refl , refl)
+
             g : (u v : W A B) → u ≡W v → u ≡ v
             g (sup-W _ _) (sup-W _ _) (p , q) = cong₂ sup-W p q
+
+            g'-helper : (u v : W A B) → (p : overline-W u ≡ overline-W v) → PathP (λ i → B (p i) → W A B) (tilde-W u) (tilde-W v) → u ≡ v
+            g'-helper {A = A} {B = B} (sup-W x α) (sup-W y β) p q = JDep {B = λ x → B x → W A B} (λ x' p' β' q' → sup-W x α ≡ sup-W x' β') (refl {x = sup-W x α}) p q
+
+            g' : (u v : W A B) → u ≡W v → u ≡ v
+            g' (sup-W x α) (sup-W y β) (p , q) = g'-helper (sup-∞ x α) (sup-∞ y β) p q
 
             sec : (u v : W A B) → section (f u v) (g u v)
             sec (sup-W _ _) (sup-W _ _) _ = refl
 
+            sec' : (u v : W A B) → section (f' u v) (g' u v)
+            sec' (sup-W x α) (sup-W y β) (p , q) = JDep ((λ y' p' β' q' → f' (sup-W x α) (sup-W y' β') (g' (sup-W x α) (sup-W y' β') (p' , q')) ≡ (p' , q'))) (
+                f' (sup-∞ x α) (sup-∞ x α) (g' (sup-∞ x α) (sup-∞ x α) (refl , refl))
+                    ≡⟨ cong (f' (sup-∞ x α) (sup-∞ x α)) (JDepRefl (λ x' p' β' q' → sup-W x α ≡ sup-W x' β') (refl {x = sup-W x α})) ⟩
+                f' (sup-∞ x α) (sup-∞ x α) refl
+                    ≡⟨ JRefl (λ y₂ z → y₂) (refl , refl) ⟩ -- why does this work?
+                refl , refl
+                    ∎) p q
+
+            sec'' : (u v : W A B) → section (f'' u v) (g' u v)
+            sec'' (sup-W x α) (sup-W y β) (p , q) = JDep ((λ y' p' β' q' → f'' (sup-W x α) (sup-W y' β') (g' (sup-W x α) (sup-W y' β') (p' , q')) ≡ (p' , q'))) (
+                f'' (sup-∞ x α) (sup-∞ x α) (g' (sup-∞ x α) (sup-∞ x α) (refl , refl))
+                    ≡⟨ cong (f'' (sup-∞ x α) (sup-∞ x α)) (JDepRefl (λ x' p' β' q' → sup-W x α ≡ sup-W x' β') (refl {x = sup-W x α})) ⟩
+                f'' (sup-∞ x α) (sup-∞ x α) refl
+                    ≡⟨ JRefl (λ v' _ → sup-W x α ≡W v') (refl {x = x} , refl {x = α}) ⟩ -- why does this not work?
+                refl , refl
+                    ∎) p q
+
             ret : (u v : W A B) → retract (f u v) (g u v)
             ret (sup-W _ _) = J> refl
+            
+            -- again with explicit specification of the family
+            ret' : (u v : W A B) → retract (f u v) (g u v)
+            ret' (sup-W x α) _ = J (λ v' p' → g (sup-W x α) v' (f (sup-W x α) v' p') ≡ p') refl
+
 
     _≡fib∞_ : {ℓ : Level} → V∞ {ℓ} → V∞ {ℓ} → Type (ℓ-suc ℓ)
     x ≡fib∞ y = (z : V∞) → (fiber (tilde-W x) z) ≃ (fiber (tilde-W y) z) 
@@ -61,6 +95,12 @@ module _ where
     ≡≃≡fib∞ : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡W y) ≃ (x ≡fib∞ y)
     ≡≃≡fib∞ {ℓ} {x} {y} = isoToEquiv (iso (f x y) (g x y) (sec x y) (ret x y))
         where
+            test : (u v : V∞ {ℓ}) → (p : overline-W u ≡ overline-W v) → PathP (λ i → p i → V∞ {ℓ}) (tilde-W u) (tilde-W v) → u ≡W v
+            test u v p q = p , q
+
+            -- f-helper : (u v : V∞ {ℓ}) → (p : overline-W u ≡ overline-W v) → PathP (λ i → p i → V∞ {ℓ}) (tilde-W u) (tilde-W v) → u ≡fib∞ v
+            -- f-helper u v p q = JDep (λ v' p' l q' → {!(z : V∞ {ℓ}) → (fiber (tilde-W u) z ≃ fiber l z)!}) (λ z → pathToEquiv (refl {x = fiber u z})) p q
+
             f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞ v
             f u v (p , q) z = isoToEquiv isom
                 where
