@@ -70,14 +70,14 @@ module _ where
                 refl , refl
                     ∎) p q
 
-            sec'' : (u v : W A B) → section (f'' u v) (g' u v)
-            sec'' (sup-W x α) (sup-W y β) (p , q) = JDep ((λ y' p' β' q' → f'' (sup-W x α) (sup-W y' β') (g' (sup-W x α) (sup-W y' β') (p' , q')) ≡ (p' , q'))) (
-                f'' (sup-∞ x α) (sup-∞ x α) (g' (sup-∞ x α) (sup-∞ x α) (refl , refl))
-                    ≡⟨ cong (f'' (sup-∞ x α) (sup-∞ x α)) (JDepRefl (λ x' p' β' q' → sup-W x α ≡ sup-W x' β') (refl {x = sup-W x α})) ⟩
-                f'' (sup-∞ x α) (sup-∞ x α) refl
-                    ≡⟨ JRefl (λ v' _ → sup-W x α ≡W v') (refl {x = x} , refl {x = α}) ⟩ -- why does this not work?
-                refl , refl
-                    ∎) p q
+            -- sec'' : (u v : W A B) → section (f'' u v) (g' u v)
+            -- sec'' (sup-W x α) (sup-W y β) (p , q) = JDep ((λ y' p' β' q' → f'' (sup-W x α) (sup-W y' β') (g' (sup-W x α) (sup-W y' β') (p' , q')) ≡ (p' , q'))) (
+            --     f'' (sup-∞ x α) (sup-∞ x α) (g' (sup-∞ x α) (sup-∞ x α) (refl , refl))
+            --         ≡⟨ cong (f'' (sup-∞ x α) (sup-∞ x α)) (JDepRefl (λ x' p' β' q' → sup-W x α ≡ sup-W x' β') (refl {x = sup-W x α})) ⟩
+            --     f'' (sup-∞ x α) (sup-∞ x α) refl
+            --         ≡⟨ JRefl (λ v' _ → sup-W x α ≡W v') (refl {x = x} , refl {x = α}) ⟩ -- why does this not work?
+            --     refl , refl
+            --         ∎) p q
 
             ret : (u v : W A B) → retract (f u v) (g u v)
             ret (sup-W _ _) = J> refl
@@ -92,8 +92,8 @@ module _ where
 
     open Iso
     
-    ≡≃≡fib∞ : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡W y) ≃ (x ≡fib∞ y)
-    ≡≃≡fib∞ {ℓ} {x} {y} = isoToEquiv (iso (f x y) (g x y) (sec x y) (ret x y))
+    ≡W≃≡fib∞ : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡W y) ≃ (x ≡fib∞ y)
+    ≡W≃≡fib∞ {ℓ} {x} {y} = isoToEquiv (iso (f x y) (g x y) (sec x y) (ret x y))
         where
             test : (u v : V∞ {ℓ}) → (p : overline-W u ≡ overline-W v) → PathP (λ i → p i → V∞ {ℓ}) (tilde-W u) (tilde-W v) → u ≡W v
             test u v p q = p , q
@@ -101,29 +101,39 @@ module _ where
             -- f-helper : (u v : V∞ {ℓ}) → (p : overline-W u ≡ overline-W v) → PathP (λ i → p i → V∞ {ℓ}) (tilde-W u) (tilde-W v) → u ≡fib∞ v
             -- f-helper u v p q = JDep (λ v' p' l q' → {!(z : V∞ {ℓ}) → (fiber (tilde-W u) z ≃ fiber l z)!}) (λ z → pathToEquiv (refl {x = fiber u z})) p q
 
-            f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞ v
-            f u v (p , q) z = isoToEquiv isom
-                where
-                    postulate isom : Iso (fiber (tilde-W u) z) (fiber (tilde-W v) z)
-                    -- isom .fun (au , _) .fst = transport p au
-                    -- isom .fun (au , su) .snd = subst (_≡ z) (λ i → q i (transport-filler p au i)) su
-                    -- isom .inv (av , sv) .fst = transport (sym p) av
-                    -- isom .inv (av , sv) .snd = subst (_≡ z) (λ i → q (~ i) (transport-filler (sym p) av i)) sv
-                    -- isom .rightInv (av , sv) = ΣPathP ((
-                    --     transport p (transport (sym p) av) ≡⟨ sym (transportComposite (sym p) p av) ⟩
-                    --     transport (sym p ∙ p) av ≡⟨ cong (flip transport av) (lCancel p) ⟩
-                    --     transport refl av ≡⟨ transportRefl av ⟩
-                    --     av ∎) , {!!})
-                    -- -- basically same as rightInv
-                    -- isom .leftInv = {!!}
-            g : (u v : V∞ {ℓ}) → u ≡fib∞ v → u ≡W v
-            g u v F .fst = ua (isoToEquiv isom)
-                where
-                    isom : Iso (overline-W u) (overline-W v)
-                    isom .fun a = F (tilde-∞ u a) .fst (a , refl) .fst
-                    isom .inv = {!!}
-                    isom .rightInv = {!!}
-                    isom .leftInv = {!!}
-            g u v F .snd = {!!}
+            postulate f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞ v
+            -- f u v (p , q) z = isoToEquiv isom
+            --     where
+            --         postulate isom : Iso (fiber (tilde-W u) z) (fiber (tilde-W v) z)
+            --         -- isom .fun (au , _) .fst = transport p au
+            --         -- isom .fun (au , su) .snd = subst (_≡ z) (λ i → q i (transport-filler p au i)) su
+            --         -- isom .inv (av , sv) .fst = transport (sym p) av
+            --         -- isom .inv (av , sv) .snd = subst (_≡ z) (λ i → q (~ i) (transport-filler (sym p) av i)) sv
+            --         -- isom .rightInv (av , sv) = ΣPathP ((
+            --         --     transport p (transport (sym p) av) ≡⟨ sym (transportComposite (sym p) p av) ⟩
+            --         --     transport (sym p ∙ p) av ≡⟨ cong (flip transport av) (lCancel p) ⟩
+            --         --     transport refl av ≡⟨ transportRefl av ⟩
+            --         --     av ∎) , {!!})
+            --         -- -- basically same as rightInv
+            --         -- isom .leftInv = {!!}
+            postulate g : (u v : V∞ {ℓ}) → u ≡fib∞ v → u ≡W v
+            -- g u v F .fst = ua (isoToEquiv isom)
+            --     where
+            --         isom : Iso (overline-W u) (overline-W v)
+            --         isom .fun a = F (tilde-∞ u a) .fst (a , refl) .fst
+            --         isom .inv = {!!}
+            --         isom .rightInv = {!!}
+            --         isom .leftInv = {!!}
+            -- g u v F .snd = {!!}
             postulate sec : (u v : V∞ {ℓ}) → section (f u v) (g u v)
             postulate ret : (u v : V∞ {ℓ}) → retract (f u v) (g u v)
+
+    ≡W≃≡fib∞' : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡W y) ≃ (x ≡fib∞ y)
+    ≡W≃≡fib∞' {ℓ = ℓ} {x = x} {y = y} = isoToEquiv (iso (f x y) (g x y) {!!} {!!})
+        where
+            -- actually ℓ should rather be ℓ', but here it doesn't really matter
+            f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞ v
+            f (sup-W _ α) _ (p , q) z = JDep (λ _ _ β' _ → (fiber α z ≃ fiber β' z)) (idEquiv (fiber α z)) p q
+
+            g : (u v : V∞ {ℓ}) → u ≡fib∞ v → u ≡W v
+            g (sup-W x α) (sup-W y β) F = EquivJ (λ A e → {!!}) {!!} (F (sup-W x α))
