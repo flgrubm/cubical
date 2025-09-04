@@ -94,17 +94,17 @@ private
                     --         ∎
                     postulate ret : retract to from
 
-            fiber≃Σfun-base-fiber' : (t : Σ C D) → fiber f (t .fst) ≃ fiber Σfun-base t
-            fiber≃Σfun-base-fiber' t = isoToEquiv (iso (to t) (from t) {!!} {!!})
-                where
-                    to : (t' : Σ C D) → fiber f (t' .fst) → fiber Σfun-base t'
-                    to (c , d) (a , p) .fst .fst = a
-                    to (c , d) (a , p) .fst .snd = subst D (sym p) d
-                    to (c , d) (a , p) .snd i .fst = p i
-                    to (c , d) (a , p) .snd i .snd = subst-filler D (sym p) d (~ i)
-                    from : (t' : Σ C D) → fiber Σfun-base t → fiber f (t .fst)
-                    from (c , d) ((a , d') , p) .fst = a
-                    from (c , d) ((a , d') , p) .snd = cong fst p
+            postulate fiber≃Σfun-base-fiber' : (t : Σ C D) → fiber f (t .fst) ≃ fiber Σfun-base t
+            -- fiber≃Σfun-base-fiber' t = isoToEquiv (iso (to t) (from t) {!!} {!!})
+            --     where
+            --         to : (t' : Σ C D) → fiber f (t' .fst) → fiber Σfun-base t'
+            --         to (c , d) (a , p) .fst .fst = a
+            --         to (c , d) (a , p) .fst .snd = subst D (sym p) d
+            --         to (c , d) (a , p) .snd i .fst = p i
+            --         to (c , d) (a , p) .snd i .snd = subst-filler D (sym p) d (~ i)
+            --         from : (t' : Σ C D) → fiber Σfun-base t → fiber f (t .fst)
+            --         from (c , d) ((a , d') , p) .fst = a
+            --         from (c , d) ((a , d') , p) .snd = cong fst p
             
 
             isEmbedding-Σfun-base : isEmbedding f → isEmbedding Σfun-base
