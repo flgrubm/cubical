@@ -15,6 +15,7 @@ open import Cubical.Relation.Nullary using (¬_)
 open import Cubical.Data.Sigma
 open import Cubical.Foundations.Transport
 open import Cubical.Foundations.GroupoidLaws
+open import Cubical.Foundations.Path
 
 open import Cubical.Data.W.W
 open import Cubical.Data.IterativeMultisets.Base
@@ -87,10 +88,24 @@ module _ where
             ret' (sup-W x α) _ = J (λ v' p' → g (sup-W x α) v' (f (sup-W x α) v' p') ≡ p') refl
 
 
+    -- maybe ≡ instead of ≃
     _≡fib∞_ : {ℓ : Level} → V∞ {ℓ} → V∞ {ℓ} → Type (ℓ-suc ℓ)
     x ≡fib∞ y = (z : V∞) → (fiber (tilde-W x) z) ≃ (fiber (tilde-W y) z) 
 
+    _≡fib∞'_ : {ℓ : Level} → V∞ {ℓ} → V∞ {ℓ} → Type (ℓ-suc (ℓ-suc ℓ))
+    x ≡fib∞' y = (z : V∞) → (fiber (tilde-W x) z) ≡ (fiber (tilde-W y) z) 
+
     open Iso
+
+    ≡W≃≡fib∞' : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡W y) ≃ (x ≡fib∞' y)
+    ≡W≃≡fib∞' {ℓ} {x} {y} = isoToEquiv (iso (f x y) (g x y) (sec x y) (ret x y))
+        where
+            f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞' v
+            f (sup-W x α) (sup-W y β) (p , q) z = {!ΣPathP!}
+
+            postulate g : {!!}
+            postulate sec : {!!}
+            postulate ret : {!!}
     
     ≡W≃≡fib∞ : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡W y) ≃ (x ≡fib∞ y)
     ≡W≃≡fib∞ {ℓ} {x} {y} = isoToEquiv (iso (f x y) (g x y) (sec x y) (ret x y))
@@ -101,21 +116,31 @@ module _ where
             -- f-helper : (u v : V∞ {ℓ}) → (p : overline-W u ≡ overline-W v) → PathP (λ i → p i → V∞ {ℓ}) (tilde-W u) (tilde-W v) → u ≡fib∞ v
             -- f-helper u v p q = JDep (λ v' p' l q' → {!(z : V∞ {ℓ}) → (fiber (tilde-W u) z ≃ fiber l z)!}) (λ z → pathToEquiv (refl {x = fiber u z})) p q
 
-            postulate f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞ v
-            -- f u v (p , q) z = isoToEquiv isom
-            --     where
-            --         postulate isom : Iso (fiber (tilde-W u) z) (fiber (tilde-W v) z)
-            --         -- isom .fun (au , _) .fst = transport p au
-            --         -- isom .fun (au , su) .snd = subst (_≡ z) (λ i → q i (transport-filler p au i)) su
-            --         -- isom .inv (av , sv) .fst = transport (sym p) av
-            --         -- isom .inv (av , sv) .snd = subst (_≡ z) (λ i → q (~ i) (transport-filler (sym p) av i)) sv
-            --         -- isom .rightInv (av , sv) = ΣPathP ((
-            --         --     transport p (transport (sym p) av) ≡⟨ sym (transportComposite (sym p) p av) ⟩
-            --         --     transport (sym p ∙ p) av ≡⟨ cong (flip transport av) (lCancel p) ⟩
-            --         --     transport refl av ≡⟨ transportRefl av ⟩
-            --         --     av ∎) , {!!})
-            --         -- -- basically same as rightInv
-            --         -- isom .leftInv = {!!}
+            f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞ v
+            f u v (p , q) z = isoToEquiv isom
+                where
+                    isom : Iso (fiber (tilde-W u) z) (fiber (tilde-W v) z)
+                    isom .fun (au , _) .fst = transport p au
+                    isom .fun (au , su) .snd = (λ i → q (~ i) (transport-filler p au (~ i))) ∙ su -- subst (_≡ z) (λ i → q i (transport-filler p au i)) su
+                    isom .inv (av , sv) .fst = transport⁻ p av
+                    isom .inv (av , sv) .snd = (λ i → q i (transport-filler (sym p) av (~ i))) ∙ sv -- subst (_≡ z) (λ i → q (~ i) (transport-filler (sym p) av i)) sv
+                    isom .rightInv (av , sv) = ΣPathP ((transportTransport⁻ p av
+                        -- transport p (transport (sym p) av) ≡⟨ sym (transportComposite (sym p) p av) ⟩
+                        -- transport (sym p ∙ p) av ≡⟨ cong (flip transport av) (lCancel p) ⟩
+                        -- transport refl av ≡⟨ transportRefl av ⟩ av ∎)
+                        , compPathL→PathP (
+                        sym (λ i → tilde-W v (transportTransport⁻ p av i)) ∙ fun isom (inv isom (av , sv)) .snd ∙ (λ i → z)
+                            ≡⟨ {!!} ⟩
+                        (sym (λ i → tilde-W v (transportTransport⁻ p av i)) ∙ fun isom (inv isom (av , sv)) .snd) ∙ (λ i → z)
+                            ≡⟨ sym (rUnit _) ⟩
+                        sym (λ i → tilde-W v (transportTransport⁻ p av i)) ∙ fun isom (inv isom (av , sv)) .snd
+                            ≡⟨⟩
+                        (λ i → tilde-W v (transportTransport⁻ p av (~ i))) ∙ (λ i → q (~ i) (transport-filler p (transport⁻ p av) (~ i))) ∙ (λ i → q i (transport-filler (λ i₁ → p (~ i₁)) av (~ i))) ∙ sv
+                            ≡⟨ {!!} ⟩
+                        sv
+                            ∎)))
+                    -- basically same as rightInv
+                    isom .leftInv (au , su) = ΣPathP ((transport⁻Transport p au) , {!!})
             postulate g : (u v : V∞ {ℓ}) → u ≡fib∞ v → u ≡W v
             -- g u v F .fst = ua (isoToEquiv isom)
             --     where
@@ -128,12 +153,12 @@ module _ where
             postulate sec : (u v : V∞ {ℓ}) → section (f u v) (g u v)
             postulate ret : (u v : V∞ {ℓ}) → retract (f u v) (g u v)
 
-    ≡W≃≡fib∞' : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡W y) ≃ (x ≡fib∞ y)
-    ≡W≃≡fib∞' {ℓ = ℓ} {x = x} {y = y} = isoToEquiv (iso (f x y) (g x y) {!!} {!!})
-        where
-            -- actually ℓ should rather be ℓ', but here it doesn't really matter
-            f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞ v
-            f (sup-W _ α) _ (p , q) z = JDep (λ _ _ β' _ → (fiber α z ≃ fiber β' z)) (idEquiv (fiber α z)) p q
+    -- ≡W≃≡fib∞' : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡W y) ≃ (x ≡fib∞ y)
+    -- ≡W≃≡fib∞' {ℓ = ℓ} {x = x} {y = y} = isoToEquiv (iso (f x y) (g x y) {!!} {!!})
+    --     where
+    --         -- actually ℓ should rather be ℓ', but here it doesn't really matter
+    --         f : (u v : V∞ {ℓ}) → u ≡W v → u ≡fib∞ v
+    --         f (sup-W _ α) _ (p , q) z = JDep (λ _ _ β' _ → (fiber α z ≃ fiber β' z)) (idEquiv (fiber α z)) p q
 
-            g : (u v : V∞ {ℓ}) → u ≡fib∞ v → u ≡W v
-            g (sup-W x α) (sup-W y β) F = EquivJ (λ A e → {!!}) {!!} (F (sup-W x α))
+    --         g : (u v : V∞ {ℓ}) → u ≡fib∞ v → u ≡W v
+    --         g (sup-W x α) (sup-W y β) F = EquivJ (λ A e → {!!}) {!!} (F (sup-W x α))
