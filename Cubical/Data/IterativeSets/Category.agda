@@ -29,6 +29,7 @@ open import Cubical.Data.IterativeSets.Unit
 open import Cubical.Data.IterativeSets.Sum
 open import Cubical.Data.IterativeSets.Sigma
 open import Cubical.Data.IterativeSets.Fiber
+open import Cubical.Data.IterativeSets.Identity
 
 V : {ℓ : Level} → Category (ℓ-suc ℓ) ℓ
 V {ℓ} .Category.ob = V⁰ {ℓ}
@@ -115,8 +116,6 @@ private
         ×-PathP i .fst = P i
         ×-PathP i .snd = Q i
         
-        
-
 pullback-V : {ℓ : Level} → Pullbacks (V {ℓ})
 pullback-V (cospan l m r s₁ s₂) .Pullback.pbOb = Σ⁰ m (λ a → fiber⁰ {x = l} {y = m} s₁ a ×⁰ fiber⁰ {x = r} {y = m} s₂ a)
 pullback-V (cospan l m r s₁ s₂) .Pullback.pbPr₁ = fst ∘ fst ∘ snd
@@ -133,6 +132,19 @@ pullback-V {ℓ} (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .snd E = 
     where
         helper' : (x : El⁰ d) → Σ[ p ∈ s₁ (h x) ≡ E .fst x .fst ] PathP (λ i → (fiber s₁ (p i) × fiber s₂ (p i))) ((h x , refl) , (k x , funExt⁻ (sym H) x)) (E .fst x .snd)
         helper' x .fst = cong s₁ (funExt⁻ (E .snd .fst) x) ∙ E .fst x .snd .fst .snd
-        helper' x .snd = ×-PathP {!!} {!!}
+        helper' x .snd = ×-PathP (ΣPathPProp (λ a → thm17 m (s₁ a) (E .fst x .fst)) (funExt⁻ (E .snd .fst) x)) (ΣPathPProp (λ a → thm17 m (s₂ a) (E .fst x .fst)) (funExt⁻ (E .snd .snd) x))
         
+-- pullback-V' : {ℓ : Level} → Pullbacks (V {ℓ})
+-- pullback-V' (cospan l m r s₁ s₂) .Pullback.pbOb = Σ⁰ r λ xᵣ → Σ⁰ l (λ xₗ → Id⁰ m (s₁ xₗ) (s₂ xᵣ))
+-- pullback-V' (cospan l m r s₁ s₂) .Pullback.pbPr₁ = fst ∘ snd
+-- pullback-V' (cospan l m r s₁ s₂) .Pullback.pbPr₂ = fst
+-- pullback-V' (cospan l m r s₁ s₂) .Pullback.pbCommutes = funExt (snd ∘ snd)
+-- pullback-V' (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .fst x = (k x) , ((h x) , (funExt⁻ H x))
+-- pullback-V' (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .snd .fst = refl
+-- pullback-V' (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .snd .snd = refl
+-- pullback-V' {ℓ} (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (thm17 l) h _) (isSet→ (thm17 r) k _)) (funExt helper')
+--     where
+--         helper' : (x : El⁰ {ℓ} d) → pullback-V' {ℓ} (cospan l m r s₁ s₂) .Pullback.univProp h k H .fst .fst x ≡ E .fst x
+--         helper' x = ΣPathP (funExt⁻ (E .snd .snd) x , ΣPathPProp (λ a → thm17 m (s₁ a) (s₂ (E .fst x .fst))) (funExt⁻ (E .snd .fst) x))
+
 -- pushout 
