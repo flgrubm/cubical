@@ -9,6 +9,7 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation
 open import Cubical.Categories.Presheaf
 open import Cubical.Categories.Constructions.Elements
+open import Cubical.Categories.Functor
 
 private
   variable
@@ -36,3 +37,7 @@ record CwF (C : Category ℓ ℓ') (ℓS : Level) : Type (ℓ-suc (ℓ-max (ℓ-
     tyPresheaf : Presheaf C ℓS -- (ℓ-max ℓ ℓ')
     -- ∫_ : ∀ {ℓS} → Functor C (SET ℓS) → Category (ℓ-max ℓ ℓS) (ℓ-max ℓ' ℓS)
     tmPresheaf : Presheaf (Covariant.∫ tyPresheaf) ℓS
+
+    ctxExt : Functor (Covariant.∫ tyPresheaf) C
+
+    -- TODO: natural equivalence
