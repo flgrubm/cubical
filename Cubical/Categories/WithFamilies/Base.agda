@@ -11,9 +11,10 @@ open import Cubical.Categories.Presheaf
 open import Cubical.Categories.Functor
 
 import Cubical.Categories.Constructions.Elements as Els -- renaming (Covariant.∫ to ∫)
-open Els.Covariant
+open Els.Contravariant
 
 open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Transport
 -- open import Cubical.Categories.NaturalTransformation
 
 private
@@ -45,27 +46,51 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
         tyPresheaf : Presheaf C ℓTy
 
     ∫Ty : Category (ℓ-max ℓ ℓTy) (ℓ-max ℓ' ℓTy)
-    ∫Ty = ∫ tyPresheaf
+    ∫Ty = ∫ᴾ tyPresheaf
 
     Ty : Ctx → Type ℓTy
     Ty Γ = (tyPresheaf ⟅ Γ ⟆) .fst
 
-    _∙Ty_ : {Δ Γ : Ctx} (A : Ty Γ) (γ : Subst Δ Γ) → Ty Δ
-    A ∙Ty γ = A ∘ᴾ⟨ C , tyPresheaf ⟩ γ
+    _∘Ty_ : {Δ Γ : Ctx} (a : Ty Γ) (γ : Subst Δ Γ) → Ty Δ
+    a ∘Ty γ = a ∘ᴾ⟨ C , tyPresheaf ⟩ γ
 
     field
-        tmPresheaf : Presheaf (∫ tyPresheaf) ℓTm
+        tmPresheaf : Presheaf ∫Ty ℓTm
 
     Tm : (Γ : Ctx) → Ty Γ → Type ℓTm
-    Tm Γ A = (tmPresheaf ⟅ Γ , A ⟆) .fst
+    Tm Γ a = (tmPresheaf ⟅ Γ , a ⟆) .fst
 
-    _[_] : {Δ Γ : Ctx} {A : Ty Γ} (M : Tm Γ A) (γ : Subst Δ Γ) → Tm Δ (A ∙Ty γ)
-    _[_] {Δ} {Γ} {A} M γ = M ∘ᴾ⟨ (∫ tyPresheaf) , tmPresheaf ⟩ {!!} , {!!} -- ({!γ!} , {!!})
+    _[_] : {Δ Γ : Ctx} {a : Ty Γ} (M : Tm Γ a) (γ : Subst Δ Γ) → Tm Δ (a ∘Ty γ)
+    _[_] {Δ} {Γ} {a} M γ = M ∘ᴾ⟨ ∫Ty , tmPresheaf ⟩ (γ , refl)
 
+    field
+        ctxExtFunctor : Functor ∫Ty C
 
-    -- field
-    --     tmPresheaf : Presheaf (Covariant.∫ tyPresheaf) ℓS
+    ctxExt : (Γ : Ctx) (a : Ty Γ) → Ctx
+    ctxExt Γ a = ctxExtFunctor ⟅ Γ , a ⟆
 
-    --     ctxExt : Functor (Covariant.∫ tyPresheaf) C
+    ⟨_,_⟩ : {Δ Γ : Ctx} (γ : Subst Δ Γ) (a : Ty Γ) → Subst (ctxExt Δ (a ∘Ty γ)) (ctxExt Γ a)
+    ⟨_,_⟩ γ _ = ctxExtFunctor ⟪ γ , refl ⟫
 
-    --     naturalEquiv : (Δ : C .ob) ((Γ , A) : (Covariant.∫ tyPresheaf) .ob) → Hom[ C , Δ ] (ctxExt .F-ob (Γ , A)) ≃ (Σ[ γ ∈ (Hom[ C , Δ ] Γ) ] tmPresheaf .F-ob (Δ , {!γ A!}) .fst)
+    field
+        ctxExtEquiv : (Δ Γ : Ctx) (a : Ty Γ) → Subst Δ (ctxExt Γ a) ≃ (Σ[ γ ∈ Subst Δ Γ ] Tm Δ (a ∘Ty γ))
+
+    ctxExtSubst : {Δ Γ : Ctx} (a : Ty Γ) (γ : Subst Δ Γ) → Tm Δ (a ∘Ty γ) → Subst Δ (ctxExt Γ a)
+    ctxExtSubst {Δ} {Γ} a γ M = invEq (ctxExtEquiv Δ Γ a) (γ , M)
+
+    wk : {Γ : Ctx} (a : Ty Γ) → Subst (ctxExt Γ a) Γ
+    wk {Γ} a = (ctxExtEquiv (ctxExt Γ a) Γ a .fst) IdSubst .fst
+
+    q : {Γ : Ctx} (a : Ty Γ) → Tm (ctxExt Γ a) (a ∘Ty (wk a))
+    q {Γ} a = (ctxExtEquiv (ctxExt Γ a) Γ a .fst) IdSubst .snd
+
+    ctxExtSubst-n : {Γ : Ctx} (a : Ty Γ) → ctxExtSubst a (wk a) (q a) ≡ IdSubst
+    ctxExtSubst-n {Γ} a = retEq (ctxExtEquiv (ctxExt Γ a) Γ a) IdSubst
+
+    field
+        ctxExtEquivNat :
+            (Δ Δ' Γ : Ctx) (A : Ty Γ) (δ : Subst Δ' Δ) →
+            (γ : Subst Δ (ctxExt Γ A)) →
+            (ctxExtEquiv Δ' Γ A .fst (C ._⋆_ δ γ)) ≡
+            (C ._⋆_ δ (ctxExtEquiv Δ Γ A .fst γ .fst) ,
+            subst⁻ (Tm Δ') (∘ᴾAssoc C tyPresheaf A _ δ) ((ctxExtEquiv Δ Γ A .fst γ .snd) [ δ ]))
