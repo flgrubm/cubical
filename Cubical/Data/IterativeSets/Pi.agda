@@ -1,4 +1,6 @@
 {-# OPTIONS --lossy-unification #-}
+{-# OPTIONS --allow-unsolved-metas #-}
+
 
 module Cubical.Data.IterativeSets.Pi where
 
