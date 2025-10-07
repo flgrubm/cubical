@@ -24,6 +24,8 @@ private
 open Category
 open Functor
 
+-- TODO: try to use more PathP
+
 -- check universe levels
 record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-max (ℓ-max (ℓ-max ℓ ℓ') ℓTy) ℓTm)) where
 
@@ -88,9 +90,10 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
     ctxExtSubst-n {Γ} a = retEq (ctxExtEquiv (ctxExt Γ a) Γ a) IdSubst
 
     field
+        -- as PathP
         ctxExtEquivNat :
             (Δ Δ' Γ : Ctx) (A : Ty Γ) (δ : Subst Δ' Δ) →
             (γ : Subst Δ (ctxExt Γ A)) →
-            (ctxExtEquiv Δ' Γ A .fst (C ._⋆_ δ γ)) ≡
-            (C ._⋆_ δ (ctxExtEquiv Δ Γ A .fst γ .fst) ,
+            (ctxExtEquiv Δ' Γ A .fst (δ ⋆⟨ C ⟩ γ)) ≡
+            (δ ⋆⟨ C ⟩ (ctxExtEquiv Δ Γ A .fst γ .fst) ,
             subst⁻ (Tm Δ') (∘ᴾAssoc C tyPresheaf A _ δ) ((ctxExtEquiv Δ Γ A .fst γ .snd) [ δ ]))
