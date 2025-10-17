@@ -80,10 +80,29 @@ V-CwF .tmPresheaf .F-seq f g = {!!} -- funExt (λ x → cong lift (funExt (λ y 
 
 V-CwF .ctxExtFunctor .F-ob X = Σ⁰ (X .fst) (X .snd)
 V-CwF .ctxExtFunctor .F-hom {x} {y} f t .fst = f .fst (t .fst)
-V-CwF .ctxExtFunctor .F-hom {x} {y} f t .snd = transport (cong El⁰ (sym (funExt⁻ (f .snd) (t .fst)))) (t .snd)
--- V-CwF .ctxExtFunctor .F-hom f x .snd = transport (cong El⁰ (funExt⁻ (sym (f .snd)) (x .fst))) (x .snd)
+V-CwF .ctxExtFunctor .F-hom {x} {y} f t .snd = subst⁻ El⁰ (funExt⁻ (f .snd) (t .fst)) (t .snd)
 V-CwF .ctxExtFunctor .F-id = funExt (λ x → ΣPathP (refl , (transportRefl (x .snd))))
-V-CwF {ℓ} .ctxExtFunctor .F-seq {x} {y} {z} (f , p) (g , q) = funExt (λ t → {!? ∙ transportComposite (cong El⁰ (funExt⁻ (sym p) (t .fst))) (cong El⁰ (funExt⁻ (sym q) (f (t .fst)))) (t .snd)!})
+V-CwF .ctxExtFunctor .F-seq {x} {y} {z} f g = funExt (λ t → ΣPathP (refl ,
+    let 
+        C = ∫ᴾ V-CwF .tyPresheaf
+
+        p : Path V⁰ (x .snd (t .fst)) (z .snd (g .fst (f .fst (t .fst))))
+        p i = seq' C {x} {y} {z} f g .snd (~ i) (t .fst)
+
+        q : Path V⁰ (y .snd (f .fst (t .fst))) (z .snd (g .fst (f .fst (t .fst))))
+        q i = g .snd (~ i) (f .fst (t .fst))
+
+        r : Path V⁰ (x .snd (t .fst)) (y .snd (f .fst (t .fst)))
+        r i = f .snd (~ i) (t .fst)
+
+        p≡r∙q : p ≡ r ∙ q
+        p≡r∙q = thm12 _ _ p (r ∙ q)
+
+        goal : subst El⁰ p (t .snd) ≡ subst El⁰ q (subst El⁰ r (t .snd))
+        goal = cong (λ a → subst El⁰ a (t .snd)) p≡r∙q ∙ substComposite El⁰ r q (t .snd)
+    in goal))
+
+--  funExt (λ t → ΣPathP (refl ,  {- cong {x = (funExt⁻ (((∫ᴾ V-CwF .tyPresheaf) ⋆ f) g .snd) (t .fst))} {y = {!!}} (λ p → subst⁻ El⁰ p (t .snd)) {!!}-} congP (λ p → {!transport p (t .snd)!}) {!!} ∙ transportComposite (cong El⁰ (funExt⁻ (sym (f .snd)) (t .fst))) (cong El⁰ (funExt⁻ (sym (g .snd)) (f .fst (t .fst)))) (t .snd)))
 -- funExt (λ t → ΣPathP (refl , (
     -- (V-CwF .ctxExtFunctor .F-hom (f ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ g) t) .snd
     --     ≡⟨⟩
@@ -93,22 +112,22 @@ V-CwF {ℓ} .ctxExtFunctor .F-seq {x} {y} {z} (f , p) (g , q) = funExt (λ t →
     --     ∎)))
 -- this one works somewhat: -- cong (λ r → transport (cong El⁰ r) (t .snd)) (thm12 (x .snd (t .fst)) (z .snd (g (f (t .fst)))) (funExt⁻ (sym (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd)) (t .fst)) (funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst)))) ∙ cong (λ r → transport r (t .snd)) (cong∙ El⁰) ∙ transportComposite (cong El⁰ (funExt⁻ (sym p) (t .fst))) (cong El⁰ (funExt⁻ (sym q) (f (t .fst)))) (t .snd)))
 -- tt {!!} {!!} {!!} a ∙ transportComposite (cong El⁰ (funExt⁻ (sym p) t)) (cong El⁰ (funExt⁻ (sym q) (f t))) a))
-    where
-        pathsEqual : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → funExt⁻ (sym (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd)) (t .fst) ≡ funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst))
-        pathsEqual t = thm12 (x .snd (t .fst)) (z .snd (g (f (t .fst)))) (funExt⁻ (sym (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd)) (t .fst)) (funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst)))
+    -- where
+    --     pathsEqual : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → funExt⁻ (sym (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd)) (t .fst) ≡ funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst))
+    --     pathsEqual t = thm12 (x .snd (t .fst)) (z .snd (g (f (t .fst)))) (funExt⁻ (sym (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd)) (t .fst)) (funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst)))
         
-        ll : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → transport (cong El⁰ (funExt⁻ (sym (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd)) (t .fst))) (t .snd) ≡ transport (cong El⁰ (funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst)))) (t .snd)
-        ll t = cong (λ r → transport (cong El⁰ r) (t .snd)) (pathsEqual t)
+    --     ll : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → transport (cong El⁰ (funExt⁻ (sym (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd)) (t .fst))) (t .snd) ≡ transport (cong El⁰ (funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst)))) (t .snd)
+    --     ll t = cong (λ r → transport (cong El⁰ r) (t .snd)) (pathsEqual t)
 
-        mm : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → transport (cong El⁰ (funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst)))) (t .snd) ≡ transport (cong El⁰ (funExt⁻ (sym p) (t .fst)) ∙ cong El⁰ (funExt⁻ (sym q) (f (t .fst)))) (t .snd)
-        mm t = cong (λ r → transport r (t .snd)) (cong∙ El⁰)
+    --     mm : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → transport (cong El⁰ (funExt⁻ (sym p) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst)))) (t .snd) ≡ transport (cong El⁰ (funExt⁻ (sym p) (t .fst)) ∙ cong El⁰ (funExt⁻ (sym q) (f (t .fst)))) (t .snd)
+    --     mm t = cong (λ r → transport r (t .snd)) (cong∙ El⁰)
         
-        rr : (t : Σ[ a ∈ El⁰ (x .fst)] El⁰ (x .snd a)) → transport (cong El⁰ (funExt⁻ (sym p) (t .fst)) ∙ (cong El⁰ (funExt⁻ (sym q) (f (t .fst))))) (t .snd) ≡ transport (cong El⁰ (funExt⁻ (sym q) (f (t .fst)))) (transport (cong El⁰ (funExt⁻ (sym p) (t .fst))) (t .snd))
-        rr t = transportComposite (cong El⁰ (funExt⁻ (sym p) (t .fst))) (cong El⁰ (funExt⁻ (sym q) (f (t .fst)))) (t .snd)
+    --     rr : (t : Σ[ a ∈ El⁰ (x .fst)] El⁰ (x .snd a)) → transport (cong El⁰ (funExt⁻ (sym p) (t .fst)) ∙ (cong El⁰ (funExt⁻ (sym q) (f (t .fst))))) (t .snd) ≡ transport (cong El⁰ (funExt⁻ (sym q) (f (t .fst)))) (transport (cong El⁰ (funExt⁻ (sym p) (t .fst))) (t .snd))
+    --     rr t = transportComposite (cong El⁰ (funExt⁻ (sym p) (t .fst))) (cong El⁰ (funExt⁻ (sym q) (f (t .fst)))) (t .snd)
 
-        hh : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → transport (cong El⁰ (funExt⁻ (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd) (t .fst))) (t .snd) ≡ transport (cong El⁰ {!funExt⁻ (sym q) (f (t .fst))!}) (transport (cong El⁰ (funExt⁻ (sym p) (t .fst))) (t .snd))
-        -- hh : (t
-        hh t = {!? ∙ (rr t)!}
+    --     hh : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → transport (cong El⁰ (funExt⁻ (((f , p) ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd) (t .fst))) (t .snd) ≡ transport (cong El⁰ {!funExt⁻ (sym q) (f (t .fst))!}) (transport (cong El⁰ (funExt⁻ (sym p) (t .fst))) (t .snd))
+    --     -- hh : (t
+    --     hh t = {!? ∙ (rr t)!}
         -- attempt at avoiding pattern matching
         -- rnr : (t : Σ[ a ∈ El⁰ (x .fst) ] El⁰ (x .snd a)) → funExt⁻ (sym ((f ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ g) .snd)) (t .fst) ≡ funExt⁻ (sym (f .snd)) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst))
         -- rnr t = thm12 (x .snd (t .fst)) (z .snd (g (f (t .fst)))) (funExt⁻ (sym ((f ⋆⟨ ∫ᴾ V-CwF .tyPresheaf ⟩ (g , q)) .snd)) (t .fst)) (funExt⁻ (sym (f .snd)) (t .fst) ∙ funExt⁻ (sym q) (f (t .fst)))
