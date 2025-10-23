@@ -11,6 +11,7 @@ open import Cubical.Functions.Embedding
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.Relation.Nullary using (¬_)
+open import Cubical.Foundations.GroupoidLaws
 
 -- TODO: remove ⊥*-elim, Data.Unit, Data.Bool Data.SumFin once the statements that need them have found their way to a better place
 open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
@@ -46,6 +47,9 @@ tilde-0 = tilde-∞ ∘ fst
 
 -- TODO: refactor so that everything that uses tilde-0 now uses tilde-0' instead; afterwards change name to tilde-0 or tilde⁰ (depending on whether the above todo is implemented)
 tilde-0' : (x : V⁰ {ℓ}) → overline-0 x → V⁰ {ℓ}
+-- the following doesn't work because seemingly `isIterativeSet` cannot be destructured
+-- tilde-0' x a .fst = tilde-∞ (x .fst) a
+-- tilde-0' x a .snd = {!x .snd .snd a!}
 tilde-0' (sup-∞ _ f , _) a .fst = f a
 tilde-0' (sup-∞ _ _ , isitset) a .snd = isitset .snd a
 
@@ -227,9 +231,26 @@ Bool*≢Unit* : ¬ (Bool* {ℓ} ≡ Unit* {ℓ})
 Bool*≢Unit* p = false*≢true* (≡-to-isProp→isProp p isPropUnit* false* true*)
 
 -- probably also move to some better place in the library
-
 module _ {ℓ ℓ' ℓ'' : Level} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''} (setX : isSet X) (x₀ : X) (f : (X × Y) → Z) (embf : isEmbedding f) where
-    postulate lem26 : isEmbedding (curry f x₀)
+    f-x₀ : Y → Z
+    f-x₀ = curry f x₀
+
+    lem26 : isEmbedding f-x₀
+    lem26 = hasPropFibers→isEmbedding (λ z → isPropRetract (g z) (h z) (ret z) (isPropΣ (isEmbedding→hasPropFibers embf z) λ s → setX (s .fst .fst) x₀))
+        where
+            g : (z : Z) → (fiber f-x₀ z) → (Σ[ s ∈ fiber f z ] (s .fst .fst) ≡ x₀)
+            g z _ .fst .fst .fst = x₀
+            g z fib .fst .fst .snd = fib .fst
+            g z fib .fst .snd = fib .snd
+            g z _ .snd = refl
+
+            h : (z : Z) → (Σ[ s ∈ fiber f z ] (s .fst .fst) ≡ x₀) → (fiber f-x₀ z)
+            -- h z (((x , y) , q) , p) .fst = y
+            h z s .fst = s .fst .fst .snd
+            h z s .snd = cong (λ x' → f (x' , (s .fst .fst .snd))) (sym (s .snd)) ∙ (s .fst .snd)
+
+            ret : (z : Z) → retract (g z) (h z)
+            ret z fib = cong (fib .fst ,_) (sym (lUnit _))
 
 private
     module _ {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} (f : A → B) where
