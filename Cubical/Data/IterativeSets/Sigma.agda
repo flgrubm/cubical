@@ -139,11 +139,6 @@ private
 --       isEmbedding-× setB setC embf = injEmbedding (isSet× setB setC) λ {x} {y} p → isEmbedding→Inj embf x y (cong fst p)
 
 
--- TODO: rename and add to library
-subst-filler-whisk : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} {a a' : A} {b : B a} {b' : B a'} (p : a ≡ a') → subst B p b ≡ b' → PathP (λ i → B (p i)) b b'
-subst-filler-whisk {B = B} {b = b} p q = (subst-filler B p b) ▷ q
-
-
 module _ {ℓA ℓA' ℓB ℓB' : Level} {A : Type ℓA} {B : A → Type ℓB} {A' : Type ℓA'} {B' : A' → Type ℓB'} (f : A → A') (g : (a : A) → B a → B' (f a)) where
     Σfun : Σ A B → Σ A' B'
     Σfun (a , _) .fst = f a
@@ -176,7 +171,7 @@ module _ {ℓA ℓA' ℓB ℓB' : Level} {A : Type ℓA} {B : A → Type ℓB} {
             P = isEmbedding→Inj (embg a') (subst B q₁ b) b' Pg₂
 
             q₂ : PathP (λ i → B (q₁ i)) b b'
-            q₂ = subst-filler-whisk q₁ P
+            q₂ = toPathP P
 
     Emb-Σfun : isSet (Σ A' B') → isEmbedding f → ((a : A) → isEmbedding (g a)) → isEmbedding Σfun
     Emb-Σfun setΣ embf embg = injEmbedding setΣ (Inj-Σfun embf embg)
