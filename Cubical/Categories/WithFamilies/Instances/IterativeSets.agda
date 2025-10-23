@@ -1,9 +1,8 @@
-module Cubical.Categories.WithFamilies.Instances.IterativeSets where
+{-# OPTIONS --lossy-unification #-}
 
 open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 
-open import Cubical.Categories.WithFamilies.Base
 open import Cubical.Categories.Functor.Base
 open import Cubical.Foundations.HLevels
 open import Cubical.Categories.Category.Base
@@ -16,12 +15,14 @@ open import Cubical.Foundations.Transport
 open import Cubical.Data.Sigma
 open import Cubical.Functions.FunExtEquiv
 open import Cubical.Foundations.HLevels
-
+open import Cubical.Foundations.Path
 
 open import Cubical.Data.IterativeSets.Base
 open import Cubical.Data.IterativeSets.Pi
 open import Cubical.Data.IterativeSets.Sigma
 open import Cubical.Categories.Instances.IterativeSets
+open import Cubical.Categories.WithFamilies.Base
+open import Cubical.Categories.WithFamilies.Structure.Pi
 
 open import Cubical.Categories.Presheaf
 open import Cubical.Categories.Functor
@@ -32,6 +33,8 @@ open Els.Contravariant
 open Category
 open CwF
 open Functor
+module Cubical.Categories.WithFamilies.Instances.IterativeSets where
+
 
 V-CwF : {ℓ : Level} → CwF (V {ℓ}) (ℓ-suc ℓ) (ℓ-suc ℓ)
 
@@ -103,13 +106,33 @@ V-CwF .ctxExtEquiv Γ Δ a = isoToEquiv isom
     where
         isom : Iso _ _
         isom .Iso.fun f = (λ x → fst (f x)) , lift (λ x → snd (f x))
-        -- the following doesn't work for some reason
-        -- isom .Iso.fun f .fst = (λ x → fst (f x))
-        -- isom .Iso.fun f .snd = lift (λ x → snd (f x))
-        isom .Iso.inv (f , g) A .fst = f A
-        isom .Iso.inv (f , g) A .snd = g .lower A
-        isom .Iso.rightInv (f , g) = refl
-        isom .Iso.leftInv f = refl
+        isom .Iso.inv f A .fst = f .fst A
+        isom .Iso.inv f A .snd = f .snd .lower A
+        isom .Iso.rightInv _ = refl
+        isom .Iso.leftInv _ = refl
 
-V-CwF .ctxExtEquivNat Δ Δ' Γ A δ γ = ΣPathP (refl , {!!})
--- subst⁻ (λ a → Lift ((x : El⁰ Δ') → El⁰ (a x))) (∘ᴾAssoc V (V-CwF .tyPresheaf) A (λ x → fst (γ x)) δ) (action (∫ᴾ V-CwF .tyPresheaf) (V-CwF .tmPresheaf) (δ , refl) (lift (λ x → snd (γ x))))
+V-CwF {ℓ} .ctxExtEquivNat Δ Δ' Γ A δ γ = ΣPathP (refl , cong lift (funExt (λ x → sym
+    let
+        p : ∘ᴾAssoc V (V-CwF .tyPresheaf) A (λ x₁ → fst (γ x₁)) δ ≡ λ i x → A (fst (γ (δ x)))
+        p = refl
+
+        rem : transport (λ i → El⁰ (A (fst (γ (δ (transp (λ j → El⁰ Δ') i x))))))
+                         ((V-CwF .tmPresheaf) .F-hom (δ , refl) (lift (λ x₁ → snd (γ x₁))) .lower (transp (λ j → El⁰ Δ') i0 x))
+            ≡ transport (λ i → El⁰ (A (fst (γ (δ x)))))
+                         ((V-CwF .tmPresheaf) .F-hom (δ , refl) (lift (λ x₁ → snd (γ x₁))) .lower x)
+        rem k = (transport (λ i → El⁰ (A (fst (γ (δ (transp (λ j → El⁰ Δ') (i ∨ k) x))))))
+                         ((V-CwF .tmPresheaf) .F-hom {Δ , λ z → (A (γ z .fst))} (δ , refl) (lift (λ x₁ → snd (γ x₁))) .lower (transp (λ j → El⁰ Δ') k x)) )
+
+ 
+        goal : transport (λ i → El⁰ (A (fst (γ (δ (transp (λ j → El⁰ Δ') i x))))))
+                         ((V-CwF .tmPresheaf) .F-hom (δ , refl) (lift (λ x₁ → snd (γ x₁))) .lower (transport refl x))
+                ≡ snd (γ (δ x))
+        goal = (rem ∙ transportRefl _ ∙ transportRefl _)
+    in goal)))
+
+V-CwF .ctxExtEquivNat₁ _ _ _ _ _ _ = refl
+
+-- V-Π-Structure : {ℓ : Level} → Π-Structure-CwF (V-CwF {ℓ})
+-- V-Π-Structure .Π-Structure-CwF.Π {Γ} A B x = Π⁰ (A x) (λ a → B (x , a))
+-- V-Π-Structure .Π-Structure-CwF.Π-natural A B σ = funExt (λ x → cong sup⁰ (cong (λ s → s , graph⁰) {!!})) -- funExt (λ x → {!!})
+-- V-Π-Structure .Π-Structure-CwF.iso-Π = {!!}
