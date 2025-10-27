@@ -98,7 +98,7 @@ thm3-help3 {C = C} f g p = q ∙∙ r ∙∙ s
         q = cong (λ t → (transport (λ i → p i → C) f ≡ g ∘ t)) (funExt (λ x → sym (transportRefl x)))
 
         r : (transport (λ i → p i → C) f ≡ g ∘ (transport refl)) ≡ (transport refl f ≡ g ∘ (transport p))
-        r = (λ i → transport (λ j → p (j ∧ (~ i)) → C) f ≡ g ∘ (transport λ j → p (j ∨ ~ i)))
+        r i = transport (λ j → p (j ∧ (~ i)) → C) f ≡ g ∘ (transport λ j → p (j ∨ ~ i))
 
         s : (transport refl f ≡ g ∘ (transport p)) ≡ (f ≡ g ∘ (transport p))
         s = cong (λ t → t ≡ g ∘ transport p) (transportRefl f)
@@ -108,6 +108,53 @@ thm3' {ℓ} {x} {y} = compEquiv thm3-help2 (pathToEquiv (Σ-cong-snd (λ p → t
 
 thm3 : (x ≡ y) ≃ (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ≡ (tilde-∞ y ∘ e .fst))
 thm3 = compEquiv thm3' (Σ-cong-equiv-fst univalence)
+
+-- thm4-help1 : {ℓ : Level} {x y : V∞ {ℓ}} → Path (Σ[ A ∈ Type ℓ ] (A → V∞ {ℓ})) (overline-∞ x , tilde-∞ x) (overline-∞ y , tilde-∞ y) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≡ fiber (tilde-∞ y) z)
+-- thm4-help1 {ℓ} {x} {y} = isoToEquiv isom
+--     where
+--         isom : Iso
+--                 (Path (Σ[ A ∈ Type ℓ ] (A → V∞ {ℓ})) (overline-∞ x , tilde-∞ x) (overline-∞ y , tilde-∞ y))
+--                 ((z : V∞) → fiber (tilde-∞ x) z ≡ fiber (tilde-∞ y) z)
+--         isom .Iso.fun p z i = Σ[ a ∈ PathPΣ p .fst i ] PathPΣ p .snd i a ≡ z
+--         isom .Iso.inv H = ΣPathP (record {
+--             fst = ua (isoToEquiv iso1);
+--             snd = {!!}})
+--                 where
+--                     iso1 : Iso (overline-∞ x) (overline-∞ y)
+--                     iso1 .Iso.fun a = transport (H (tilde-∞ x a)) (a , refl) .fst
+--                     iso1 .Iso.inv a = transport⁻ (H (tilde-∞ y a)) (a , refl) .fst
+--                     iso1 .Iso.rightInv a = {!!}
+--                     iso1 .Iso.leftInv = {!!}
+--         isom .Iso.rightInv = {!!}
+--         isom .Iso.leftInv = {!!}
+-- thm4-help1 : {ℓ : Level} {x y : V∞ {ℓ}} → Path (Σ[ A ∈ Type ℓ ] (A → V∞ {ℓ})) (overline-∞ x , tilde-∞ x) (overline-∞ y , tilde-∞ y) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z)
+-- thm4-help1 {ℓ} {x} {y} = isoToEquiv isom
+--     where
+--         isom : Iso
+--                 (Path (Σ[ A ∈ Type ℓ ] (A → V∞ {ℓ})) (overline-∞ x , tilde-∞ x) (overline-∞ y , tilde-∞ y))
+--                 ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z)
+--         isom .Iso.fun p z = isoToEquiv isoFun
+--             where
+--                 isoFun : Iso (fiber (tilde-∞ x) z) (fiber (tilde-∞ y) z)
+--                 isoFun .Iso.fun fib .fst = transport (PathPΣ p .fst) (fib .fst)
+--                 isoFun .Iso.fun fib .snd = {!!}
+--                 isoFun .Iso.inv = {!!}
+--                 isoFun .Iso.rightInv = {!!}
+--                 isoFun .Iso.leftInv = {!!}
+--         isom .Iso.inv = {!!}
+--         isom .Iso.rightInv = {!!}
+--         isom .Iso.leftInv = {!!}
+        
+thm4-help2 : {ℓ : Level} {x y : V∞ {ℓ}} → (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ≡ (tilde-∞ y ∘ e .fst)) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z)
+thm4-help2 {ℓ} {x} {y} = isoToEquiv isom
+    where
+        isom : Iso
+                (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] (tilde-∞ x ≡ tilde-∞ y ∘ e .fst))
+                ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z)
+        isom .Iso.fun s z = {!!}
+        isom .Iso.inv = {!!}
+        isom .Iso.rightInv = {!!}
+        isom .Iso.leftInv = {!!}
 
 postulate thm4 : ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z))
 
