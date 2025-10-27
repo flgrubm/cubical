@@ -109,9 +109,12 @@ isProp∈⁰ : {x z : V⁰ {ℓ}} → isProp (z ∈⁰ x)
 isProp∈⁰ {x = x} {z = z} = isEmbedding→hasPropFibers (isEmbedding-tilde-0 x) z
 
 sup⁰ : (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}) → V⁰ {ℓ}
-sup⁰ (A , f) .fst = sup-∞ A (compEmbedding cor11 f .fst) -- λ x → f .fst x .fst
-sup⁰ (A , f) .snd .fst = compEmbedding cor11 f .snd
-sup⁰ (A , f) .snd .snd y = f .fst y .snd
+-- sup⁰ (A , f) .fst = sup-∞ A (compEmbedding cor11 f .fst) -- λ x → f .fst x .fst
+-- sup⁰ (A , f) .snd .fst = compEmbedding cor11 f .snd
+-- sup⁰ (A , f) .snd .snd y = f .fst y .snd
+sup⁰ s .fst = sup-∞ (s .fst) (compEmbedding cor11 (s .snd) .fst) -- λ x → f .fst x .fst
+sup⁰ s .snd .fst = compEmbedding cor11 (s .snd) .snd
+sup⁰ s .snd .snd y = s .snd .fst y .snd
 
 desup⁰ : V⁰ {ℓ} → (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
 desup⁰ (sup-∞ A f , isitset) .fst = A
