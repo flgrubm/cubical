@@ -71,7 +71,43 @@ x ∈∞ y = fiber (tilde-∞ y) x
 ∈∞-irrefl : ¬ x ∈∞ x
 ∈∞-irrefl = ∈W-irrefl
 
-postulate thm3 : ((x ≡ y) ≃ (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ∼ (tilde-∞ y ∘ e .fst)))
+V∞≡sup : x ≡ sup-∞ (overline-∞ x) (tilde-∞ x)
+V∞≡sup {x = sup-∞ x α} = refl
+
+thm3-help1 : (x ≡ y) ≃ Path (Σ[ A ∈ Type ℓ ] (A → V∞ {ℓ})) (overline-∞ x , tilde-∞ x) (overline-∞ y , tilde-∞ y)
+thm3-help1 {ℓ} {x = sup-∞ x α} {y = sup-∞ y β} = isoToEquiv isom
+    where
+        isom : Iso (sup-∞ x α ≡ sup-∞ y β)
+                   (Path (Σ[ A ∈ Type ℓ ] (A → V∞)) (x , α) (y , β))
+        isom .Iso.fun = cong (λ s → overline-∞ s , tilde-∞ s)
+        isom .Iso.inv = cong (λ s → sup-∞ (s .fst) (s .snd))
+        isom .Iso.rightInv _ = refl
+        isom .Iso.leftInv p = cong (λ s → cong s p) (funExt (λ s → sym (V∞≡sup {x = s})))
+            -- cong (λ s → sup-∞ (overline-∞ s) (tilde-∞ s)) p
+            --     ≡⟨ cong (λ s → cong s p) (funExt (λ s → sym (V∞≡sup {x = s}))) ⟩
+            -- cong (λ s → s) p
+            --     ∎
+
+thm3-help2 : (x ≡ y) ≃ (Σ[ p ∈ overline-∞ x ≡ overline-∞ y ] transport (λ i → p i → V∞) (tilde-∞ x) ≡ tilde-∞ y)
+thm3-help2 = compEquiv thm3-help1 (invEquiv (ΣPathTransport≃PathΣ _ _))
+
+thm3-help3 : {ℓ ℓ' ℓ'' : Level} {A B : Type ℓ} {C : Type ℓ''} (f : A → C) (g : B → C) (p : A ≡ B) → (transport (λ i → p i → C) f ≡ g) ≡ (f ≡ g ∘ (transport p))
+thm3-help3 {C = C} f g p = q ∙∙ r ∙∙ s
+    where
+        q : (transport (λ i → p i → C) f ≡ g) ≡ (transport (λ i → p i → C) f ≡ g ∘ (transport refl))
+        q = cong (λ t → (transport (λ i → p i → C) f ≡ g ∘ t)) (funExt (λ x → sym (transportRefl x)))
+
+        r : (transport (λ i → p i → C) f ≡ g ∘ (transport refl)) ≡ (transport refl f ≡ g ∘ (transport p))
+        r = (λ i → transport (λ j → p (j ∧ (~ i)) → C) f ≡ g ∘ (transport λ j → p (j ∨ ~ i)))
+
+        s : (transport refl f ≡ g ∘ (transport p)) ≡ (f ≡ g ∘ (transport p))
+        s = cong (λ t → t ≡ g ∘ transport p) (transportRefl f)
+
+thm3' : {ℓ : Level} {x y : V∞ {ℓ}} → (x ≡ y) ≃ (Σ[ p ∈ overline-∞ x ≡ overline-∞ y ] (tilde-∞ x ≡ tilde-∞ y ∘ transport p))
+thm3' {ℓ} {x} {y} = compEquiv thm3-help2 (pathToEquiv (Σ-cong-snd (λ p → thm3-help3 {ℓ' = ℓ} (tilde-∞ x) (tilde-∞ y) p)))
+
+thm3 : (x ≡ y) ≃ (Σ[ e ∈ overline-∞ x ≃ overline-∞ y ] tilde-∞ x ≡ (tilde-∞ y ∘ e .fst))
+thm3 = compEquiv thm3' (Σ-cong-equiv-fst univalence)
 
 postulate thm4 : ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z))
 
