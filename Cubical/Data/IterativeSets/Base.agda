@@ -18,6 +18,7 @@ open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
 open import Cubical.Data.Unit
 open import Cubical.Data.Bool
 open import Cubical.Data.Sum renaming (rec to ⊎-rec)
+open import Cubical.Data.W.W
 
 open import Cubical.Data.IterativeMultisets.Base
 
@@ -29,17 +30,28 @@ private
 isIterativeSet : V∞ {ℓ} → Type (ℓ-suc ℓ)
 isIterativeSet (sup-∞ A f) = (isEmbedding f) × ((a : A) → isIterativeSet (f a))
 
+isIterativeSet' : V∞ {ℓ} → Type (ℓ-suc ℓ)
+isIterativeSet' = WInd _ _ _ (λ {A} {f} p → (isEmbedding f) × ((a : A) → p a))
+
 V⁰ : Type (ℓ-suc ℓ)
 V⁰ = Σ[ x ∈ V∞ ] isIterativeSet x
+
+V⁰' : Type (ℓ-suc ℓ)
+V⁰' = Σ[ x ∈ V∞ ] isIterativeSet' x
 
 private
   variable
     x y z : V⁰ {ℓ}
+    x' y' z' : V⁰' {ℓ}
 
 -- TODO: For the sake of consistency, I think it should be called overline⁰, similarly tilde⁰, or maybe even ⁻⁰, ̃⁰, idk
 overline-0 : V⁰ {ℓ} → Type ℓ
 -- overline-0 (sup-∞ A _ , _) = A
 overline-0 = overline-∞ ∘ fst
+
+overline-0' : V⁰' {ℓ} → Type ℓ
+overline-0' = overline-∞' ∘ fst
+
 
 tilde-0 : (x : V⁰ {ℓ}) → overline-0 x → V∞ {ℓ}
 -- tilde-0 (sup-∞ B f , p) = f
@@ -52,6 +64,13 @@ tilde-0' : (x : V⁰ {ℓ}) → overline-0 x → V⁰ {ℓ}
 -- tilde-0' x a .snd = {!x .snd .snd a!}
 tilde-0' (sup-∞ _ f , _) a .fst = f a
 tilde-0' (sup-∞ _ _ , isitset) a .snd = isitset .snd a
+
+-- for the same reason as above the following doesn't work
+-- tilde-0'' : (x : V⁰' {ℓ}) → overline-0' x → V⁰ {ℓ}
+-- tilde-0'' x a .fst = tilde-∞' (x .fst) a
+-- tilde-0'' x a .snd = {!x .snd .snd a!}
+-- tilde-0'' (x , _) a .fst = tilde-∞' x a
+-- tilde-0'' (_ , i) a .snd = {!i .snd a!}
 
 
 _∈⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → Type (ℓ-suc ℓ)
@@ -165,8 +184,8 @@ isProp-∈⁰-Equiv x y = isPropΠ λ z → isPropEquiv (isProp∈⁰ {x = x} {z
         g (a , p) .fst = a
         g (a , p) .snd = Σ≡Prop lem10 p
 
-thm4'-helper : {x y : V⁰ {ℓ}} → (((z : V∞ {ℓ}) → (z ∈∞ x .fst) ≃ (z ∈∞ y .fst)) ≃ ((z : V⁰ {ℓ}) → (z ∈⁰ x) ≃ (z ∈⁰ y)))
-thm4'-helper {x = sup-∞ x α , itsetx} {y = sup-∞ y β , itsety} = propBiimpl→Equiv (thm12-help2 (sup-∞ x α , itsetx) (sup-∞ y β , itsety)) (isProp-∈⁰-Equiv (sup-∞ x α , itsetx) (sup-∞ y β , itsety)) f g
+thm4⁰-helper : {x y : V⁰ {ℓ}} → (((z : V∞ {ℓ}) → (z ∈∞ x .fst) ≃ (z ∈∞ y .fst)) ≃ ((z : V⁰ {ℓ}) → (z ∈⁰ x) ≃ (z ∈⁰ y)))
+thm4⁰-helper {x = sup-∞ x α , itsetx} {y = sup-∞ y β , itsety} = propBiimpl→Equiv (thm12-help2 (sup-∞ x α , itsetx) (sup-∞ y β , itsety)) (isProp-∈⁰-Equiv (sup-∞ x α , itsetx) (sup-∞ y β , itsety)) f g
     where
        f : ((z : V∞) → (z ∈∞ sup-∞ x α) ≃ (z ∈∞ sup-∞ y β)) → (z : V⁰) → (z ∈⁰ (sup-∞ x α , itsetx)) ≃ (z ∈⁰ (sup-∞ y β , itsety))
        f fibEquiv z = compEquiv (compEquiv (∈⁰≃∈∞ {x = sup-∞ x α , itsetx} {z = z}) (fibEquiv (z .fst))) (invEquiv (∈⁰≃∈∞ {x = sup-∞ y β , itsety} {z = z}))
@@ -180,8 +199,8 @@ thm4'-helper {x = sup-∞ x α , itsetx} {y = sup-∞ y β , itsety} = propBiimp
                        z⁰ .fst = z
                        z⁰ .snd = transport (cong isIterativeSet p) (itsetu .snd a)
 
-thm4' : (x ≡ y) ≃ ((z : V⁰ {ℓ}) → (z ∈⁰ x) ≃ (z ∈⁰ y))
-thm4' {x = x} {y = y} = compEquiv cor11-1 (compEquiv thm4 (thm4'-helper {x = x} {y = y}))
+thm4⁰ : (x ≡ y) ≃ ((z : V⁰ {ℓ}) → (z ∈⁰ x) ≃ (z ∈⁰ y))
+thm4⁰ {x = x} {y = y} = compEquiv cor11-1 (compEquiv thm4 (thm4⁰-helper {x = x} {y = y}))
 
 -- move to better place
 ⊥*≢Unit* : ((⊥* {ℓ} :> Type ℓ) ≡ (Unit* {ℓ} :> Type ℓ)) → ⊥
