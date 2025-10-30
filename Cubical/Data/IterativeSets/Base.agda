@@ -18,7 +18,6 @@ open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
 open import Cubical.Data.Unit
 open import Cubical.Data.Bool
 open import Cubical.Data.Sum renaming (rec to ⊎-rec)
-open import Cubical.Data.W.W
 
 open import Cubical.Data.IterativeMultisets.Base
 
@@ -30,19 +29,12 @@ private
 isIterativeSet : V∞ {ℓ} → Type (ℓ-suc ℓ)
 isIterativeSet (sup-∞ A f) = (isEmbedding f) × ((a : A) → isIterativeSet (f a))
 
-isIterativeSet' : V∞ {ℓ} → Type (ℓ-suc ℓ)
-isIterativeSet' = WInd _ _ _ (λ {A} {f} p → (isEmbedding f) × ((a : A) → p a))
-
 V⁰ : Type (ℓ-suc ℓ)
 V⁰ = Σ[ x ∈ V∞ ] isIterativeSet x
-
-V⁰' : Type (ℓ-suc ℓ)
-V⁰' = Σ[ x ∈ V∞ ] isIterativeSet' x
 
 private
   variable
     x y z : V⁰ {ℓ}
-    x' y' z' : V⁰' {ℓ}
 
 -- TODO: For the sake of consistency, I think it should be called overline⁰, similarly tilde⁰, or maybe even ⁻⁰, ̃⁰, idk
 overline-0 : V⁰ {ℓ} → Type ℓ
