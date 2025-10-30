@@ -49,10 +49,6 @@ overline-0 : V⁰ {ℓ} → Type ℓ
 -- overline-0 (sup-∞ A _ , _) = A
 overline-0 = overline-∞ ∘ fst
 
-overline-0' : V⁰' {ℓ} → Type ℓ
-overline-0' = overline-∞' ∘ fst
-
-
 tilde-0 : (x : V⁰ {ℓ}) → overline-0 x → V∞ {ℓ}
 -- tilde-0 (sup-∞ B f , p) = f
 tilde-0 = tilde-∞ ∘ fst
@@ -64,14 +60,6 @@ tilde-0' : (x : V⁰ {ℓ}) → overline-0 x → V⁰ {ℓ}
 -- tilde-0' x a .snd = {!x .snd .snd a!}
 tilde-0' (sup-∞ _ f , _) a .fst = f a
 tilde-0' (sup-∞ _ _ , isitset) a .snd = isitset .snd a
-
--- for the same reason as above the following doesn't work
--- tilde-0'' : (x : V⁰' {ℓ}) → overline-0' x → V⁰ {ℓ}
--- tilde-0'' x a .fst = tilde-∞' (x .fst) a
--- tilde-0'' x a .snd = {!x .snd .snd a!}
--- tilde-0'' (x , _) a .fst = tilde-∞' x a
--- tilde-0'' (_ , i) a .snd = {!i .snd a!}
-
 
 _∈⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → Type (ℓ-suc ℓ)
 x ∈⁰ y = fiber (tilde-0' y) (x)
