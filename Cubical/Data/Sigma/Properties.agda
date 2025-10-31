@@ -331,14 +331,15 @@ module _ (A : Unit → Type ℓ) where
   ΣUnit : Σ Unit A ≃ A tt
   unquoteDef ΣUnit = defStrictEquiv {B = A tt} ΣUnit snd (tt ,_)
 
+Σ-contractSnd-iso : ((a : A) → isContr (B a)) → Iso (Σ A B) A
+Σ-contractSnd-iso c .fun = fst
+Σ-contractSnd-iso c .inv a .fst = a
+Σ-contractSnd-iso c .inv a .snd = c a .fst
+Σ-contractSnd-iso c .rightInv _ = refl
+Σ-contractSnd-iso c .leftInv s = cong (s .fst ,_) (c (s .fst) .snd (s .snd))
+
 Σ-contractSnd : ((a : A) → isContr (B a)) → Σ A B ≃ A
-Σ-contractSnd c = isoToEquiv isom
-  where
-  isom : Iso _ _
-  isom .fun = fst
-  isom .inv a = a , c a .fst
-  isom .rightInv _ = refl
-  isom .leftInv (a , b) = cong (a ,_) (c a .snd b)
+Σ-contractSnd c = isoToEquiv (Σ-contractSnd-iso c)
 
 isEmbeddingFstΣProp : ((x : A) → isProp (B x))
                     → {u v : Σ A B}
@@ -358,6 +359,7 @@ isEmbeddingFstΣProp {B = B} pB {u = u} {v = v} .equiv-proof x = ctr , isCtr
     ctrSnd = isProp→SquareP (λ _ _ → pB _) _ _ _ _
     ctrP≡ : ctrP ≡ z
     ctrP≡ i = ΣPathP (fzsingl i .fst , ctrSnd i)
+
 
 Σ≡PropEquiv : ((x : A) → isProp (B x)) → {u v : Σ A B}
             → (u .fst ≡ v .fst) ≃ (u ≡ v)
