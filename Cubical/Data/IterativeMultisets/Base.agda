@@ -31,7 +31,6 @@ private
   variable
     x y : V∞ {ℓ}
 
-
 overline = nodes
 
 tilde : (A : V∞ {ℓ}) → overline A → V∞ {ℓ}
