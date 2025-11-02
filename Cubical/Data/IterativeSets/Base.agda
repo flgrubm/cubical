@@ -1,3 +1,4 @@
+-- {-# OPTIONS --lossy-unification #-}
 module Cubical.Data.IterativeSets.Base where
 
 open import Cubical.Core.Everything
@@ -21,7 +22,7 @@ open import Cubical.Data.Unit
 open import Cubical.Data.Bool
 open import Cubical.Data.Sum renaming (rec to ⊎-rec)
 
-open import Cubical.Data.IterativeMultisets.Base renaming (overline to overline-∞ ; tilde to tilde-∞ ; toFib to toFib-∞)
+open import Cubical.Data.IterativeMultisets.Base renaming (overline to overline-∞ ; tilde to tilde-V∞ ; toFib to toFib-∞)
 
 private
   variable
@@ -49,22 +50,26 @@ private
 
 -- accessing the components
 
--- TODO: For the sake of consistency, I think it should be called overline⁰, similarly tilde⁰, or maybe even ⁻⁰, ̃⁰, idk
 overline : V⁰ {ℓ} → Type ℓ
 -- overline (sup-∞ A _ , _) = A
 overline = overline-∞ ∘ fst
 
-tilde-plain : (x : V⁰ {ℓ}) → overline x → V∞ {ℓ}
--- tilde (sup-∞ B f , p) = f
-tilde-plain = tilde-∞ ∘ fst
+tilde-∞ : (x : V⁰ {ℓ}) → overline x → V∞ {ℓ}
+-- tilde (sup-∞ _ f , _) = f
+tilde-∞ = tilde-V∞ ∘ fst
 
--- TODO: refactor so that everything that uses tilde now uses tilde instead; afterwards change name to tilde or tilde⁰ (depending on whether the above todo is implemented)
 tilde : (x : V⁰ {ℓ}) → overline x → V⁰ {ℓ}
 -- the following doesn't work because seemingly `isIterativeSet` cannot be destructured
 -- tilde x a .fst = tilde-∞ (x .fst) a
 -- tilde x a .snd = {!x .snd .snd a!}
 tilde (sup-∞ _ f , _) a .fst = f a
 tilde (sup-∞ _ _ , isitset) a .snd = isitset .snd a
+
+isEmbedding-tilde-∞ : (x : V⁰ {ℓ}) → isEmbedding (tilde-∞ x)
+isEmbedding-tilde-∞ (sup-∞ _ _ , its) = its .fst
+
+isEmbedding-tilde : (x : V⁰ {ℓ}) → isEmbedding (tilde x)
+isEmbedding-tilde (sup-∞ _ _ , isitset) = isEmbeddingSndΣProp isPropIsIterativeSet _ (isitset .fst)
 
 V⁰↪V∞ : V⁰ {ℓ} ↪ V∞ {ℓ}
 V⁰↪V∞ = EmbeddingΣProp isPropIsIterativeSet
@@ -81,7 +86,6 @@ cor11 = V⁰↪V∞
 cor11-1 : (x ≡ y) ≃ (x .fst ≡ y .fst)
 cor11-1 = ≡V⁰-≃-≡V∞
 {-# WARNING_ON_USAGE cor11-1 "Deprecated: use V⁰↪V∞" #-}
--- invEquiv (Σ≡PropEquiv isPropIsIterativeSet)
 
 _∈⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → Type (ℓ-suc ℓ)
 x ∈⁰ y = fiber (tilde y) (x)
@@ -122,18 +126,26 @@ V⁰≃Emb = isoToEquiv Iso-V⁰-Emb
 Emb≃V⁰ : Embedding (V⁰ {ℓ}) ℓ ≃ V⁰ {ℓ}
 Emb≃V⁰ = isoToEquiv (invIso Iso-V⁰-Emb)
 
--- x ≃V⁰ y =
---    ((z : V⁰) → (z ∈⁰ x) → (z ∈⁰ y)) ×
---    ((z : V⁰) → (z ∈⁰ y) → (z ∈⁰ x))
--- (with pattern matched x and y)
+isSetV⁰ : isSet (V⁰ {ℓ})
+isSetV⁰ = isOfHLevelRespectEquiv 2 Emb≃V⁰ isSetEmbedding
+
 _≃V⁰_ : (x y : V⁰ {ℓ}) → Type (ℓ-suc ℓ)
-x ≃V⁰ y = toEmb x ≃Emb toEmb y
+x ≃V⁰ y = ((z : V⁰) → (z ∈⁰ x) → (z ∈⁰ y)) ×
+          ((z : V⁰) → (z ∈⁰ y) → (z ∈⁰ x))
 
 ≃V⁰-≃-≡V⁰ : {ℓ : Level} {x y : V⁰ {ℓ}} → (x ≃V⁰ y) ≃ (x ≡ y)
-≃V⁰-≃-≡V⁰ {x = x} {y = y} = compEquiv (EmbeddingIP (toEmb x) (toEmb y)) (invEquiv (cong toEmb , iso→isEmbedding Iso-V⁰-Emb x y))
+≃V⁰-≃-≡V⁰ {x = sup-∞ A f , itsx} {y = sup-∞ B g , itsy} =
+    let
+        x = sup-∞ A f , itsx
+        y = sup-∞ B g , itsy
+    in compEquiv (EmbeddingIP (toEmb x) (toEmb y)) (invEquiv (cong toEmb , iso→isEmbedding Iso-V⁰-Emb x y))
 
 ≡V⁰-≃-≃V⁰ : {ℓ : Level} {x y : V⁰ {ℓ}} → (x ≡ y) ≃ (x ≃V⁰ y)
-≡V⁰-≃-≃V⁰ {x = x} {y = y} = compEquiv (cong toEmb , iso→isEmbedding Iso-V⁰-Emb x y) (invEquiv (EmbeddingIP (toEmb x) (toEmb y)))
+≡V⁰-≃-≃V⁰ {x = sup-∞ A f , itsx} {y = sup-∞ B g , itsy} =
+    let
+        x = sup-∞ A f , itsx
+        y = sup-∞ B g , itsy
+    in compEquiv (cong toEmb , iso→isEmbedding Iso-V⁰-Emb x y) (invEquiv (EmbeddingIP (toEmb x) (toEmb y)))
 
 V⁰↪Fib : (V⁰ {ℓ}) ↪ Fibration (V⁰ {ℓ}) ℓ
 V⁰↪Fib {ℓ} = compEmbedding Emb↪Fib (Iso→Embedding Iso-V⁰-Emb)
@@ -146,25 +158,22 @@ V⁰↪Fib {ℓ} = compEmbedding Emb↪Fib (Iso→Embedding Iso-V⁰-Emb)
 toFib : (V⁰ {ℓ}) → Fibration (V⁰ {ℓ}) ℓ
 toFib = V⁰↪Fib .fst
     
--- x ≃V⁰' y =
---    ((z : V⁰) → (z ∈⁰ x) → (z ∈⁰ y)) ≃
---    ((z : V⁰) → (z ∈⁰ y) → (z ∈⁰ x))
--- (with pattern matched x and y)
 _≃V⁰'_ : (x y : V⁰ {ℓ}) → Type (ℓ-suc ℓ)
-x ≃V⁰' y = toFib x ≃Fib toFib y
+x ≃V⁰' y = (z : V⁰) → ((z ∈⁰ x) ≃ (z ∈⁰ y))
 
 ≃V⁰'-≃-≡V⁰ : {ℓ : Level} {x y : V⁰ {ℓ}} → (x ≃V⁰' y) ≃ (x ≡ y)
-≃V⁰'-≃-≡V⁰ {x = x} {y = y} = compEquiv (FibrationIP (toFib x) (toFib y)) (invEquiv (cong toFib , V⁰↪Fib .snd x y))
+≃V⁰'-≃-≡V⁰ {x = sup-∞ A f , itsx} {y = sup-∞ B g , itsy} =
+    let
+        x = sup-∞ A f , itsx
+        y = sup-∞ B g , itsy
+    in compEquiv (FibrationIP (toFib x) (toFib y)) (invEquiv (cong toFib , V⁰↪Fib .snd x y))
 
 ≡V⁰-≃-≃V⁰' : {ℓ : Level} {x y : V⁰ {ℓ}} → (x ≡ y) ≃ (x ≃V⁰' y)
-≡V⁰-≃-≃V⁰' {x = x} {y = y} = compEquiv (cong toFib , V⁰↪Fib .snd x y) (invEquiv (FibrationIP (toFib x) (toFib y)))
-
-isSetV⁰ : isSet (V⁰ {ℓ})
-isSetV⁰ = isOfHLevelRespectEquiv 2 Emb≃V⁰ isSetEmbedding
-
--- TODO: rename to isEmbedding-tilde-plain
-isEmbedding-tilde-∞ : (x : V⁰ {ℓ}) → isEmbedding (tilde-plain x)
-isEmbedding-tilde-∞ (sup-∞ A f , isitset) = isitset .fst
+≡V⁰-≃-≃V⁰' {x = sup-∞ A f , itsx} {y = sup-∞ B g , itsy} =
+    let
+        x = sup-∞ A f , itsx
+        y = sup-∞ B g , itsy
+    in compEquiv (cong toFib , V⁰↪Fib .snd x y) (invEquiv (FibrationIP (toFib x) (toFib y)))
 
 isProp∈∞ : {z : V∞ {ℓ}} → isProp (z ∈∞ (x .fst))
 isProp∈∞ {x = x} {z = z} = isEmbedding→hasPropFibers (isEmbedding-tilde-∞ x) z
@@ -174,12 +183,12 @@ embeddingToEquivOfPath : {ℓ ℓ' : Level} {A : Type ℓ} → {B : Type ℓ'} �
 embeddingToEquivOfPath {f = f} _ _ _ .fst = cong f
 embeddingToEquivOfPath isemb x y .snd = isemb x y
 
-thm12-help1 : ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ (x .fst)) z ≃ fiber (tilde-∞ (y .fst)) z))
+thm12-help1 : ((x ≡ y) ≃ ((z : V∞) → fiber (tilde-∞ x) z ≃ fiber (tilde-∞ y) z))
 thm12-help1 = compEquiv ≡V⁰-≃-≡V∞ thm4
 
 -- couldn't find it in the library
 isPropEquiv : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → isProp A → isProp B → isProp (A ≃ B)
-isPropEquiv _ pB = isPropΣ (isPropΠ (λ _ → pB)) isPropIsEquiv
+isPropEquiv = isOfHLevel≃ 1 -- isPropΣ (isPropΠ (λ _ → pB)) isPropIsEquiv
 {-# WARNING_ON_USAGE isPropEquiv "" #-}
 
 thm12-help2 : (x y : V⁰ {ℓ}) → isProp ((z : V∞) → (z ∈∞ (x .fst)) ≃ (z ∈∞ (y .fst)))
@@ -193,9 +202,6 @@ thm12 = isSetV⁰ -- isOfHLevelRespectEquiv 1 (invEquiv thm12-help1) (thm12-help
 -- probably can be generalized to embeddings (potentially with assuming that g is an embedding too, but this is a WIP, see `T15DefDesup.agda`
 firstInInjCompIsInj : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''} → (f : A → B) → (g : B → C) → ((w x : A) → g (f w) ≡ g (f x) → w ≡ x) → {w x : A} → f w ≡ f x → w ≡ x
 firstInInjCompIsInj f g inj∘ {w} {x} p = inj∘ w x (cong g p)
-
-isEmbedding-tilde : (x : V⁰ {ℓ}) → isEmbedding (tilde x)
-isEmbedding-tilde (sup-∞ A f , isitset) = isEmbeddingSndΣProp isPropIsIterativeSet _ (isitset .fst)
 
 -- TODO: figure out why removing {x z : V⁰ {ℓ}} doesn't work (complains about z)...
 isProp∈⁰ : {x z : V⁰ {ℓ}} → isProp (z ∈⁰ x)
@@ -236,13 +242,65 @@ sup⁰desup⁰≃ = V⁰≃Emb
 El⁰ : V⁰ {ℓ} → Type ℓ
 El⁰ = overline
 
+fromEmb' : (x : V⁰ {ℓ}) → (El⁰ x ↪ V⁰ {ℓ})
+fromEmb' (sup-∞ A f , its) = toEmb (sup-∞ A f , its) .snd
+
 desup⁰' : (x : V⁰ {ℓ}) → (El⁰ x ↪ V⁰ {ℓ})
-desup⁰' (sup-∞ A f , its) = desup⁰ (sup-∞ A f , its) .snd
+desup⁰' = fromEmb'
+{-# WARNING_ON_USAGE desup⁰' "Deprecated: use fromEmb'" #-}
+
+isSetEl⁰ : (x : V⁰ {ℓ}) → isSet (El⁰ x)
+isSetEl⁰ {ℓ} x = Embedding-into-isSet→isSet {A = El⁰ {ℓ} x} {B = V⁰ {ℓ}} (fromEmb' x) (isSetV⁰ {ℓ})
 
 thm17 : (x : V⁰ {ℓ}) → isSet (El⁰ x)
-thm17 {ℓ} x = Embedding-into-isSet→isSet {A = El⁰ {ℓ} x} {B = V⁰ {ℓ}} (desup⁰' x) (isSetV⁰ {ℓ})
+thm17 = isSetEl⁰
+{-# WARNING_ON_USAGE thm17 "Deprecated: use isSetEl⁰" #-}
 
-postulate pro18 : {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
+-- pro18-alt : {A : Type ℓ} → Iso (A ↪ V⁰ {ℓ}) (Σ[ x ∈ Embedding (V⁰ {ℓ}) ℓ ] x .fst ≡ A)
+-- pro18-alt {ℓ} {A} .Iso.fun emb .fst .fst = A
+-- pro18-alt {ℓ} {A} .Iso.fun emb .fst .snd = emb
+-- pro18-alt {ℓ} {A} .Iso.fun emb .snd = refl
+-- pro18-alt {ℓ} {A} .Iso.inv s = subst (λ B → B ↪ V⁰ {ℓ}) (s .snd) (s .fst .snd)
+-- pro18-alt {ℓ} {A} .Iso.rightInv s = (J> cong (λ h → ((A , h) , refl)) (substRefl {!!})) A (s .snd)
+-- pro18-alt {ℓ} {A} .Iso.leftInv emb =
+--     subst (λ B → B ↪ V⁰ {ℓ}) refl emb
+--         ≡⟨ substRefl emb ⟩
+--     emb
+--         ∎
+
+postulate pro18-iso : {A : Type ℓ} → Iso (A ↪ V⁰ {ℓ}) (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A)
+-- pro18-iso {ℓ} {A} .Iso.fun emb .fst = fromEmb (record {fst = A ; snd = emb})
+-- pro18-iso {ℓ} {A} .Iso.fun emb .snd = refl
+-- pro18-iso {ℓ} {A} .Iso.inv ((sup-∞ A' f , its) , p) = J (λ B _ → B ↪ V⁰ {ℓ}) (toEmb (sup-∞ A' f , its) .snd) p
+--                                                    -- (J> (toEmb (sup-∞ A' f , its) .snd)) A p
+--                                                    -- subst (λ s → s ↪ V⁰ {ℓ}) p (toEmb (sup-∞ A' f , its) .snd)
+-- pro18-iso {ℓ} {A} .Iso.rightInv ((sup-∞ A' f , its) , p) = (J> (
+--     {!fromEmb (J (λ B _ → B ↪ V⁰ {ℓ}) (toEmb (sup-∞ A' f , its) .snd) refl) , refl!}
+--         ≡⟨ {!!} ⟩
+--     {!!}
+--         ∎)) A p
+-- pro18-iso {ℓ} {A} .Iso.leftInv emb = {!!}
+    -- J (λ B _ → B ↪ V⁰ {ℓ}) (toEmb (fromEmb (A , emb)) .snd) refl
+    --     ≡⟨ JRefl (λ B _ → B ↪ V⁰ {ℓ}) (toEmb (fromEmb (A , emb)) .snd) ⟩
+    -- toEmb (fromEmb (A , emb)) .snd
+    --     ≡⟨ cong snd {!secEmb (A , emb)!} ⟩
+    -- emb
+    --     ∎
+    -- subst (λ s → s ↪ V⁰ {ℓ}) refl (toEmb (fromEmb (A , emb)) .snd)
+    --     ≡⟨ substRefl (toEmb (fromEmb (A , emb)) .snd) ⟩
+    -- toEmb (fromEmb (A , emb)) .snd
+    --     ≡⟨ cong snd {!p!} ⟩
+    -- emb
+    --     ∎
+    -- where
+    --     p : Path (Embedding (V⁰ {ℓ}) ℓ) (toEmb (fromEmb (A , emb))) (A , emb)
+    --     p = secEmb (A , emb)
+    -- (λ v v₁ →
+    --                                                        Σ (v → V⁰)
+    --                                                        (λ f₁ → (w x : v) → isEquiv (λ p₁ i → f₁ (p₁ i))))
+
+pro18 : {A : Type ℓ} → ((A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A))
+pro18 = isoToEquiv pro18-iso
 
 -- pro18' : {A : Type ℓ} → Iso (A ↪ V⁰ {ℓ}) (fiber (El⁰ {ℓ}) A)
 -- pro18' {A = A} .Iso.fun emb .fst = fromEmb (record {fst = A ; snd = emb})
@@ -297,7 +355,8 @@ thm4⁰-helper {x = sup-∞ x α , itsetx} {y = sup-∞ y β , itsety} = propBii
                        z⁰ .snd = transport (cong isIterativeSet p) (itsetu .snd a)
 
 thm4⁰ : (x ≡ y) ≃ ((z : V⁰ {ℓ}) → (z ∈⁰ x) ≃ (z ∈⁰ y))
-thm4⁰ {x = sup-∞ _ _ , _} {y = sup-∞ _ _ , _} = ≡V⁰-≃-≃V⁰'
+thm4⁰ = ≡V⁰-≃-≃V⁰'
+{-# WARNING_ON_USAGE thm4⁰ "Deprecated: use ≡V⁰-≃-≃V⁰'" #-}
 
 -- move to better place
 ⊥*≢Unit* : ((⊥* {ℓ} :> Type ℓ) ≡ (Unit* {ℓ} :> Type ℓ)) → ⊥
@@ -308,10 +367,10 @@ Unit*≢⊥* p = ⊥*-elim {A = λ _ → ⊥} (transport p (lift tt))
 
 -- this should be somewhere else, but I couldn't find it in the library for some reason
 ≡-from-isOfHLevel→isOfHLevel : {ℓ : Level} {A B : Type ℓ} {n : HLevel} → A ≡ B → isOfHLevel n A → isOfHLevel n B
-≡-from-isOfHLevel→isOfHLevel {n = n} A≡B = transport (cong (isOfHLevel n) A≡B)
+≡-from-isOfHLevel→isOfHLevel {n = n} A≡B = subst (isOfHLevel n) A≡B
 
 ≡-to-isOfHLevel→isOfHLevel : {ℓ : Level} {A B : Type ℓ} {n : HLevel} → A ≡ B → isOfHLevel n B → isOfHLevel n A
-≡-to-isOfHLevel→isOfHLevel {n = n} A≡B = transport (cong (isOfHLevel n) (sym A≡B))
+≡-to-isOfHLevel→isOfHLevel {n = n} A≡B = subst⁻ (isOfHLevel n) A≡B
 
 ≡-to-isContr→isContr : {ℓ : Level} {A B : Type ℓ} → A ≡ B → isContr B → isContr A
 ≡-to-isContr→isContr = ≡-to-isOfHLevel→isOfHLevel {n = 0}
