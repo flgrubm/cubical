@@ -1,4 +1,5 @@
 -- {-# OPTIONS --no-termination-check #-}
+{-# OPTIONS --termination-depth 2 #-}
 module Cubical.Data.IterativeSets.Nat where
 -- definitions in Base
 -- properties in Properties
@@ -30,7 +31,7 @@ open import Cubical.Data.Sum using (_⊎_; inl; inr; ⊎-IdL-⊥*-≃) public
 
 open import Cubical.Homotopy.Base
 
-open import Cubical.Data.IterativeMultisets.Base
+open import Cubical.Data.IterativeMultisets.Base renaming (overline to overline-∞ ; tilde to tilde-V∞)
 open import Cubical.Data.IterativeSets.Base
 open import Cubical.Data.IterativeSets.Empty
 
@@ -55,28 +56,10 @@ isPropIsPropDisjointSum propA propB disj (inl a) (inr b) = ⊥-elim (disj (a , b
 isPropIsPropDisjointSum propA propB disj (inr b) (inl a) = ⊥-elim (disj (a , b))
 
 
-EquivToIsProp→isProp : {A : Type ℓ} {B : Type ℓ} → isProp A → (A ≃ B) → isProp B
-EquivToIsProp→isProp propA equiv = Embedding-into-isProp→isProp (Equiv→Embedding (invEquiv equiv)) propA
-
--- EquivToIsProp→isProp' : {A : Type ℓ} {B : Type ℓ} → isProp A → (A ≃ B) → isProp B
--- EquivToIsProp→isProp' propA (f , isequiv) w x =
---         w
---             ≡⟨ sym (secIsEq isequiv w) ⟩
---         f (invIsEq isequiv w)
---             ≡⟨ cong f (propA (invIsEq isequiv w) (invIsEq isequiv x)) ⟩
---         f (invIsEq isequiv x)
---             ≡⟨ secIsEq isequiv x ⟩
---         x
---             ∎
-
--- this might be something for the library?
-
-
-
 suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
-suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ (A ⊎ Unit* {ℓ} , ϕₓ , hasPropFibers→isEmbedding hpf)
+suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = fromEmb E
     where
-        ϕₓ : (overline-0 (sup-∞ A f , isitsetAf) ⊎ Unit* {ℓ}) → V⁰ {ℓ}
+        ϕₓ : (overline (sup-∞ A f , isitsetAf) ⊎ Unit* {ℓ}) → V⁰ {ℓ}
         ϕₓ (inl a) = f a , isitsetAf .snd a
         ϕₓ (inr _) = (sup-∞ A f , isitsetAf)
 
@@ -95,12 +78,16 @@ suc⁰ {ℓ} (sup-∞ A f , isitsetAf) = sup⁰ (A ⊎ Unit* {ℓ} , ϕₓ , has
                 ret : retract to fro
                 ret (inl _ , _) = refl
                 ret (inr _ , _) = refl
-
         hpf : hasPropFibers ϕₓ
-        hpf (sup-∞ B g , isitsetBg) = EquivToIsProp→isProp (isPropIsPropDisjointSum (isEmbedding→hasPropFibers (isEmbedding-tilde-0 (sup-∞ A f , isitsetAf)) (sup-∞ B g , isitsetBg)) (thm12 _ _) ∈⁰×≡→⊥) (invEquiv (eqFib (sup-∞ B g , isitsetBg)))
+        hpf (sup-∞ B g , isitsetBg) = isOfHLevelRespectEquiv 1 (invEquiv (eqFib (sup-∞ B g , isitsetBg))) (isPropIsPropDisjointSum (isEmbedding→hasPropFibers (isEmbedding-tilde (sup-∞ A f , isitsetAf)) (sup-∞ B g , isitsetBg)) (isSetV⁰ _ _) ∈⁰×≡→⊥)
             where
                 ∈⁰×≡→⊥ : ((sup-∞ B g , isitsetBg) ∈⁰ (sup-∞ A f , isitsetAf)) × ((sup-∞ A f , isitsetAf) ≡ (sup-∞ B g , isitsetBg)) → ⊥
                 ∈⁰×≡→⊥ ((a , pa) , p) = ∈⁰-irrefl {x = (sup-∞ B g , isitsetBg)} (transport (cong (λ r → ((sup-∞ B g , isitsetBg) ∈⁰ r)) p) (a , pa))
+
+        E : Embedding (V⁰ {ℓ}) ℓ
+        E .fst = A ⊎ Unit* {ℓ}
+        E .snd .fst = ϕₓ
+        E .snd .snd = hasPropFibers→isEmbedding hpf
 
 ℕ* : Type ℓ
 ℕ* = Lift ℕ
@@ -140,7 +127,7 @@ ret-finj' : {n : ℕ} → retract (finj' {n = suc n}) (finj'-ret {n = n})
 ret-finj' {n} (zero , _) = Fin-fst-≡ refl
 ret-finj' {n} (suc m , k , prf) = Fin-fst-≡ refl
 
-vonNeumannOverline≃Fin : (n : ℕ) → (El⁰ (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin.Fin n)
+vonNeumannOverline≃Fin : (n : ℕ) → (El⁰ (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin n)
 vonNeumannOverline≃Fin {ℓ} = elim+2 case0 case1 caseSuc
     where
         case0 : El⁰ (vonNeumannEncoding (lift 0)) ≃ Fin 0
@@ -168,38 +155,41 @@ vonNeumannOverline≃Fin {ℓ} = elim+2 case0 case1 caseSuc
                                 cong inl (retEq indHyp x)
 
 -- for some reason the following doesn't termination check
--- vonNeumannOverline≃Fin' : (n : ℕ) → (El⁰ (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin.Fin n)
--- vonNeumannOverline≃Fin' {ℓ} zero = uninhabEquiv (λ ()) ¬Fin0
--- vonNeumannOverline≃Fin' {ℓ} (suc zero) = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1 
--- vonNeumannOverline≃Fin' {ℓ} (suc (suc n)) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
---     where
---         f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin (suc (suc n))
---         f (inr _) .fst = suc n
---         f (inr _) .snd = ≤-refl
---         f (inl x) = finj' (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n) .fst x)
+-- it does with termination depth > 1
+vonNeumannOverline≃Fin' : (n : ℕ) → (El⁰ (vonNeumannEncoding {ℓ} (lift n)) ≃ Fin n)
+vonNeumannOverline≃Fin' {ℓ} zero = uninhabEquiv (λ ()) ¬Fin0
+vonNeumannOverline≃Fin' {ℓ} (suc zero) = compEquiv (compEquiv ⊎-IdL-⊥*-≃ Unit*≃Unit) Unit≃Fin1 
+vonNeumannOverline≃Fin' {ℓ} (suc (suc n)) = compEquiv (El⁰-vNE-suc≃El⁰-vNE⊎Unit* (suc n)) (isoToEquiv (iso f g sec ret))
+    where
+        f : El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit* → Fin (suc (suc n))
+        f (inr _) .fst = suc n
+        f (inr _) .snd = ≤-refl
+        f (inl x) = finj' (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n) .fst x)
 
---         g : Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
---         g (l , zero , sucl≡susucn) = inr _
---         g (l , suc k , suck+sucl≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) (finj'-ret (l , suc k , suck+sucl≡sucsucn)))
+        g : Fin (suc (suc n)) → El⁰ (vonNeumannEncoding (lift (suc n))) ⊎ Unit*
+        g (l , zero , sucl≡susucn) = inr _
+        g (l , suc k , suck+sucl≡sucsucn) = inl (invEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) (finj'-ret (l , suc k , suck+sucl≡sucsucn)))
 
---         sec : section f g
---         sec (suc l , zero , sucsucl≡sucsucn) = Fin-fst-≡ (sym (injSuc sucsucl≡sucsucn))
---         sec (zero , zero , prf) = ⊥-elim {A = λ _ → f (g (zero , zero , prf)) ≡ (zero , zero , prf)} (znots (injSuc prf))
---         sec (zero , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) fzero))
---         sec (suc l , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) (suc l , k , injSuc prf)))
+        sec : section f g
+        sec (suc l , zero , sucsucl≡sucsucn) = Fin-fst-≡ (sym (injSuc sucsucl≡sucsucn))
+        sec (zero , zero , prf) = ⊥-elim {A = λ _ → f (g (zero , zero , prf)) ≡ (zero , zero , prf)} (znots (injSuc prf))
+        sec (zero , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) fzero))
+        sec (suc l , suc k , prf) = Fin-fst-≡ (cong (fst ∘ finj') (secEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) (suc l , k , injSuc prf)))
 
---         ret : retract f g
---         ret (inr _) = refl
---         ret (inl x) = cong (inl ∘ (invEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)))) (ret-finj' (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n) .fst x)) ∙
---                         cong inl (retEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) x)
+        ret : retract f g
+        ret (inr _) = refl
+        ret (inl x) = cong (inl ∘ (invEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)))) (ret-finj' (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n) .fst x)) ∙
+                        cong inl (retEq (vonNeumannOverline≃Fin' {ℓ = ℓ} (suc n)) x)
         
 ℕ⁰ : V⁰ {ℓ}
-ℕ⁰ {ℓ} = sup⁰ (ℕ* {ℓ} , vonNeumannEncoding {ℓ} , isemb)
+ℕ⁰ {ℓ} = fromEmb E
     where
         isinj : (w x : ℕ* {ℓ}) → vonNeumannEncoding w ≡ vonNeumannEncoding x → w ≡ x
-        isinj (lift n) (lift m) p = liftExt (Fin-inj n m (ua (compEquiv (invEquiv (vonNeumannOverline≃Fin n)) (compEquiv (pathToEquiv (cong overline-0 p)) (vonNeumannOverline≃Fin m)))))
-        isemb : isEmbedding (vonNeumannEncoding {ℓ})
-        isemb = injEmbedding thm12 λ {w} {x} → isinj w x
+        isinj (lift n) (lift m) p = liftExt (Fin-inj n m (ua (compEquiv (invEquiv (vonNeumannOverline≃Fin n)) (compEquiv (pathToEquiv (cong overline p)) (vonNeumannOverline≃Fin m)))))
+        E : Embedding (V⁰ {ℓ}) ℓ
+        E .fst = ℕ* {ℓ}
+        E .snd .fst = vonNeumannEncoding {ℓ}
+        E .snd .snd = injEmbedding isSetV⁰ (λ {w} {x} → isinj w x)
 
 ℕ⁰Isℕ* : El⁰ (ℕ⁰ {ℓ}) ≡ ℕ* {ℓ}
 ℕ⁰Isℕ* = refl

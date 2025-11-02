@@ -63,13 +63,13 @@ private
         ≢-sym x≢y y≡x = x≢y (sym y≡x)
 
 unorderedPair⁰ : (x y : V⁰ {ℓ}) → ¬ (x ≡ y) → V⁰ {ℓ}
-unorderedPair⁰ {ℓ} x y x≢y = sup⁰ emb
+unorderedPair⁰ {ℓ} x y x≢y = fromEmb emb
     where
-        emb : Σ[ A ∈ Type ℓ ] A ↪ V⁰
+        emb : Embedding (V⁰ {ℓ}) ℓ
         emb .fst = Bool* {ℓ}
         emb .snd .fst (lift false) = x
         emb .snd .fst (lift true) = y
-        emb .snd .snd = injEmbedding thm12 inj
+        emb .snd .snd = injEmbedding isSetV⁰ inj
             where
                 inj : {a b : _} → emb .snd .fst a ≡ emb .snd .fst b → a ≡ b
                 inj {lift false} {lift true} x≡y = ⊥-elim (x≢y x≡y)
@@ -79,61 +79,53 @@ unorderedPair⁰ {ℓ} x y x≢y = sup⁰ emb
 
 -- {x , y} ≡ {y , x}
 unorderedUnorderedPair⁰ : {x y : V⁰ {ℓ}} {x≢y : ¬ (x ≡ y)} {y≢x : ¬ (y ≡ x)} → unorderedPair⁰ x y x≢y ≡ unorderedPair⁰ y x y≢x
-unorderedUnorderedPair⁰ {x = x} {y = y} = invEq thm4' fibEq
+unorderedUnorderedPair⁰ {x = x} {y = y} = invEq ≡V⁰-≃-≃V⁰ (f , g)
     where
-        fibEq : (z : V⁰) → (z ∈⁰ unorderedPair⁰ x y _) ≃ (z ∈⁰ unorderedPair⁰ y x _)
-        fibEq z = propBiimpl→Equiv (isProp∈⁰ {x = unorderedPair⁰ x y _} {z = z}) (isProp∈⁰ {x = unorderedPair⁰ y x _} {z = z}) f g
-            where
-                f : z ∈⁰ unorderedPair⁰ x y _ → z ∈⁰ unorderedPair⁰ y x _
-                f (lift false , prf) .fst = lift true
-                f (lift false , prf) .snd = prf
-                f (lift true , prf) .fst = lift false
-                f (lift true , prf) .snd = prf
-                g : z ∈⁰ unorderedPair⁰ y x _ → z ∈⁰ unorderedPair⁰ x y _
-                g (lift false , prf) .fst = lift true
-                g (lift false , prf) .snd = prf
-                g (lift true , prf) .fst = lift false
-                g (lift true , prf) .snd = prf
+        f : (z : V⁰) → z ∈⁰ unorderedPair⁰ x y _ → z ∈⁰ unorderedPair⁰ y x _
+        f _ (lift false , prf) .fst = lift true
+        f _ (lift false , prf) .snd = prf
+        f _ (lift true , prf) .fst = lift false
+        f _ (lift true , prf) .snd = prf
+        
+        g : (z : V⁰) → z ∈⁰ unorderedPair⁰ y x _ → z ∈⁰ unorderedPair⁰ x y _
+        g _ (lift false , prf) .fst = lift true
+        g _ (lift false , prf) .snd = prf
+        g _ (lift true , prf) .fst = lift false
+        g _ (lift true , prf) .snd = prf
 
 -- {x , y} ≡ {y , x} where for the sake of convenience the proof q : ¬ (y ≡ x) is simply the reversed version of p (which is irrelevant since V⁰ is a set)
 unorderedUnorderedPair⁰' : {x y : V⁰ {ℓ}} {x≢y : ¬ (x ≡ y)} → unorderedPair⁰ x y x≢y ≡ unorderedPair⁰ y x λ y≡x → x≢y (sym y≡x)
 unorderedUnorderedPair⁰' = unorderedUnorderedPair⁰
 
 unorderedPair⁰-is-unordered-pair : {x y z : V⁰ {ℓ}} {x≢y : ¬ (x ≡ y)} → ((z ∈⁰ (unorderedPair⁰ x y x≢y)) ≃ ((x ≡ z) ⊎ (y ≡ z)))
-unorderedPair⁰-is-unordered-pair {x = x} {y = y} {z = z} = isoToEquiv (iso f g sec ret)
+unorderedPair⁰-is-unordered-pair {x = x} {y = y} {z = z} = isoToEquiv isom
     where
-        f : z ∈⁰ unorderedPair⁰ x y _ → (x ≡ z) ⊎ (y ≡ z)
-        f (lift false , q) = inl q
-        f (lift true , q) = inr q
-        g : (x ≡ z) ⊎ (y ≡ z) → z ∈⁰ unorderedPair⁰ x y _
-        g (inl _) .fst = lift false
-        g (inl q) .snd = q
-        g (inr _) .fst = lift true
-        g (inr q) .snd = q
-        sec : section f g
-        sec (inl _) = refl
-        sec (inr _) = refl
-        ret : retract f g
-        ret (lift false , _) = refl
-        ret (lift true , _) = refl
+        isom : Iso (z ∈⁰ unorderedPair⁰ x y _) ((x ≡ z) ⊎ (y ≡ z))
+        isom .Iso.fun (lift false , q) = inl q
+        isom .Iso.fun (lift true , q) = inr q
+        isom .Iso.inv (inl _) .fst = lift false
+        isom .Iso.inv (inl q) .snd = q
+        isom .Iso.inv (inr q) .fst = lift true
+        isom .Iso.inv (inr q) .snd = q
+        isom .Iso.rightInv (inl _) = refl
+        isom .Iso.rightInv (inr _) = refl
+        isom .Iso.leftInv (lift false , _) = refl
+        isom .Iso.leftInv (lift true , _) = refl
 
 unorderedPair⁰-is-unordered-pair-sym : {x y z : V⁰ {ℓ}} {x≢y : ¬ (x ≡ y)} → ((z ∈⁰ (unorderedPair⁰ x y x≢y)) ≃ ((z ≡ x) ⊎ (z ≡ y)))
-unorderedPair⁰-is-unordered-pair-sym {x = x} {y = y} {z = z} = isoToEquiv (iso f g sec ret)
+unorderedPair⁰-is-unordered-pair-sym {x = x} {y = y} {z = z} = isoToEquiv isom
     where
-        f : z ∈⁰ unorderedPair⁰ x y _ → (z ≡ x) ⊎ (z ≡ y)
-        f (lift false , q) = inl (sym q)
-        f (lift true , q) = inr (sym q)
-        g : (z ≡ x) ⊎ (z ≡ y) → z ∈⁰ unorderedPair⁰ x y _
-        g (inl _) .fst = lift false
-        g (inl q) .snd = sym q
-        g (inr _) .fst = lift true
-        g (inr q) .snd = sym q
-        sec : section f g
-        sec (inl _) = refl
-        sec (inr _) = refl
-        ret : retract f g
-        ret (lift false , _) = refl
-        ret (lift true , _) = refl
+        isom : Iso (z ∈⁰ unorderedPair⁰ x y _) ((z ≡ x) ⊎ (z ≡ y))
+        isom .Iso.fun (lift false , q) = inl (sym q)
+        isom .Iso.fun (lift true , q) = inr (sym q)
+        isom .Iso.inv (inl _) .fst = lift false
+        isom .Iso.inv (inl q) .snd = sym q
+        isom .Iso.inv (inr q) .fst = lift true
+        isom .Iso.inv (inr q) .snd = sym q
+        isom .Iso.rightInv (inl _) = refl
+        isom .Iso.rightInv (inr _) = refl
+        isom .Iso.leftInv (lift false , _) = refl
+        isom .Iso.leftInv (lift true , _) = refl
 
 unorderedPair⁰-≢-witness-agnostic : {x y : V⁰ {ℓ}} (x≢y₁ x≢y₂ : ¬ (x ≡ y)) → unorderedPair⁰ x y x≢y₁ ≡ unorderedPair⁰ x y x≢y₂
 unorderedPair⁰-≢-witness-agnostic {x = x} {y = y} x≢y₁ x≢y₂ = cong (unorderedPair⁰ x y) x≢y₁≡x≢y₂
@@ -142,17 +134,14 @@ unorderedPair⁰-≢-witness-agnostic {x = x} {y = y} x≢y₁ x≢y₂ = cong (
         x≢y₁≡x≢y₂ = isProp→ (λ ()) x≢y₁ x≢y₂
 
 unorderedPair⁰≡unorderedPair⁰ : {x y a b : V⁰ {ℓ}} {x≢y : ¬ (x ≡ y)} {a≢b : ¬ (a ≡ b)} → ((unorderedPair⁰ x y x≢y ≡ unorderedPair⁰ a b a≢b) ≃ (((x ≡ a) × (y ≡ b)) ⊎ ((x ≡ b) × (y ≡ a))))
-unorderedPair⁰≡unorderedPair⁰ {x = x} {y = y} {a = a} {b = b} {x≢y = x≢y} {a≢b = a≢b} = propBiimpl→Equiv (thm12 _ _) isPropRHS f g
+unorderedPair⁰≡unorderedPair⁰ {x = x} {y = y} {a = a} {b = b} {x≢y = x≢y} {a≢b = a≢b} = propBiimpl→Equiv (isSetV⁰ _ _) isPropRHS f g
     where
        isPropRHS : isProp (((x ≡ a) × (y ≡ b)) ⊎ ((x ≡ b) × (y ≡ a)))
-       isPropRHS = isProp⊎ (isProp× (thm12 _ _) (thm12 _ _)) (isProp× (thm12 _ _) (thm12 _ _)) (λ (x≡a , _) (_ , y≡a) → x≢y (x≡a ∙ (sym y≡a)))
-
-       thm4'-unorderedPair⁰ : (unorderedPair⁰ x y _ ≡ unorderedPair⁰ a b _) ≃ ((z : V⁰) → ((z ≡ x) ⊎ (z ≡ y)) ≃ ((z ≡ a) ⊎ (z ≡ b)))
-       thm4'-unorderedPair⁰ = compEquiv thm4' (equivΠCod (λ z → equivComp unorderedPair⁰-is-unordered-pair-sym unorderedPair⁰-is-unordered-pair-sym))
+       isPropRHS = isProp⊎ (isProp× (isSetV⁰ _ _) (isSetV⁰ _ _)) (isProp× (isSetV⁰ _ _) (isSetV⁰ _ _)) (λ (x≡a , _) (_ , y≡a) → x≢y (x≡a ∙ (sym y≡a)))
 
        destruct : (unorderedPair⁰ x y _ ≡ unorderedPair⁰ a b _) → ((x ≡ a) ⊎ (x ≡ b)) × ((y ≡ a) ⊎ (y ≡ b))
-       destruct p .fst = thm4'-unorderedPair⁰ .fst p x .fst (inl refl)
-       destruct p .snd = thm4'-unorderedPair⁰ .fst p y .fst (inr refl)
+       destruct p .fst = unorderedPair⁰-is-unordered-pair-sym .fst (≡V⁰-≃-≃V⁰ .fst p .fst x (lift false , refl))
+       destruct p .snd = unorderedPair⁰-is-unordered-pair-sym .fst (≡V⁰-≃-≃V⁰ .fst p .fst y (lift true , refl))
 
        filter : ((x ≡ a) ⊎ (x ≡ b)) × ((y ≡ a) ⊎ (y ≡ b)) → ((x ≡ a) × (y ≡ b)) ⊎ ((x ≡ b) × (y ≡ a))
        filter (inl x≡a , inl y≡a) = ⊥-elim (x≢y (x≡a ∙ (sym y≡a)))

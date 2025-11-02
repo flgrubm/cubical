@@ -16,17 +16,17 @@ private
     x : V⁰ {ℓ}
 
 empty⁰ : V⁰ {ℓ}
-empty⁰ .fst = emptySet-∞
-empty⁰ .snd .fst ()
-empty⁰ .snd .snd ()
+empty⁰ {ℓ} = fromEmb E
+    where
+        E : Embedding (V⁰ {ℓ}) ℓ
+        E .fst = ⊥*
+        E .snd .fst ()
+        E .snd .snd ()
 
 empty⁰' : V⁰ {ℓ}
-empty⁰' {ℓ} = sup⁰ e
-    where
-        e : Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}
-        e .fst = ⊥*
-        e .snd .fst ()
-        e .snd .snd ()
+empty⁰' .fst = emptySet-∞
+empty⁰' .snd .fst ()
+empty⁰' .snd .snd ()
 
 El⁰empty⁰Is⊥* : El⁰ {ℓ} empty⁰ ≡ ⊥* {ℓ}
 El⁰empty⁰Is⊥* = refl
