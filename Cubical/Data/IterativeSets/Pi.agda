@@ -1,7 +1,6 @@
 {-# OPTIONS --lossy-unification #-}
 {-# OPTIONS --allow-unsolved-metas #-}
 
-
 module Cubical.Data.IterativeSets.Pi where
 
 open import Cubical.Core.Everything
@@ -15,7 +14,7 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Homotopy.Base
 open import Cubical.Foundations.Transport
 
-open import Cubical.Data.IterativeMultisets.Base
+open import Cubical.Data.IterativeMultisets.Base renaming (overline to overline-V∞ ; tilde to tilde-V∞)
 open import Cubical.Data.IterativeSets.Base
 open import Cubical.Data.IterativeSets.OrderedPair
 
@@ -67,11 +66,11 @@ module _ {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} where
     private
         module _ where
             emb : ((a : El⁰ x) → El⁰ (y a)) → (El⁰ x ↪ V⁰ {ℓ})
-            emb ϕ .fst a = ⟨ tilde-0' x a , tilde-0' (y a) (ϕ a) ⟩⁰
+            emb ϕ .fst a = ⟨ tilde x a , tilde (y a) (ϕ a) ⟩⁰
             emb ϕ .snd = injEmbedding thm12 f
                 where
                     f : {v w : El⁰ x} → emb ϕ .fst v ≡ emb ϕ .fst w → v ≡ w
-                    f {v} {w} p = isEmbedding→Inj (isEmbedding-tilde-0 x) _ _ (orderedPair⁰≡orderedPair⁰ .fst p .fst)
+                    f {v} {w} p = isEmbedding→Inj (isEmbedding-tilde x) _ _ (orderedPair⁰≡orderedPair⁰ .fst p .fst)
 
             elem : ((a : El⁰ x) → El⁰ (y a)) → Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ}
             elem ϕ .fst = El⁰ x
@@ -83,14 +82,14 @@ module _ {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} where
                     inj : {ϕ ψ : (a : El⁰ x) → El⁰ (y a)} → emb ϕ .fst ≡ emb ψ .fst → ϕ ≡ ψ
                     inj {ϕ} {ψ} p = funExt (λ a →
                         let
-                            h : (tilde-0' x a ≡ tilde-0' x a) × (tilde-0' (y a) (ϕ a) ≡ tilde-0' (y a) (ψ a))
+                            h : (tilde x a ≡ tilde x a) × (tilde (y a) (ϕ a) ≡ tilde (y a) (ψ a))
                             h = orderedPair⁰≡orderedPair⁰ .fst (funExt⁻ p a)
 
-                            hh : tilde-0' (y a) (ϕ a) ≡ tilde-0' (y a) (ψ a)
+                            hh : tilde (y a) (ϕ a) ≡ tilde (y a) (ψ a)
                             hh = h .snd
 
                             hhh : ϕ a ≡ ψ a
-                            hhh = isEmbedding→Inj (isEmbedding-tilde-0 (y a)) _ _ hh
+                            hhh = isEmbedding→Inj (isEmbedding-tilde (y a)) _ _ hh
                         in hhh)
             
             sets : isSet (Σ[ A ∈ Type ℓ ] A ↪ V⁰ {ℓ})
@@ -113,10 +112,10 @@ module _ {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} where
             ii : Inj (sup⁰ ∘ elem)
             ii {ϕ} {ψ} p = {!!}
                 where
-                    q : sup-∞ (El⁰ x) (λ a → ⟨ tilde-0' x a , tilde-0' (y a) (ϕ a) ⟩⁰ .fst) ≡ sup-∞ (El⁰ x) (λ a → ⟨ tilde-0' x a , tilde-0' (y a) (ψ a) ⟩⁰ .fst) 
+                    q : sup-∞ (El⁰ x) (λ a → ⟨ tilde x a , tilde (y a) (ϕ a) ⟩⁰ .fst) ≡ sup-∞ (El⁰ x) (λ a → ⟨ tilde x a , tilde (y a) (ψ a) ⟩⁰ .fst) 
                     q = cong fst p
 
-                    qq : (z : V∞ {ℓ}) → (fiber (λ a → ⟨ tilde-0' x a , tilde-0' (y a) (ϕ a) ⟩⁰ .fst) z) ≃ (fiber (λ a → ⟨ tilde-0' x a , tilde-0' (y a) (ψ a) ⟩⁰ .fst) z)
+                    qq : (z : V∞ {ℓ}) → (fiber (λ a → ⟨ tilde x a , tilde (y a) (ϕ a) ⟩⁰ .fst) z) ≃ (fiber (λ a → ⟨ tilde x a , tilde (y a) (ψ a) ⟩⁰ .fst) z)
                     qq = thm12-help1 .fst p
 
         

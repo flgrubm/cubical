@@ -14,7 +14,6 @@ open import Cubical.Relation.Nullary using (¬_)
 -- TODO: remove ⊥*-elim, Data.Unit, Data.SumFin once the statements that need them have found their way to a better place
 open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
 open import Cubical.Data.Bool
-open import Cubical.Data.SumFin
 
 open import Cubical.Data.IterativeSets.Base
 open import Cubical.Data.IterativeSets.UnorderedPair

@@ -51,7 +51,7 @@ orderedPair⁰ : (V⁰ {ℓ} × V⁰ {ℓ}) → V⁰ {ℓ}
 orderedPair⁰ = uncurry ⟨_,_⟩⁰
 
 isEmbOrderedPair⁰ : isEmbedding (orderedPair⁰ {ℓ})
-isEmbOrderedPair⁰ {ℓ} = injEmbedding thm12 inj
+isEmbOrderedPair⁰ {ℓ} = injEmbedding isSetV⁰ inj
     where
         inj : {s t : V⁰ {ℓ} × V⁰ {ℓ}} → orderedPair⁰ s ≡ orderedPair⁰ t → s ≡ t
         inj {s = x , y} {t = a , b} p = ΣPathP (helper (unorderedPair⁰≡unorderedPair⁰ .fst p)) -- x≡a,y≡b
@@ -67,4 +67,4 @@ isEmbOrderedPair⁰ {ℓ} = injEmbedding thm12 inj
                 -- x≡a,y≡b = helper (unorderedPair⁰≡unorderedPair⁰ .fst p)
 
 orderedPair⁰≡orderedPair⁰ : {x y a b : V⁰ {ℓ}} → ((⟨ x , y ⟩⁰ ≡ ⟨ a , b ⟩⁰) ≃ ((x ≡ a) × (y ≡ b)))
-orderedPair⁰≡orderedPair⁰ {x = x} {y = y} {a = a} {b = b} = propBiimpl→Equiv (thm12 _ _) (isProp× (thm12 _ _) (thm12 _ _)) (PathPΣ ∘ (isEmbedding→Inj isEmbOrderedPair⁰ (x , y) (a , b))) (λ (x≡a , y≡b) → cong ⟨_, y ⟩⁰ x≡a ∙ cong ⟨ a ,_⟩⁰ y≡b)
+orderedPair⁰≡orderedPair⁰ {x = x} {y = y} {a = a} {b = b} = propBiimpl→Equiv (isSetV⁰ _ _) (isProp× (isSetV⁰ _ _) (isSetV⁰ _ _)) (PathPΣ ∘ (isEmbedding→Inj isEmbOrderedPair⁰ (x , y) (a , b))) (λ (x≡a , y≡b) → cong ⟨_, y ⟩⁰ x≡a ∙ cong ⟨ a ,_⟩⁰ y≡b)

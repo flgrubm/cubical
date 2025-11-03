@@ -176,14 +176,13 @@ module _ {ℓA ℓA' ℓB ℓB' : Level} {A : Type ℓA} {B : A → Type ℓB} {
     Emb-Σfun : isSet (Σ A' B') → isEmbedding f → ((a : A) → isEmbedding (g a)) → isEmbedding Σfun
     Emb-Σfun setΣ embf embg = injEmbedding setΣ (Inj-Σfun embf embg)
 
-private
-    module _ {ℓ : Level} (x : V⁰ {ℓ}) (y : El⁰ x → V⁰ {ℓ}) where
-        emb : (Σ[ a ∈ El⁰ x ] El⁰ (y a)) ↪ V⁰ {ℓ}
-        emb .fst (a , b) = ⟨ (tilde-0' x a) , (tilde-0' (y a) b) ⟩⁰
-        emb .snd = isEmbedding-∘ isEmbOrderedPair⁰ (Emb-Σfun _ _ (isSetΣ thm12 (λ _ → thm12)) (isEmbedding-tilde-0 x) λ a → isEmbedding-tilde-0 (y a))
-
 Σ⁰ : (x : V⁰ {ℓ}) → (El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
-Σ⁰ {ℓ = ℓ} x y = sup⁰ ((Σ[ a ∈ El⁰ {ℓ} x ] El⁰ {ℓ} (y a)) , emb x y)
+Σ⁰ {ℓ = ℓ} x y = fromEmb E
+  where
+    E : Embedding (V⁰ {ℓ}) ℓ
+    E .fst = (Σ[ a ∈ El⁰ {ℓ} x ] El⁰ {ℓ} (y a))
+    E .snd .fst (a , b) = ⟨ (tilde x a) , (tilde (y a) b) ⟩⁰
+    E .snd .snd = isEmbedding-∘ isEmbOrderedPair⁰ (Emb-Σfun _ _ (isSetΣ isSetV⁰ (λ _ → isSetV⁰)) (isEmbedding-tilde x) λ a → isEmbedding-tilde (y a))
 
 El⁰Σ⁰IsΣ : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Σ⁰ x y) ≡ (Σ (El⁰ x) (λ a → El⁰ (y a)))
 El⁰Σ⁰IsΣ = refl
