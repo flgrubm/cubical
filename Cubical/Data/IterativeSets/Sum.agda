@@ -29,19 +29,19 @@ private
 private
     module _ {x y : V⁰ {ℓ}} where
         fl : El⁰ x → V⁰ {ℓ}
-        fl a = ⟨ empty⁰ , tilde-0' x a ⟩⁰
+        fl a = ⟨ empty⁰ , tilde x a ⟩⁰
 
         fr : El⁰ y → V⁰ {ℓ}
-        fr b = ⟨ unit⁰ , tilde-0' y b ⟩⁰
+        fr b = ⟨ unit⁰ , tilde y b ⟩⁰
         
         f : El⁰ x ⊎ El⁰ y → V⁰ {ℓ}
         f = ⊎-rec fl fr
 
         embfl : isEmbedding fl
-        embfl = compEmbedding ((curry orderedPair⁰ empty⁰) , (lem26 thm12 empty⁰ orderedPair⁰ isEmbOrderedPair⁰)) ((tilde-0' x) , (isEmbedding-tilde-0 x)) .snd
+        embfl = compEmbedding ((curry orderedPair⁰ empty⁰) , (lem26 isSetV⁰ empty⁰ orderedPair⁰ isEmbOrderedPair⁰)) ((tilde x) , (isEmbedding-tilde x)) .snd
 
         embfr : isEmbedding fr
-        embfr = compEmbedding ((curry orderedPair⁰ unit⁰) , (lem26 thm12 unit⁰ orderedPair⁰ isEmbOrderedPair⁰)) ((tilde-0' y) , (isEmbedding-tilde-0 y)) .snd
+        embfr = compEmbedding ((curry orderedPair⁰ unit⁰) , (lem26 isSetV⁰ unit⁰ orderedPair⁰ isEmbOrderedPair⁰)) ((tilde y) , (isEmbedding-tilde y)) .snd
 
         fla≢frb : (a : El⁰ x) (b : El⁰ y) → ¬ fl a ≡ fr b
         fla≢frb a b fla≡frb = empty⁰≢unit⁰ (orderedPair⁰≡orderedPair⁰ .fst fla≡frb .fst)
@@ -50,7 +50,12 @@ private
         femb = lem27 fl fr embfl embfr fla≢frb
 
 _+⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
-x +⁰ y = sup⁰ ((El⁰ x ⊎ El⁰ y) , ((f {x = x} {y = y} , femb {x = x} {y = y})))
+x +⁰ y = fromEmb E
+  where
+    E : Embedding V⁰ _
+    E .fst = El⁰ x ⊎ El⁰ y
+    E .snd .fst = f
+    E .snd .snd = femb
 
 El⁰+⁰Is⊎ : {x y : V⁰ {ℓ}} → El⁰ (x +⁰ y) ≡ El⁰ x ⊎ El⁰ y
 El⁰+⁰Is⊎ = refl

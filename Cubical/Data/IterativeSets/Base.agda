@@ -189,7 +189,7 @@ thm12-help1 = compEquiv ≡V⁰-≃-≡V∞ thm4
 -- couldn't find it in the library
 isPropEquiv : {ℓ ℓ' : Level} → {A : Type ℓ} → {B : Type ℓ'} → isProp A → isProp B → isProp (A ≃ B)
 isPropEquiv = isOfHLevel≃ 1 -- isPropΣ (isPropΠ (λ _ → pB)) isPropIsEquiv
-{-# WARNING_ON_USAGE isPropEquiv "" #-}
+{-# WARNING_ON_USAGE isPropEquiv "use isOfHLevel≃" #-}
 
 thm12-help2 : (x y : V⁰ {ℓ}) → isProp ((z : V∞) → (z ∈∞ (x .fst)) ≃ (z ∈∞ (y .fst)))
 thm12-help2 x y = isPropΠ λ z → isOfHLevel≃ 1 (isProp∈∞ {x = x} {z = z}) (isProp∈∞ {x = y} {z = z})

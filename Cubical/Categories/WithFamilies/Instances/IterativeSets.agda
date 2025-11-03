@@ -18,11 +18,11 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Path
 
 open import Cubical.Data.IterativeSets.Base
-open import Cubical.Data.IterativeSets.Pi
+-- open import Cubical.Data.IterativeSets.Pi
 open import Cubical.Data.IterativeSets.Sigma
 open import Cubical.Categories.Instances.IterativeSets
 open import Cubical.Categories.WithFamilies.Base
-open import Cubical.Categories.WithFamilies.Structure.Pi
+-- open import Cubical.Categories.WithFamilies.Structure.Pi
 
 open import Cubical.Categories.Presheaf
 open import Cubical.Categories.Functor
@@ -41,13 +41,13 @@ V-CwF : {ℓ : Level} → CwF (V {ℓ}) (ℓ-suc ℓ) (ℓ-suc ℓ)
 V-CwF .emptyContext = terminal-object-V
 
 V-CwF .tyPresheaf .F-ob Γ .fst = El⁰ Γ → V⁰
-V-CwF .tyPresheaf .F-ob _ .snd = isSet→ thm12
+V-CwF .tyPresheaf .F-ob _ .snd = isSet→ isSetV⁰
 V-CwF .tyPresheaf .F-hom f g x = g (f x)
 V-CwF .tyPresheaf .F-id = refl
 V-CwF .tyPresheaf .F-seq _ _ = refl
 
 V-CwF .tmPresheaf .F-ob x .fst = Lift ((t : El⁰ (x .fst)) → El⁰ (x .snd t))
-V-CwF .tmPresheaf .F-ob x .snd = isOfHLevelLift 2 (isSetΠ (λ t → thm17 (x .snd t)))
+V-CwF .tmPresheaf .F-ob x .snd = isOfHLevelLift 2 (isSetΠ (λ t → isSetEl⁰ (x .snd t)))
 V-CwF .tmPresheaf .F-hom f t = lift (λ x → subst El⁰ (funExt⁻ (f .snd) x) (t .lower (f .fst x)))
 V-CwF .tmPresheaf .F-id = funExt (λ _ → cong lift (funExt (λ _ → transportRefl _)))
 V-CwF .tmPresheaf .F-seq {x} {y} {z} f g = funExt (λ t → cong lift (funExt (λ s →
@@ -67,7 +67,7 @@ V-CwF .tmPresheaf .F-seq {x} {y} {z} f g = funExt (λ t → cong lift (funExt (�
         r = funExt⁻ (f .snd) (g .fst s)
 
         p≡r∙q : p ≡ r ∙ q
-        p≡r∙q = thm12 _ _ p (r ∙ q)
+        p≡r∙q = isSetV⁰ _ _ p (r ∙ q)
 
         goal : Path (El⁰ (z .snd s))
                 (subst El⁰ (funExt⁻ (seq' C {x} {y} {z} f g .snd) s)
@@ -96,7 +96,7 @@ V-CwF .ctxExtFunctor .F-seq {x} {y} {z} f g = funExt (λ t → ΣPathP (refl ,
         r i = f .snd (~ i) (t .fst)
 
         p≡r∙q : p ≡ r ∙ q
-        p≡r∙q = thm12 _ _ p (r ∙ q)
+        p≡r∙q = isSetV⁰ _ _ p (r ∙ q)
 
         goal : subst El⁰ p (t .snd) ≡ subst El⁰ q (subst El⁰ r (t .snd))
         goal = cong (λ a → subst El⁰ a (t .snd)) p≡r∙q ∙ substComposite El⁰ r q (t .snd)

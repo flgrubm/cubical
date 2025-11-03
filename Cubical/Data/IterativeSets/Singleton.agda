@@ -24,7 +24,7 @@ singleton⁰ {ℓ} x = fromEmb E
     E : Embedding (V⁰ {ℓ}) ℓ
     E .fst = Unit*
     E .snd .fst _ = x
-    E .snd .snd = isEmbeddingFunctionFromIsPropToIsSet _ isPropUnit* isSetV⁰
+    E .snd .snd = isEmbedding-isProp→isSet isPropUnit* isSetV⁰ _
 
 El⁰singleton⁰IsUnit* : El⁰ (singleton⁰ x) ≡ Unit*
 El⁰singleton⁰IsUnit* = refl
