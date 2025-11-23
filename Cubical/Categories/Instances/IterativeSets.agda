@@ -39,11 +39,11 @@ V .Category._⋆_ f g x = g (f x)
 V .Category.⋆IdL _ = refl
 V .Category.⋆IdR _ = refl
 V .Category.⋆Assoc f g h = refl
-V .Category.isSetHom {x = x} {y = y} = isSet→ (thm17 y)
+V .Category.isSetHom {x = x} {y = y} = isSet→ (isSetEl⁰ y)
 
 Functor-V-SET : {ℓ : Level} → Functor (V {ℓ}) (SET ℓ)
 Functor-V-SET {ℓ = ℓ} .Functor.F-ob x .fst = El⁰ x
-Functor-V-SET {ℓ = ℓ} .Functor.F-ob x .snd = thm17 x
+Functor-V-SET {ℓ = ℓ} .Functor.F-ob x .snd = isSetEl⁰ x
 Functor-V-SET {ℓ = ℓ} .Functor.F-hom f = f
 Functor-V-SET {ℓ = ℓ} .Functor.F-id = refl
 Functor-V-SET {ℓ = ℓ} .Functor.F-seq g f = refl
@@ -77,7 +77,7 @@ binary-coproducts-V x y .BinCoproduct.binCoprodInj₂ = inr
 binary-coproducts-V x y .BinCoproduct.univProp f g .fst .fst = ⊎-rec f g
 binary-coproducts-V x y .BinCoproduct.univProp f g .fst .snd .fst = refl
 binary-coproducts-V x y .BinCoproduct.univProp f g .fst .snd .snd = refl
-binary-coproducts-V x y .BinCoproduct.univProp {z} f g .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (thm17 z) _ f) (isSet→ (thm17 z) _ g)) (funExt helper)
+binary-coproducts-V x y .BinCoproduct.univProp {z} f g .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (isSetEl⁰ z) _ f) (isSet→ (isSetEl⁰ z) _ g)) (funExt helper)
     where
         helper : (a : El⁰ x ⊎ El⁰ y) → ⊎-rec f g a ≡ E .fst a
         helper (inl a) = funExt⁻ (sym (E .snd .fst)) a
@@ -94,7 +94,7 @@ binary-products-V x y .BinProduct.univProp f g .fst .fst c .fst = f c
 binary-products-V x y .BinProduct.univProp f g .fst .fst c .snd = g c
 binary-products-V x y .BinProduct.univProp f g .fst .snd .fst = refl
 binary-products-V x y .BinProduct.univProp f g .fst .snd .snd = refl
-binary-products-V x y .BinProduct.univProp {z} f g .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (thm17 x) _ f) (isSet→ (thm17 y) _ g)) (funExt helper)
+binary-products-V x y .BinProduct.univProp {z} f g .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (isSetEl⁰ x) _ f) (isSet→ (isSetEl⁰ y) _ g)) (funExt helper)
     where
         -- TODO: maybe rewrite since it seems like actually using both funExt and funExt⁻ is unnecessary, seeing that we don't need to pattern match on c anyway
         helper : (c : El⁰ z) → (f c , g c) ≡ E .fst c
@@ -128,11 +128,11 @@ pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .fst x .sn
 pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .fst x .snd .snd .snd = funExt⁻ (sym H) x
 pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .snd .fst = refl
 pullback-V (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .fst .snd .snd = refl
-pullback-V {ℓ} (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (thm17 l) h _) (isSet→ (thm17 r) k _)) (funExt (λ x → ΣPathP (helper' x)))
+pullback-V {ℓ} (cospan l m r s₁ s₂) .Pullback.univProp {d} h k H .snd E = Σ≡Prop (λ _ → isProp× (isSet→ (isSetEl⁰ l) h _) (isSet→ (isSetEl⁰ r) k _)) (funExt (λ x → ΣPathP (helper' x)))
     where
         helper' : (x : El⁰ d) → Σ[ p ∈ s₁ (h x) ≡ E .fst x .fst ] PathP (λ i → (fiber s₁ (p i) × fiber s₂ (p i))) ((h x , refl) , (k x , funExt⁻ (sym H) x)) (E .fst x .snd)
         helper' x .fst = cong s₁ (funExt⁻ (E .snd .fst) x) ∙ E .fst x .snd .fst .snd
-        helper' x .snd = ×-PathP (ΣPathPProp (λ a → thm17 m (s₁ a) (E .fst x .fst)) (funExt⁻ (E .snd .fst) x)) (ΣPathPProp (λ a → thm17 m (s₂ a) (E .fst x .fst)) (funExt⁻ (E .snd .snd) x))
+        helper' x .snd = ×-PathP (ΣPathPProp (λ a → isSetEl⁰ m (s₁ a) (E .fst x .fst)) (funExt⁻ (E .snd .fst) x)) (ΣPathPProp (λ a → isSetEl⁰ m (s₂ a) (E .fst x .fst)) (funExt⁻ (E .snd .snd) x))
         
 -- pullback-V' : {ℓ : Level} → Pullbacks (V {ℓ})
 -- pullback-V' (cospan l m r s₁ s₂) .Pullback.pbOb = Σ⁰ r λ xᵣ → Σ⁰ l (λ xₗ → Id⁰ m (s₁ xₗ) (s₂ xᵣ))
