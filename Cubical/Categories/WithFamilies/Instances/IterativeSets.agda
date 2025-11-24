@@ -30,13 +30,13 @@ open import Cubical.Categories.Functor
 import Cubical.Categories.Constructions.Elements as Els -- renaming (Covariant.∫ to ∫)
 open Els.Contravariant
 
-open Category
-open CwF
 open Functor
-module Cubical.Categories.WithFamilies.Instances.IterativeSets where
+module Cubical.Categories.WithFamilies.Instances.IterativeSets {ℓ : Level} where
 
+open Category (V {ℓ})
+open CwF
 
-V-CwF : {ℓ : Level} → CwF (V {ℓ}) (ℓ-suc ℓ) (ℓ-suc ℓ)
+V-CwF : CwF (V {ℓ}) (ℓ-suc ℓ) (ℓ-suc ℓ)
 
 V-CwF .emptyContext = terminal-object-V
 
@@ -111,26 +111,31 @@ V-CwF .ctxExtEquiv Γ Δ a = isoToEquiv isom
         isom .Iso.rightInv _ = refl
         isom .Iso.leftInv _ = refl
 
-V-CwF {ℓ} .ctxExtEquivNat Δ Δ' Γ A δ γ = ΣPathP (refl , cong lift (funExt (λ x → sym
+V-CwF .ctxExtEquivNat Γ Γ' _ A σ τ = ΣPathP (refl , cong lift (funExt (λ x → sym
     let
-        p : ∘ᴾAssoc V (V-CwF .tyPresheaf) A (λ x₁ → fst (γ x₁)) δ ≡ λ i x → A (fst (γ (δ x)))
-        p = refl
+        p : transport
+             (λ i → El⁰ (A (τ (σ (transp (λ j → El⁰ Γ) (i ∨ i0) x)) .fst)))
+             (V-CwF .tmPresheaf .F-hom {Γ' , λ z → A (τ z .fst)} (σ , refl)
+              (lift (λ y → τ y .snd)) .lower (transp (λ j → El⁰ Γ) i0 x))
+             ≡
+            transport
+             (λ i → El⁰ (A (τ (σ (transp (λ j → El⁰ Γ) (i ∨ i1) x)) .fst)))
+             (V-CwF .tmPresheaf .F-hom {Γ' , λ z → A (τ z .fst)} (σ , refl)
+              (lift (λ y → τ y .snd)) .lower (transp (λ j → El⁰ Γ) i1 x))
+        p k =
+            transport
+             (λ i → El⁰ (A (τ (σ (transp (λ j → El⁰ Γ) (i ∨ k) x)) .fst)))
+             (V-CwF .tmPresheaf .F-hom {Γ' , λ z → A (τ z .fst)} (σ , refl)
+              (lift (λ y → τ y .snd)) .lower (transp (λ j → El⁰ Γ) k x))
+    in p ∙ transportRefl _ ∙ transportRefl _)))
 
-        rem : transport (λ i → El⁰ (A (fst (γ (δ (transp (λ j → El⁰ Δ') i x))))))
-                         ((V-CwF .tmPresheaf) .F-hom (δ , refl) (lift (λ x₁ → snd (γ x₁))) .lower (transp (λ j → El⁰ Δ') i0 x))
-            ≡ transport (λ i → El⁰ (A (fst (γ (δ x)))))
-                         ((V-CwF .tmPresheaf) .F-hom (δ , refl) (lift (λ x₁ → snd (γ x₁))) .lower x)
-        rem k = (transport (λ i → El⁰ (A (fst (γ (δ (transp (λ j → El⁰ Δ') (i ∨ k) x))))))
-                         ((V-CwF .tmPresheaf) .F-hom {Δ , λ z → (A (γ z .fst))} (δ , refl) (lift (λ x₁ → snd (γ x₁))) .lower (transp (λ j → El⁰ Δ') k x)) )
+V-CwF .ctxExtSubstComp A B a τ σ = refl
 
- 
-        goal : transport (λ i → El⁰ (A (fst (γ (δ (transp (λ j → El⁰ Δ') i x))))))
-                         ((V-CwF .tmPresheaf) .F-hom (δ , refl) (lift (λ x₁ → snd (γ x₁))) .lower (transport refl x))
-                ≡ snd (γ (δ x))
-        goal = (rem ∙ transportRefl _ ∙ transportRefl _)
-    in goal)))
-
-V-CwF .ctxExtEquivNat₁ _ _ _ _ _ _ = refl
+V-CwF .ctxExtComp {Γ} {Δ} {Δ'} A B τ σ =
+    substRefl {B = λ X → Hom[ V-CwF .ctxExtFunctor .F-ob (Γ , X) , V-CwF .ctxExtFunctor .F-ob (Δ' , A) ]} _
+        ∙ funExt (λ x → ΣPathP (refl ,
+                                (substRefl {B = El⁰} _ ∙ substRefl {B = El⁰} _
+                                 ∙ sym (substRefl {B = El⁰} _))))
 
 -- V-Π-Structure : {ℓ : Level} → Π-Structure-CwF (V-CwF {ℓ})
 -- V-Π-Structure .Π-Structure-CwF.Π {Γ} A B x = Π⁰ (A x) (λ a → B (x , a))

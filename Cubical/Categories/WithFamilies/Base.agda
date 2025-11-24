@@ -107,9 +107,10 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
         ctxExtSubstComp :{Γ Δ Δ' : Ctx} (A : Ty Δ') (B : Ty (ctxExt Δ' A)) (a : Tm Δ' A) (τ : Subst Δ Δ') (σ : Subst Γ Δ) →
             Path (Subst Γ (ctxExt Δ' A)) (σ ⋆⟨ C ⟩ ctxExtSubst A τ (a [ τ ])) (ctxExtSubst A (σ ⋆⟨ C ⟩ τ) (a [ σ ⋆⟨ C ⟩ τ ]))
         -- σ should be something else, maybe Γ → ctxExt Δ (A ∘Ty τ)
-        -- ctxExtComp :{Γ Δ Δ' : Ctx} (A : Ty Δ') (B : Ty (ctxExt Δ' A)) (τ : Subst Δ Δ') (σ : Subst Γ (ctxExt Δ (A ∘Ty τ))) →
-        --     Path (Subst {!!} (ctxExt Δ' A)) (⟨ σ , ? ⟩ ⋆⟨ C ⟩ ⟨ τ , A ⟩) {!⟨_,_⟩!}
-        --     -- Path (Subst (ctxExt Γ (A ∘Ty (σ ⋆⟨ C ⟩ τ))) (ctxExt Δ' A)) ({!hasType (Hom[_,_] C ? ?) ?!} ⋆⟨ C ⟩ ⟨ τ , A ⟩) ⟨ σ ⋆⟨ C ⟩ τ , A ⟩
+        ctxExtComp :{Γ Δ Δ' : Ctx} (A : Ty Δ') (B : Ty (ctxExt Δ' A)) (τ : Subst Δ Δ') (σ : Subst Γ Δ) →
+          Path (Subst (ctxExt Γ (A ∘Ty (σ ⋆⟨ C ⟩ τ))) (ctxExt Δ' A))
+            (subst⁻ (λ X → Subst (ctxExt Γ X) (ctxExt Δ' A)) (∘ᴾAssoc C tyPresheaf A τ σ) (⟨ σ , A ∘Ty τ ⟩ ⋆⟨ C ⟩ ⟨ τ , A ⟩))
+            ⟨ σ ⋆⟨ C ⟩ τ , A ⟩
 
     private
       module _ {Γ Δ Δ' : Ctx} (A : Ty Δ') (B : Ty (ctxExt Δ' A)) (a : Tm Δ' A) (τ : Subst Δ Δ') (σ : Subst Γ Δ) where
