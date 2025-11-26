@@ -23,6 +23,7 @@ open import Cubical.Data.IterativeSets.Sigma
 open import Cubical.Categories.Instances.IterativeSets
 open import Cubical.Categories.WithFamilies.Base
 -- open import Cubical.Categories.WithFamilies.Structure.Pi
+open import Cubical.Categories.WithFamilies.Structure.Sigma
 
 open import Cubical.Categories.Presheaf
 open import Cubical.Categories.Functor
@@ -129,9 +130,9 @@ V-CwF .ctxExtEquivNat Γ Γ' _ A σ τ = ΣPathP (refl , cong lift (funExt (λ x
               (lift (λ y → τ y .snd)) .lower (transp (λ j → El⁰ Γ) k x))
     in p ∙ transportRefl _ ∙ transportRefl _)))
 
-V-CwF .ctxExtSubstComp A B a τ σ = refl
+V-CwF .ctxExtSubstComp _ _ _ _ = refl
 
-V-CwF .ctxExtComp {Γ} {Δ} {Δ'} A B τ σ =
+V-CwF .ctxExtComp {Γ} {Δ} {Δ'} A τ σ =
     substRefl {B = λ X → Hom[ V-CwF .ctxExtFunctor .F-ob (Γ , X) , V-CwF .ctxExtFunctor .F-ob (Δ' , A) ]} _
         ∙ funExt (λ x → ΣPathP (refl ,
                                 (substRefl {B = El⁰} _ ∙ substRefl {B = El⁰} _
@@ -141,3 +142,18 @@ V-CwF .ctxExtComp {Γ} {Δ} {Δ'} A B τ σ =
 -- V-Π-Structure .Π-Structure-CwF.Π {Γ} A B x = Π⁰ (A x) (λ a → B (x , a))
 -- V-Π-Structure .Π-Structure-CwF.Π-natural A B σ = funExt (λ x → cong sup⁰ (cong (λ s → s , graph⁰) {!!})) -- funExt (λ x → {!!})
 -- V-Π-Structure .Π-Structure-CwF.iso-Π = {!!}
+
+open Σ-Structure-CwF
+
+V-Σ-Structure : {ℓ : Level} → Σ-Structure-CwF V-CwF
+V-Σ-Structure .sig Γ A B x = Σ⁰ (A x) (λ a → B (x , a))
+V-Σ-Structure .sig-nat {Γ} {Δ} A B σ = funExt (λ x → 
+    let
+        goal : Σ⁰ (A (σ x)) (λ a → B (σ x , a))
+                ≡ Σ⁰ (A (σ x))
+                    (λ a → (V-CwF ∘Ty B) (⟨ V-CwF , σ ⟩ A) (x , a))
+        goal = ΣPathP ({!!} , {!!})
+    in goal)
+V-Σ-Structure .sig-iso = {!!}
+V-Σ-Structure .sig-iso' = {!!}
+V-Σ-Structure .ctxExtSubstSigmaSndEq = {!!}
