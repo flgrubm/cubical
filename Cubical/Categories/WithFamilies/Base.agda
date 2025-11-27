@@ -101,7 +101,35 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
             (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
             (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ)) ≡
             (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) ,
-            subst⁻ (Tm Γ) (∘ᴾAssoc C tyPresheaf A _ σ) ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
+            subst⁻ (Tm Γ) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
+
+        t1 :
+            (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
+            ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .fst ≡
+            σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst)
+
+        t2 :
+            (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
+            PathP (λ i → Tm Γ (A ∘Ty (t1 Γ Γ' Δ A σ τ i)))
+            (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .snd)
+            (subst⁻ (Tm Γ) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
+        t3 :
+            (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
+            PathP (λ i → Tm Γ (((λ k → A ∘Ty (t1 Γ Γ' Δ A σ τ k)) ∙ ∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) i))
+            (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .snd)
+            (ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ])
+
+
+        -- test1 : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
+        --     (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ)) ≡ 
+        --     subst⁻ (λ X → Σ (C .Hom[_,_] Γ Δ) (λ _ → Tm Γ X)) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) , (ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ]))
+        -- test :
+        --     (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
+        --     PathP (λ i → Σ (C .Hom[_,_] Γ Δ) λ γ → Tm Γ {!∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ (~ i)!})
+        --         (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ))
+        --         (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) , ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ])
+
+
 
     -- these should be provable
     field

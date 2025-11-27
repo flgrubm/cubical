@@ -16,6 +16,7 @@ open import Cubical.Data.Sigma
 open import Cubical.Functions.FunExtEquiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Path
+open import Cubical.Foundations.GroupoidLaws
 
 open import Cubical.Data.IterativeSets.Base
 -- open import Cubical.Data.IterativeSets.Pi
@@ -32,9 +33,13 @@ import Cubical.Categories.Constructions.Elements as Els -- renaming (Covariant.�
 open Els.Contravariant
 
 open Functor
-module Cubical.Categories.WithFamilies.Instances.IterativeSets {ℓ : Level} where
+module Cubical.Categories.WithFamilies.Instances.IterativeSets where
 
-open Category (V {ℓ})
+private
+  variable
+    ℓ : Level
+
+open Category
 open CwF
 
 V-CwF : CwF (V {ℓ}) (ℓ-suc ℓ) (ℓ-suc ℓ)
@@ -130,10 +135,28 @@ V-CwF .ctxExtEquivNat Γ Γ' _ A σ τ = ΣPathP (refl , cong lift (funExt (λ x
               (lift (λ y → τ y .snd)) .lower (transp (λ j → El⁰ Γ) k x))
     in p ∙ transportRefl _ ∙ transportRefl _)))
 
+
+V-CwF .t1 _ _ _ _ _ _ = refl
+
+V-CwF .t2 Γ Γ' Δ A σ τ = cong snd (V-CwF .ctxExtEquivNat Γ Γ' Δ A σ τ)
+
+V-CwF .t3 Γ Γ' Δ A σ τ = 
+    let
+        q : PathP (λ i → refl i) (V-CwF .ctxExtEquiv Γ Δ A .fst ((V ⋆ σ) τ) .snd) (action (V-CwF .tmPresheaf) (σ , refl) (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd))
+        q = cong lift (funExt λ x → sym (substRefl {B = El⁰} (τ (σ x) .snd)))
+
+        goal : PathP
+                (λ i → F-ob (V-CwF .tmPresheaf) (Γ , ((λ k → action (V-CwF .tyPresheaf) (V-CwF .t1 Γ Γ' Δ A σ τ k) A) ∙ ∘ᴾAssoc V (V-CwF .tyPresheaf) A (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .fst) σ) i) .fst)
+                (V-CwF .ctxExtEquiv Γ Δ A .fst ((V ⋆ σ) τ) .snd)
+                (action (V-CwF .tmPresheaf) (σ , refl)
+                 (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd))
+        goal = subst (λ m → PathP (λ i → V-CwF .tmPresheaf .F-ob (Γ , (m i)) .fst) (V-CwF .ctxExtEquiv Γ Δ A .fst ((V ⋆ σ) τ) .snd) (action (V-CwF .tmPresheaf) (σ , refl) (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd))) compPathRefl q
+    in goal
+
 V-CwF .ctxExtSubstComp _ _ _ _ = refl
 
 V-CwF .ctxExtComp {Γ} {Δ} {Δ'} A τ σ =
-    substRefl {B = λ X → Hom[ V-CwF .ctxExtFunctor .F-ob (Γ , X) , V-CwF .ctxExtFunctor .F-ob (Δ' , A) ]} _
+    substRefl {B = λ X → V .Hom[_,_] (V-CwF .ctxExtFunctor .F-ob (Γ , X)) (V-CwF .ctxExtFunctor .F-ob (Δ' , A))} _
         ∙ funExt (λ x → ΣPathP (refl ,
                                 (substRefl {B = El⁰} _ ∙ substRefl {B = El⁰} _
                                  ∙ sym (substRefl {B = El⁰} _))))
@@ -145,15 +168,56 @@ V-CwF .ctxExtComp {Γ} {Δ} {Δ'} A τ σ =
 
 open Σ-Structure-CwF
 
-V-Σ-Structure : {ℓ : Level} → Σ-Structure-CwF V-CwF
+V-Σ-Structure : {ℓ : Level} → Σ-Structure-CwF (V-CwF {ℓ})
 V-Σ-Structure .sig Γ A B x = Σ⁰ (A x) (λ a → B (x , a))
-V-Σ-Structure .sig-nat {Γ} {Δ} A B σ = funExt (λ x → 
+V-Σ-Structure .sig-nat A B σ = funExt (λ x →
+    cong (Σ⁰ (A (σ x)))
+        (funExt (λ a → cong (λ t → B (σ x , t)) (sym (substRefl {B = El⁰} a)))))
+V-Σ-Structure {ℓ} .sig-iso {Δ} A B = isoToEquiv isom
+  where
+    isom : Iso (Tm V-CwF Δ (V-Σ-Structure .sig Δ A B))
+               (Σ-syntax (Tm V-CwF Δ A) (λ a → Tm V-CwF Δ ((V-CwF ∘Ty B) (ctxExtSubst V-CwF A (IdSubst V-CwF) (subst⁻ (Tm V-CwF Δ) (∘ᴾId V (tyPresheaf V-CwF) A) a)))))
+
+    isom .Iso.fun t .fst .lower x = t .lower x .fst
+    isom .Iso.fun t .snd .lower x = subst⁻ (λ m → El⁰ (B (x , m .lower x))) (substRefl {B = Tm V-CwF Δ} {x = A} (lift (λ y → t .lower y .fst)) ) (t .lower x .snd)
+
+    isom .Iso.inv t .lower x .fst = t .fst .lower x
+    isom .Iso.inv t .lower x .snd = subst (λ m → El⁰ (B (x , m .lower x))) (substRefl {B = Tm V-CwF Δ} (t .fst)) (t .snd .lower x)
+
+    isom .Iso.rightInv t = ΣPathP (refl , cong lift (funExt (λ x → subst⁻Subst (λ m → El⁰ (B (x , m .lower x))) (substRefl {B = Tm V-CwF Δ} (t .fst)) (t .snd .lower x))))
+    isom .Iso.leftInv t = cong lift (funExt (λ x → ΣPathP (refl , (substSubst⁻ (λ m → El⁰ (B (x , m .lower x))) (substRefl {B = Tm V-CwF Δ} {x = A} (lift (λ y → t .lower y .fst))) (snd (t .lower x))))))
+
+-- V-Σ-Structure .sig-iso' = {!!}
+V-Σ-Structure .ctxExtSubstSigmaSndEq {Γ} {Δ} A B a σ = funExt (λ x → 
     let
-        goal : Σ⁰ (A (σ x)) (λ a → B (σ x , a))
-                ≡ Σ⁰ (A (σ x))
-                    (λ a → (V-CwF ∘Ty B) (⟨ V-CwF , σ ⟩ A) (x , a))
-        goal = ΣPathP ({!!} , {!!})
+        goal' : B (σ x , a .lower (σ x))
+                   ≡
+                B (σ x , subst⁻ El⁰ refl (subst⁻ El⁰ refl (a .lower (σ x))))
+        goal' = cong (λ m → B (σ x , m)) (sym (substRefl {B = El⁰} (a .lower (σ x))) ∙ cong (subst⁻ El⁰ refl) (sym (substRefl {B = El⁰} (a .lower (σ x)))))
+        
+        goal :
+                -- ((V-CwF .tyPresheaf ⟪ ctxExtSubst V-CwF A (IdSubst V-CwF) (subst⁻ (Tm V-CwF Δ) refl a) ⟫) B) (σ x)
+                B (ctxExtSubst V-CwF A (IdSubst V-CwF) (subst⁻ (Tm V-CwF Δ) refl a) (σ x))
+                  ≡
+                B (⟨_,_⟩ V-CwF σ A (ctxExtSubst V-CwF ((V-CwF ∘Ty A) σ) (IdSubst V-CwF) (subst⁻ (Tm V-CwF Γ) refl (_[_] V-CwF a σ)) x))
+                -- ((V-CwF ∘Ty (V-CwF ∘Ty B) (⟨_,_⟩ V-CwF σ A)) (ctxExtSubst V-CwF ((V-CwF ∘Ty A) σ) (IdSubst V-CwF) (subst⁻ (Tm V-CwF Γ) refl (_[_] V-CwF a σ))) x)
+        goal = cong (λ t → B (ctxExtSubst V-CwF A (IdSubst V-CwF) t (σ x))) (substRefl {B = Tm V-CwF Δ} a) ∙ goal' ∙ cong (λ s → B (⟨_,_⟩ V-CwF σ A (ctxExtSubst V-CwF ((V-CwF ∘Ty A) σ) (IdSubst V-CwF) s x))) (sym (substRefl {B = Tm V-CwF Γ} (_[_] V-CwF a σ)))
+
+        -- p : B (σ x , subst⁻ (Tm V-CwF Δ) refl a .lower (σ x))
+        --        ≡
+        --     B (σ x , subst⁻ El⁰ refl (_[_] V-CwF a σ .lower x))
+        -- p = cong (λ m → B (σ x , m)) (cong (λ n → n .lower (σ x)) (substRefl {B = Tm V-CwF Δ} a)
+        --                                                             ∙ {!!} ∙ sym (substRefl {B = El⁰} (_[_] V-CwF a σ .lower x)))
+        
+        -- q :
+        --         -- B (ctxExtSubst V-CwF A (IdSubst V-CwF) (subst⁻ (Tm V-CwF Δ) refl a) (σ x))
+        --         -- B (σ x , subst⁻ (Tm V-CwF Δ) refl a .lower (σ x))
+        --         -- B (σ x , (F-hom (ctxExtFunctor V-CwF)
+        --         --             (σ , (λ _ → V-CwF .tyPresheaf .F-hom σ A))
+        --         --             (x , (V-CwF [ a ]) σ .lower x) .snd))
+        --         B (σ x , subst⁻ El⁰ refl (_[_] V-CwF a σ .lower x))
+        --           ≡
+        --         B (⟨ V-CwF , σ ⟩ A (x , subst⁻ (Tm V-CwF Γ) refl (_[_] V-CwF a σ) .lower x))
+        -- q = cong (λ m → B (⟨ V-CwF , σ ⟩ A (x , m .lower x))) (sym (substRefl {B = Tm V-CwF Γ} (_[_] V-CwF a σ)))
     in goal)
-V-Σ-Structure .sig-iso = {!!}
-V-Σ-Structure .sig-iso' = {!!}
-V-Σ-Structure .ctxExtSubstSigmaSndEq = {!!}
+V-Σ-Structure .sig-iso-nat A B a σ = ΣPathP ({!!} , {!!})
