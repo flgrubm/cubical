@@ -71,6 +71,10 @@ isEmbedding-tilde-∞ (sup-∞ _ _ , its) = its .fst
 isEmbedding-tilde : (x : V⁰ {ℓ}) → isEmbedding (tilde x)
 isEmbedding-tilde (sup-∞ _ _ , isitset) = isEmbeddingSndΣProp isPropIsIterativeSet _ (isitset .fst)
 
+Embedding-tilde : (x : V⁰ {ℓ}) → overline x ↪ V⁰ {ℓ}
+Embedding-tilde x .fst = tilde x
+Embedding-tilde x .snd = isEmbedding-tilde x
+
 V⁰↪V∞ : V⁰ {ℓ} ↪ V∞ {ℓ}
 V⁰↪V∞ = EmbeddingΣProp isPropIsIterativeSet
 
@@ -267,6 +271,106 @@ thm17 = isSetEl⁰
 --         ≡⟨ substRefl emb ⟩
 --     emb
 --         ∎
+
+flipΣ-fun : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} {C : A → B → Type ℓ''} → (Σ[ a ∈ A ] (Σ[ b ∈ B ] C a b)) → (Σ[ b ∈ B ] Σ[ a ∈ A ] C a b)
+flipΣ-fun x .fst = x .snd .fst
+flipΣ-fun x .snd .fst = x .fst
+flipΣ-fun x .snd .snd = x .snd .snd
+
+flipΣ-Iso : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} {C : A → B → Type ℓ''} → Iso (Σ[ a ∈ A ] (Σ[ b ∈ B ] C a b)) (Σ[ b ∈ B ] Σ[ a ∈ A ] C a b)
+flipΣ-Iso .Iso.fun = flipΣ-fun
+flipΣ-Iso .Iso.inv = flipΣ-fun
+flipΣ-Iso .Iso.rightInv _ = refl
+flipΣ-Iso .Iso.leftInv _ = refl
+
+qq : Iso (Embedding (V⁰ {ℓ}) ℓ) (Σ[ a ∈ V⁰ {ℓ} ] Σ[ A ∈ Type ℓ ] El⁰ a ≡ A)
+qq {ℓ} = iso f g {!!} ret
+  where
+    f : Embedding (V⁰ {ℓ}) ℓ → Σ[ a ∈ V⁰ {ℓ} ] Σ[ A ∈ Type ℓ ] El⁰ a ≡ A
+    f E .fst = fromEmb E
+    f E .snd .fst = E .fst
+    f E .snd .snd = refl
+
+    g : (Σ[ a ∈ V⁰ {ℓ} ] Σ[ A ∈ Type ℓ ] El⁰ a ≡ A) → Embedding (V⁰ {ℓ}) ℓ
+    g S .fst = S .snd .fst
+    g S .snd = subst (λ X → X ↪ V⁰ {ℓ}) (S .snd .snd) (Embedding-tilde (S .fst))
+
+    sec : section f g
+    sec S =
+        fromEmb (S .snd .fst , subst (λ X → X ↪ V⁰ {ℓ}) (S .snd .snd) (Embedding-tilde (S .fst))) , S .snd .fst , refl
+            ≡⟨⟩
+        (sup-∞ (S .snd .fst) (compEmbedding V⁰↪V∞ (subst (λ X → X ↪ V⁰ {ℓ}) (S .snd .snd) (Embedding-tilde (S .fst))) .fst) , compEmbedding V⁰↪V∞ (subst (λ X → X ↪ V⁰ {ℓ}) (S .snd .snd) (Embedding-tilde (S .fst))) .snd ,  λ a → subst (λ X → X ↪ V⁰ {ℓ}) (S .snd .snd) (Embedding-tilde (S .fst)) .fst a .snd), S .snd .fst , refl
+            ≡⟨ {!!} ⟩
+        S .fst , S .snd .fst , S .snd .snd
+            ∎
+
+    ret : retract f g
+    ret E =
+        E .fst , subst (λ X → X ↪ V⁰ {ℓ}) refl (Embedding-tilde (fromEmb E))
+            ≡⟨ cong (λ (X : E .fst ↪ V⁰ {ℓ}) → E .fst , X) (substRefl {B = λ X → X ↪ V⁰ {ℓ}} (Embedding-tilde (fromEmb E))) ⟩
+        E .fst , Embedding-tilde (fromEmb E)
+            ≡⟨ cong (λ (X : E .fst ↪ V⁰ {ℓ}) → E .fst , X) (Σ≡Prop (λ _ → isPropIsEmbedding) refl) ⟩
+        E
+            ∎
+
+pp : Iso (V⁰ {ℓ}) (Σ[ a ∈ V⁰ {ℓ} ] Σ[ A ∈ Type ℓ ] El⁰ a ≡ A)
+pp {ℓ} = iso f g sec ret 
+  where
+    f : V⁰ {ℓ} → (Σ[ a ∈ V⁰ {ℓ} ] Σ[ A ∈ Type ℓ ] El⁰ a ≡ A)
+    f a = a , (overline a) , refl
+
+    g : (Σ[ a ∈ V⁰ {ℓ} ] Σ[ A ∈ Type ℓ ] El⁰ a ≡ A) → V⁰ {ℓ}
+    g x = {!!}
+    -- g x = J (λ B p → V⁰ {ℓ}) (x .fst) (x .snd .snd)
+    -- g x = (J> x .fst) (x .snd .fst) (x .snd .snd)
+
+    sec : section f g
+    sec = {!!}
+    -- sec x = J (λ B p → f (g x) ≡ x) {!!} (x .snd .snd)
+    -- sec x = (J> cong f (JRefl (λ (B : Type ℓ) (p : El⁰ (x .fst) ≡ B) → V⁰ {ℓ}) (x .fst))) (x .snd .fst) (x .snd .snd)
+    -- sec x = (J> JRefl _ (x .fst)) (x .snd. fst) (x .snd .snd)
+
+    ret : retract f g
+    ret a = {!!}
+    -- ret a = JRefl (λ (B : Type ℓ) (p : El⁰ a ≡ B) → V⁰ {ℓ}) a
+
+-- p18 : {A : Type ℓ} → (A ↪ V⁰ {ℓ}) ≃ (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A)
+-- p18 {ℓ = ℓ} {A = A} = isoToEquiv (iso (f' A) g sec ret)
+--     where
+--         f : A ↪ V⁰ → Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A
+--         f E .fst = fromEmb (A , E)
+--         f E .snd = refl
+
+--         g : Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A → A ↪ V⁰
+--         g ((sup-∞ x f , itset), p) = subst (λ X → X ↪ V⁰) p (toEmb (sup-∞ x f , itset) .snd)
+
+--         sec : section f g
+--         sec ((sup-∞ x f , itset) , p) =
+--             fromEmb (A , subst (λ X → X ↪ V⁰) p (toEmb (sup-∞ x f , itset) .snd)) , refl
+--                 ≡⟨ {!!} ⟩
+--             (sup-∞ x f , itset) , p
+--                 ∎
+--         -- sec' : (a : V⁰ {ℓ}) → (p : El⁰ a ≡ A) → f (g (a , p)) ≡ (a , p)
+--         -- sec' (sup-∞ x f , itset) p = (J> {!cong (λ X → fromEmb (A , X) , refl) (substRefl {B = λ X → X ↪ V⁰} (toEmb (sup-∞ x f , itset) .snd)) ∙ retEmb ((sup-∞ x f , itset) , p)!}) A (p)
+
+--         f' : (B : Type ℓ) → B ↪ V⁰ {ℓ} → Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ B
+--         f' B E .fst = {!fromEmb (B , E)!}
+--         f' B E .snd = {!!}
+        
+--         -- sec'' : (a : V⁰ {ℓ}) → (B : Type ℓ) → (p : El⁰ a ≡ B) → f (g (a , p)) ≡ (a , p)
+--         -- sec'' = ?
+
+--         postulate ret : retract f g
+--         -- ret E =
+--         --     subst (λ X → X ↪ V⁰) refl (toEmb (fromEmb (A , E)) .snd)
+--         --         ≡⟨ substRefl {B = λ X → X ↪ V⁰} (toEmb (fromEmb (A , E)) .snd) ⟩
+--         --     snd (toEmb (fromEmb (A , E)))
+--         --         ≡⟨ cong snd (secEmb (A , E)) ⟩
+--         --     snd (A , E)
+--         --         ≡⟨⟩
+--         --     E
+--         --         ∎
+
 
 postulate pro18-iso : {A : Type ℓ} → Iso (A ↪ V⁰ {ℓ}) (Σ[ a ∈ V⁰ {ℓ} ] El⁰ a ≡ A)
 -- pro18-iso {ℓ} {A} .Iso.fun emb .fst = fromEmb (record {fst = A ; snd = emb})
