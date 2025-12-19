@@ -108,6 +108,7 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
             ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .fst ≡
             σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst)
 
+        -- remove t2
         t2 :
             (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
             PathP (λ i → Tm Γ (A ∘Ty (t1 Γ Γ' Δ A σ τ i)))
