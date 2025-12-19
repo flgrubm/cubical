@@ -1,5 +1,3 @@
-{-# OPTIONS --safe #-}
-
 module Cubical.Algebra.CommRing.Instances.Bool where
 
 open import Cubical.Foundations.Prelude

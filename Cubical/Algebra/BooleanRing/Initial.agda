@@ -1,5 +1,3 @@
-{-# OPTIONS --safe #-}
-
 module Cubical.Algebra.BooleanRing.Initial where
 
 open import Cubical.Foundations.Prelude

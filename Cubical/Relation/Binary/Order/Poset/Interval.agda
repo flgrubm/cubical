@@ -1,5 +1,3 @@
-{-# OPTIONS --safe #-}
-
 module Cubical.Relation.Binary.Order.Poset.Interval where
 
 open import Cubical.Foundations.Equiv

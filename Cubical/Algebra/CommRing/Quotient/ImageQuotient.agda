@@ -1,5 +1,3 @@
-{-# OPTIONS --safe #-}
-
 module Cubical.Algebra.CommRing.Quotient.ImageQuotient where
 
 open import Cubical.Foundations.Prelude
