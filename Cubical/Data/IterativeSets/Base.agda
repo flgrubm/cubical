@@ -101,7 +101,7 @@ Iso-V⁰-Emb : Iso (V⁰ {ℓ}) (Embedding (V⁰ {ℓ}) ℓ)
 Iso-V⁰-Emb {ℓ} = compIso isom Σ-assoc-Iso
   where
     isom : Iso (V⁰ {ℓ}) (Σ[ F ∈ Fibration (V⁰ {ℓ}) ℓ ] isEmbedding (F .snd))
-    isom .Iso.fun (sup-∞ A f , its) .fst .fst = A
+    isom .Iso.fun (sup-∞ A f , its) .fst .fst = overline (sup-∞ A f , its)
     isom .Iso.fun (sup-∞ A f , its) .fst .snd a .fst = f a
     isom .Iso.fun (sup-∞ A f , its) .fst .snd a .snd = its .snd a
     isom .Iso.fun (sup-∞ A f , its) .snd = isEmbeddingSndΣProp isPropIsIterativeSet _ (its .fst)
@@ -259,6 +259,103 @@ isSetEl⁰ {ℓ} x = Embedding-into-isSet→isSet {A = El⁰ {ℓ} x} {B = V⁰ 
 thm17 : (x : V⁰ {ℓ}) → isSet (El⁰ x)
 thm17 = isSetEl⁰
 {-# WARNING_ON_USAGE thm17 "Deprecated: use isSetEl⁰" #-}
+
+ttti : Iso (Σ[ E ∈ Type ℓ ] fiber El⁰ E) (V⁰ {ℓ})
+ttti = invIso (totalIso El⁰)
+
+ttt : (Σ[ E ∈ Type ℓ ] fiber El⁰ E) ≃ (V⁰ {ℓ})
+ttt = isoToEquiv ttti
+
+sssi : {ℓ : Level} → Iso (Σ[ E ∈ Type ℓ ] fiber El⁰ E) (Embedding (V⁰ {ℓ}) ℓ)
+sssi = compIso ttti Iso-V⁰-Emb
+
+sss : {ℓ : Level} → (Σ[ E ∈ Type ℓ ] fiber El⁰ E) ≃ (Embedding (V⁰ {ℓ}) ℓ)
+sss = isoToEquiv sssi
+
+rrr : {ℓ : Level} (E : Embedding (V⁰ {ℓ}) ℓ) → sssi .Iso.inv E .fst ≡ E .fst
+rrr _ = refl
+
+rrrr : {ℓ : Level} (F : Σ[ E ∈ Type ℓ ] fiber El⁰ E) → sssi .Iso.fun F .fst ≡ F .fst
+rrrr ( _ , (sup-∞ _ _ , _) , p) = p
+
+-- private
+--   ΣIso-sndIso : {ℓA ℓB ℓC : Level} {A : Type ℓA} {B : A → Type ℓB} {C : A → Type ℓC}
+--     (I : Iso (Σ A B) (Σ A C))
+--     → ((S : Σ A B) → I .Iso.fun S .fst ≡ S .fst)
+--     → ((S : Σ A C) → I .Iso.inv S .fst ≡ S .fst)
+--     → (a : A) → Iso (B a) (C a)
+--   ΣIso-sndIso {A = A} {B = B} {C = C} I p q a .Iso.fun b = subst C (p (a , b)) (I .Iso.fun (a , b) .snd)
+--   ΣIso-sndIso {A = A} {B = B} {C = C} I p q a .Iso.inv c = subst B (q (a , c)) (I .Iso.inv (a , c) .snd)
+--   ΣIso-sndIso {A = A} {B = B} {C = C} I p q a .Iso.rightInv c =
+--     let
+--         s : (b : Σ A C) → Iso.fun I (Iso.inv I b) ≡ b
+--         s = I .Iso.rightInv
+--         t : (b : Σ A C) → Σ[ p ∈ fst (Iso.fun I (Iso.inv I b)) ≡ fst b ]
+--                               PathP (λ i → C (p i)) (snd (Iso.fun I (Iso.inv I b))) (snd b)
+--         t b = PathPΣ (I .Iso.rightInv b)
+
+--         S : Σ A C
+--         S = a , c
+
+--         S' : Σ A B
+--         S' = I .Iso.inv S
+
+--         a' : A
+--         a' = S' .fst
+
+--         b' : B a'
+--         b' = S' .snd
+
+--         b+ : B a
+--         b+ = ΣIso-sndIso I p q a .Iso.inv c
+
+--         S+ : Σ A B
+--         S+ = a , b+
+
+--         α : S' ≡ S+
+--         α = ΣPathP (q S , subst-filler B (q S) b')
+
+--         hh : I .Iso.fun S' ≡ I .Iso.fun (I .Iso.inv S)
+--         hh = refl
+
+--         hhh : I .Iso.fun S' ≡ S
+--         hhh = I .Iso.rightInv S
+
+--         goal'' : subst C (p S') {!p S'!} ≡ subst C (sym (q S)) c
+--         goal'' = {!!}
+
+--         goal' : subst C (p S') (I .Iso.fun S' .snd) ≡ subst C (sym (q S)) c
+--         goal' = {!!}
+        
+--         goal : subst C (p S+) (I .Iso.fun S+ .snd) ≡ c
+--         goal = {!!}
+--     in goal
+--   ΣIso-sndIso {A = A} {B = B} {C = C} I p q x .Iso.leftInv b = {!!}
+--   -- ΣIso-sndIso I p q x .Iso.fun y = {!subst C ? (I .Iso.fun (x , y) .snd)!}
+
+-- qqq : {A : Type ℓ} → Iso (fiber El⁰ A) (A ↪ V⁰ {ℓ})
+-- qqq {ℓ} {A = A} = ΣIso-sndIso sssi rrrr (λ _ → refl) A
+
+-- -- rrrr : {ℓ : Level} (F : Σ[ E ∈ Type ℓ ] fiber El⁰ E) → sssi .Iso.fun F .fst ≡ F .fst
+-- -- rrrr ( _ , (sup-∞ _ _ , _) , p) = p
+
+-- qqqq : {A : Type ℓ} → Iso (fiber El⁰ A) (A ↪ V⁰ {ℓ})
+-- qqqq {ℓ} {A = A} .Iso.fun E = subst (λ M → M ↪ V⁰ {ℓ}) (rrrr (A , E)) (sssi .Iso.fun (A , E) .snd)
+-- qqqq {ℓ} {A = A} .Iso.inv E = sssi .Iso.inv (A , E) .snd
+-- qqqq {ℓ} {A = A} .Iso.rightInv E = 
+--     let
+--         goal : subst (λ M → M ↪ V⁰ {ℓ}) (sssi .Iso.inv (A , E) .snd .snd) (sssi .Iso.fun (A , (sssi .Iso.inv (A , E) .snd)) .snd)  ≡ E
+--         goal = {!!}
+--     in goal
+-- qqqq {ℓ} {A = A} .Iso.leftInv = {!!}
+
+-- pro18-alt : {A : Type ℓ} → Iso (A ↪ V⁰ {ℓ}) (Σ[ x ∈ Embedding (V⁰ {ℓ}) ℓ ] x .fst ≡ A)
+-- pro18-alt {ℓ} {A} .Iso.fun emb .fst .fst = A
+-- pro18-alt {ℓ} {A} .Iso.fun emb .fst .snd = emb
+-- pro18-alt {ℓ} {A} .Iso.fun emb .snd = refl
+-- pro18-alt {ℓ} {A} .Iso.inv s = subst (λ B → B ↪ V⁰ {ℓ}) (s .snd) (s .fst .snd)
+-- pro18-alt {ℓ} {A} .Iso.rightInv s = {!!}
+-- pro18-alt {ℓ} {A} .Iso.leftInv emb = {!!}
 
 -- pro18-alt : {A : Type ℓ} → Iso (A ↪ V⁰ {ℓ}) (Σ[ x ∈ Embedding (V⁰ {ℓ}) ℓ ] x .fst ≡ A)
 -- pro18-alt {ℓ} {A} .Iso.fun emb .fst .fst = A

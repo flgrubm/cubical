@@ -48,15 +48,19 @@ module FiberIso {ℓ} (p⁻¹ : B → Type ℓ) (x : B) where
 open FiberIso using (fiberEquiv) public
 
 module _ {ℓ} {E : Type ℓ} (p : E → B) where
+  totalIso : Iso E (Σ B (fiber p))
+  totalIso .Iso.fun x .fst = p x
+  totalIso .Iso.fun x .snd .fst = x
+  totalIso .Iso.fun x .snd .snd = refl
+  totalIso .Iso.inv S = S .snd. fst
+  totalIso .Iso.rightInv S i .fst = S .snd .snd i
+  totalIso .Iso.rightInv S i .snd .fst = S .snd. fst
+  totalIso .Iso.rightInv S i .snd .snd j = S .snd .snd (i ∧ j)
+  totalIso .Iso.leftInv _ = refl
 
   -- HoTT Lemma 4.8.2
   totalEquiv : E ≃ Σ B (fiber p)
-  totalEquiv = isoToEquiv isom
-    where isom : Iso E (Σ B (fiber p))
-          Iso.fun isom x           = p x , x , refl
-          Iso.inv isom (b , x , q) = x
-          Iso.leftInv  isom x           i = x
-          Iso.rightInv isom (b , x , q) i = q i , x , λ j → q (i ∧ j)
+  totalEquiv = isoToEquiv totalIso
 
 module _ (B : Type ℓb) (ℓ : Level) where
   private
