@@ -202,7 +202,7 @@ V-Σ-Structure .ctxExtSubstSigmaSndEq {Γ} {Δ} A B a σ = funExt (λ x →
                   ≡
                 B (⟨_,_⟩ V-CwF σ A (ctxExtSubst V-CwF ((V-CwF ∘Ty A) σ) (IdSubst V-CwF) (subst⁻ (Tm V-CwF Γ) refl (_[_] V-CwF a σ)) x))
                 -- ((V-CwF ∘Ty (V-CwF ∘Ty B) (⟨_,_⟩ V-CwF σ A)) (ctxExtSubst V-CwF ((V-CwF ∘Ty A) σ) (IdSubst V-CwF) (subst⁻ (Tm V-CwF Γ) refl (_[_] V-CwF a σ))) x)
-        goal = cong (λ t → B (ctxExtSubst V-CwF A (IdSubst V-CwF) t (σ x))) (substRefl {B = Tm V-CwF Δ} a) ∙ goal' ∙ cong (λ s → B (⟨_,_⟩ V-CwF σ A (ctxExtSubst V-CwF ((V-CwF ∘Ty A) σ) (IdSubst V-CwF) s x))) (sym (substRefl {B = Tm V-CwF Γ} (_[_] V-CwF a σ)))
+        goal = cong (λ t → B (ctxExtSubst V-CwF A (IdSubst V-CwF) t (σ x))) (substRefl {B = Tm V-CwF Δ} a) ∙∙ goal' ∙∙ cong (λ s → B (⟨_,_⟩ V-CwF σ A (ctxExtSubst V-CwF ((V-CwF ∘Ty A) σ) (IdSubst V-CwF) s x))) (sym (substRefl {B = Tm V-CwF Γ} (_[_] V-CwF a σ)))
 
         -- p : B (σ x , subst⁻ (Tm V-CwF Δ) refl a .lower (σ x))
         --        ≡
@@ -237,12 +237,59 @@ V-Σ-Structure .ctxExtSubstSigmaSndEq {Γ} {Δ} A B a σ = funExt (λ x →
     --   ≡⟨ transportRefl (a .lower (σ x) .fst) ⟩
     -- a .lower (σ x) .fst
     --   ∎
-V-Σ-Structure .sig-iso-nat {Γ} {Δ} A B a σ = ΣPathP (cong lift (funExt (λ x → cong (λ M → M .lower x .fst)
-      (substRefl {B = Tm V-CwF Γ} ((V-CwF [ a ]) σ))
-        ∙∙ transportRefl (a .lower (σ x) .fst)
-        ∙∙ sym (substRefl {B = El⁰} (V-Σ-Structure .sig-iso A B .fst a .fst .lower (σ x)))))
-      , cong lift (funExt (λ (x : El⁰ Γ) → 
-          let
+-- V-Σ-Structure .sig-iso-nat {Γ} {Δ} A B a σ i .fst = lift λ x → substRefl {B = Tm V-CwF Γ} ((V-CwF [ a ]) σ) i .lower x .fst
+-- V-Σ-Structure .sig-iso-nat {Γ} {Δ} A B a σ i .snd = {!!}
+V-Σ-Structure .sig-iso-nat {Γ} {Δ} A B a σ = ΣPathP (
+    let
+        h : (fst
+              (V-Σ-Structure .sig-iso ((V-CwF ∘Ty A) σ)
+               ((V-CwF ∘Ty B) (⟨ V-CwF , σ ⟩ A)) .fst
+               (subst (Tm V-CwF Γ) (V-Σ-Structure .sig-nat A B σ)
+                ((V-CwF [ a ]) σ))))
+            ≡
+            lift (λ x → subst (Tm V-CwF Γ) refl ((V-CwF [ a ]) σ) .lower x .fst) 
+        h = refl
+
+        g : lift (λ x → subst El⁰ refl (a .lower (σ x) .fst)) ≡ ((V-CwF [ V-Σ-Structure .sig-iso A B .fst a .fst ]) σ)
+        g = refl
+
+        p : lift (λ x → subst (Tm V-CwF Γ) refl ((V-CwF [ a ]) σ) .lower x .fst) ≡ lift (λ x → subst El⁰ refl (a .lower (σ x) .fst))
+        p = cong lift (funExt (λ x → cong (λ M → M .lower x .fst) (substRefl {B = Tm V-CwF Γ} ((V-CwF [ a ]) σ))))
+
+        -- q : {!PathP
+        --      (λ i →
+        --         Tm V-CwF Γ
+        --         ((V-CwF ∘Ty (V-CwF ∘Ty B) (⟨ V-CwF , σ ⟩ A))
+        --          (ctxExtSubst V-CwF ((V-CwF ∘Ty A) σ) (IdSubst V-CwF)
+        --           (subst⁻ (Tm V-CwF Γ) (∘ᴾId V (tyPresheaf V-CwF) ((V-CwF ∘Ty A) σ))
+        --            (lift
+        --             (funExt (λ x i₁ → substRefl ((V-CwF [ a ]) σ) i₁ .lower x .fst)
+        --              i))))))
+        --      (Iso.fun
+        --       (Cubical.Categories.WithFamilies.Instances.IterativeSets.isom
+        --        ((V-CwF ∘Ty A) σ) ((V-CwF ∘Ty B) (⟨ V-CwF , σ ⟩ A)))
+        --       (subst (Tm V-CwF Γ) (V-Σ-Structure .sig-nat A B σ)
+        --        ((V-CwF [ a ]) σ))
+        --       .snd)
+        --      (subst (Tm V-CwF Γ)
+        --       (V-Σ-Structure .ctxExtSubstSigmaSndEq A B
+        --        (V-Σ-Structure .sig-iso A B .fst a .fst) σ)
+        --       ((V-CwF [ V-Σ-Structure .sig-iso A B .fst a .snd ]) σ))!}
+        q : PathP (λ i → Tm V-CwF Γ {!p i!}) {!!} {!!}
+        q = {!!} ∙ {!!}
+    in p , q)
+
+    -- let
+    --   p : lift (λ x → subst (Tm V-CwF Γ) refl ((V-CwF [ a ]) σ) .lower x .fst) ≡ lift (λ x → subst El⁰ refl (a .lower (σ x) .fst))
+    --   p = cong lift (funExt (λ x →
+    --     cong (λ M → M .lower x .fst)
+    --     (substRefl {B = Tm V-CwF Γ} ((V-CwF [ a ]) σ))
+    --         ∙∙ transportRefl (a .lower (σ x) .fst)
+    --         ∙∙ sym (substRefl {B = El⁰} (V-Σ-Structure .sig-iso A B .fst a .fst .lower (σ x)))))
+    --   q : PathP (λ i → p i) {!!} {!!}
+    --   q = {!!}
+    -- in p , q)
+
 -- Goal: subst⁻
 --       (λ m → El⁰ ((V-CwF ∘Ty B) (⟨ V-CwF , σ ⟩ A) (x , m .lower x)))
 --       (substRefl
@@ -317,13 +364,13 @@ V-Σ-Structure .sig-iso-nat {Γ} {Δ} A B a σ = ΣPathP (cong lift (funExt (λ 
                    (subst (Tm V-CwF Γ) (V-Σ-Structure .sig-nat A B σ) ((V-CwF [ a ]) σ))
                    .snd .lower
                   -}
-              goal : {!!}
-              goal =
-                {!subst⁻ (λ m → El⁰ ((V-CwF ∘Ty B) (⟨ V-CwF , σ ⟩ A) (x , m .lower x))) (substRefl {B = Tm V-CwF Δ} {x = (V-CwF ∘Ty A) σ} (lift (λ y → (subst (Tm V-CwF Γ) (V-Σ-Structure .sig-nat A B σ) ((V-CwF [ a ]) σ))  .lower y .fst)) ) ((subst (Tm V-CwF Γ) (V-Σ-Structure .sig-nat A B σ) ((V-CwF [ a ]) σ)) .lower x .snd)!}
-                    ≡⟨ {!!} ⟩
-                {!!}
-                    ∎
-        in goal)))
+        --       goal : PathP (λ v → {!!}) {!!} {!!}
+        --       goal = {!!}
+        --         -- {!subst⁻ (λ m → El⁰ ((V-CwF ∘Ty B) (⟨ V-CwF , σ ⟩ A) (x , m .lower x))) (substRefl {B = Tm V-CwF Δ} {x = (V-CwF ∘Ty A) σ} (lift (λ y → (subst (Tm V-CwF Γ) (V-Σ-Structure .sig-nat A B σ) ((V-CwF [ a ]) σ))  .lower y .fst)) ) ((subst (Tm V-CwF Γ) (V-Σ-Structure .sig-nat A B σ) ((V-CwF [ a ]) σ)) .lower x .snd)!}
+        --         --     ≡⟨ {!!} ⟩
+        --         -- {!!}
+        --         --     ∎
+        -- in goal)))
       -- cong lift (funExt (λ x → 
       --   let
       --       goal : {!!} -- Path {!!} {!!} {!!}
