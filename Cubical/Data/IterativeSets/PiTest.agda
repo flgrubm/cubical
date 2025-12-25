@@ -81,104 +81,157 @@ private
           
 
 
-Ψ : {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → ((a : El⁰ x) → El⁰ (y a)) → El⁰ x ↪ V⁰ {ℓ}
-Ψ {ℓ} {x} {y} ϕ = compEmbedding (orderedPair⁰ , isEmbOrderedPair⁰) emb
-  where
-    emb : El⁰ x ↪ (V⁰ × V⁰)
-    emb .fst a .fst = tilde x a
-    emb .fst a .snd = tilde (y a) (ϕ a)
-    emb .snd = injEmbedding (isSet× isSetV⁰ isSetV⁰) (λ p → isEmbedding→Inj (isEmbedding-tilde x) _ _ (cong fst p))
+-- Ψ : {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → ((a : El⁰ x) → El⁰ (y a)) → El⁰ x ↪ V⁰ {ℓ}
+-- Ψ {ℓ} {x} {y} ϕ = compEmbedding (orderedPair⁰ , isEmbOrderedPair⁰) emb
+--   where
+--     emb : El⁰ x ↪ (V⁰ × V⁰)
+--     emb .fst a .fst = tilde x a
+--     emb .fst a .snd = tilde (y a) (ϕ a)
+--     emb .snd = injEmbedding (isSet× isSetV⁰ isSetV⁰) (λ p → isEmbedding→Inj (isEmbedding-tilde x) _ _ (cong fst p))
 
-graph⁰ : {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → ((a : El⁰ x) → El⁰ (y a)) ↪ V⁰ {ℓ}
-graph⁰ {ℓ} {x} {y} = compEmbedding (Iso→Embedding (invIso Iso-V⁰-Emb)) ee
-  where
-    ee : ((a : El⁰ x) → El⁰ (y a)) ↪ Embedding V⁰ ℓ
-    ee .fst ϕ .fst = El⁰ x
-    ee .fst ϕ .snd = Ψ ϕ
-    ee .snd = injEmbedding isSetEmbedding help
-      where
-        help : {ϕ θ : (a : El⁰ x) → El⁰ (y a)} → ee .fst ϕ ≡ ee .fst θ → ϕ ≡ θ
-        help {ϕ} {θ} p = {!!}
-          where
-            q : (El⁰ x , Ψ ϕ .fst) ≡ (El⁰ x , Ψ θ .fst)
-            q = cong EmbeddingIdentityPrinciple.toFibr p
-
-            qq : Σ[ p ∈ El⁰ x ≡ El⁰ x ] subst (λ m → m → V⁰) p (Ψ ϕ .fst) ≡ Ψ θ .fst
-            qq = PathΣ→ΣPathTransport (El⁰ x , Ψ ϕ .fst) (El⁰ x , Ψ θ .fst) q
-
-            qq1 : El⁰ x ≡ El⁰ x
-            qq1 = qq .fst
-
-            qq2 : subst (λ m → m → V⁰) (qq .fst) (Ψ ϕ .fst) ≡ Ψ θ .fst
-            qq2 = qq .snd
-
-            qqq : Σ[ p ∈ El⁰ x ≡ El⁰ x ] PathP (λ i → p i → V⁰) (Ψ ϕ .fst) (Ψ θ .fst)
-            qqq = PathPΣ q
-
-            qqq1 : El⁰ x ≡ El⁰ x
-            qqq1 = qqq .fst
-
-            qqq2 : PathP (λ i → qqq1 i → V⁰) (Ψ ϕ .fst) (Ψ θ .fst)
-            qqq2 = qqq .snd
-
-            qqqq : (a : (i : I) → qqq1 i) → Ψ ϕ .fst (a i0) ≡ Ψ θ .fst (a i1)
-            qqqq a i = qqq2 i (a i)
-
-            ggg : (a : El⁰ x) → PathP (λ i → qqq1 i) a (transport qqq1 a)
-            ggg a = transport-filler qqq1 a
-
-            qqqqq : (a : El⁰ x) → Ψ ϕ .fst a ≡ Ψ θ .fst (transport qqq1 a)
-            qqqqq a = qqqq (λ i → transport-filler qqq1 a i)
-
-            hhh : (a : El⁰ x) → transport refl (Ψ ϕ .fst a) ≡ Ψ θ .fst (transport qqq1 a)
-            hhh a = fromPathP (qqqqq a)
-
-graph⁰' : {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → ((a : El⁰ x) → El⁰ (y a)) ↪ V⁰ {ℓ}
-graph⁰' {ℓ} {x} {y} = compEmbedding (Iso→Embedding (invIso Iso-V⁰-Emb)) ee
-  where
-    ee : ((a : El⁰ x) → El⁰ (y a)) ↪ Embedding V⁰ ℓ
-    ee .fst ϕ .fst = El⁰ x
-    ee .fst ϕ .snd = Ψ ϕ
-    ee .snd = injEmbedding isSetEmbedding help
-      where
-        help : {ϕ θ : (a : El⁰ x) → El⁰ (y a)} → ee .fst ϕ ≡ ee .fst θ → ϕ ≡ θ
-        help {ϕ} {θ} p = {!!}
-        -- (J> isEmbedding→Inj {!Ψ ϕ .snd!} {!!}) (ee .fst θ)
 -- graph⁰ : {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → ((a : El⁰ x) → El⁰ (y a)) ↪ V⁰ {ℓ}
--- graph⁰ {ℓ} {x} {y} .fst ϕ = fromEmb (El⁰ x , Ψ ϕ)
--- graph⁰ {ℓ} {x} {y} .snd = injEmbedding isSetV⁰ (λ {ϕ} {θ} p → funExt (λ a → 
---     let
---       h : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} ϕ) .fst ≡ sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (ϕ a)) .fst)
---       h = refl
+-- graph⁰ {ℓ} {x} {y} = compEmbedding (Iso→Embedding (invIso Iso-V⁰-Emb)) ee
+--   where
+--     ee : ((a : El⁰ x) → El⁰ (y a)) ↪ Embedding V⁰ ℓ
+--     ee .fst ϕ .fst = El⁰ x
+--     ee .fst ϕ .snd = Ψ ϕ
+--     ee .snd = injEmbedding isSetEmbedding help
+--       where
+--         help : {ϕ θ : (a : El⁰ x) → El⁰ (y a)} → ee .fst ϕ ≡ ee .fst θ → ϕ ≡ θ
+--         help {ϕ} {θ} p = {!!}
+--           where
+--             q : (El⁰ x , Ψ ϕ .fst) ≡ (El⁰ x , Ψ θ .fst)
+--             q = cong EmbeddingIdentityPrinciple.toFibr p
 
---       -- hh : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} ϕ) ≡ (sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (ϕ a)) .fst) , _)
---       -- hh = Σ≡Prop isPropIsIterativeSet {!!}
+--             qq : Σ[ p ∈ El⁰ x ≡ El⁰ x ] subst (λ m → m → V⁰) p (Ψ ϕ .fst) ≡ Ψ θ .fst
+--             qq = PathΣ→ΣPathTransport (El⁰ x , Ψ ϕ .fst) (El⁰ x , Ψ θ .fst) q
 
---       j : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} θ) .fst ≡ sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (θ a)) .fst)
---       j = refl
+--             qq1 : El⁰ x ≡ El⁰ x
+--             qq1 = qq .fst
 
---       k : sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (ϕ a)) .fst) ≡ sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (θ a)) .fst)
---       k = cong fst p
+--             qq2 : subst (λ m → m → V⁰) (qq .fst) (Ψ ϕ .fst) ≡ Ψ θ .fst
+--             qq2 = qq .snd
 
---       kk : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} ϕ) ≃V⁰ fromEmb (El⁰ x , Ψ {ℓ} {x} {y} θ)
---       kk = ≡V⁰-≃-≃V⁰ .fst p
+--             qqq : Σ[ p ∈ El⁰ x ≡ El⁰ x ] PathP (λ i → p i → V⁰) (Ψ ϕ .fst) (Ψ θ .fst)
+--             qqq = PathPΣ q
 
---       kkk : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} ϕ) ≃V⁰' fromEmb (El⁰ x , Ψ {ℓ} {x} {y} θ)
---       kkk = ≡V⁰-≃-≃V⁰' .fst p
+--             qqq1 : El⁰ x ≡ El⁰ x
+--             qqq1 = qqq .fst
 
---       goal : tilde (y a) (ϕ a) ≡ tilde (y a) (θ a)
---       goal = {!!}
---     in isEmbedding→Inj (isEmbedding-tilde (y a)) (ϕ a) (θ a) goal))
+--             qqq2 : PathP (λ i → qqq1 i → V⁰) (Ψ ϕ .fst) (Ψ θ .fst)
+--             qqq2 = qqq .snd
 
--- Π⁰ : (x : V⁰ {ℓ}) → (El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
--- Π⁰ x y = sup⁰ (((a : El⁰ x) → El⁰ (y a)) , graph⁰ {x = x} {y = y})
+--             qqqq : (a : (i : I) → qqq1 i) → Ψ ϕ .fst (a i0) ≡ Ψ θ .fst (a i1)
+--             qqqq a i = qqq2 i (a i)
 
--- El⁰Π⁰IsΠ : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Π⁰ x y) ≡ ((a : El⁰ x) → El⁰ (y a))
--- El⁰Π⁰IsΠ = refl
+--             ggg : (a : El⁰ x) → PathP (λ i → qqq1 i) a (transport qqq1 a)
+--             ggg a = transport-filler qqq1 a
 
--- -- Corollary 23
--- _→⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
--- x →⁰ y = Π⁰ x (λ _ → y)
+--             qqqqq : (a : El⁰ x) → Ψ ϕ .fst a ≡ Ψ θ .fst (transport qqq1 a)
+--             qqqqq a = qqqq (λ i → transport-filler qqq1 a i)
 
--- El⁰→⁰Is→ : {x y : V⁰ {ℓ}} → El⁰ (x →⁰ y) ≡ (El⁰ x → El⁰ y)
--- El⁰→⁰Is→ = refl
+--             hhh : (a : El⁰ x) → transport refl (Ψ ϕ .fst a) ≡ Ψ θ .fst (transport qqq1 a)
+--             hhh a = fromPathP (qqqqq a)
+
+-- graph⁰' : {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → ((a : El⁰ x) → El⁰ (y a)) ↪ V⁰ {ℓ}
+-- graph⁰' {ℓ} {x} {y} = compEmbedding (Iso→Embedding (invIso Iso-V⁰-Emb)) ee
+--   where
+--     ee : ((a : El⁰ x) → El⁰ (y a)) ↪ Embedding V⁰ ℓ
+--     ee .fst ϕ .fst = El⁰ x
+--     ee .fst ϕ .snd = Ψ ϕ
+--     ee .snd = injEmbedding isSetEmbedding help
+--       where
+--         help : {ϕ θ : (a : El⁰ x) → El⁰ (y a)} → ee .fst ϕ ≡ ee .fst θ → ϕ ≡ θ
+--         help {ϕ} {θ} p = {!!}
+--         -- (J> isEmbedding→Inj {!Ψ ϕ .snd!} {!!}) (ee .fst θ)
+-- -- graph⁰ : {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → ((a : El⁰ x) → El⁰ (y a)) ↪ V⁰ {ℓ}
+-- -- graph⁰ {ℓ} {x} {y} .fst ϕ = fromEmb (El⁰ x , Ψ ϕ)
+-- -- graph⁰ {ℓ} {x} {y} .snd = injEmbedding isSetV⁰ (λ {ϕ} {θ} p → funExt (λ a → 
+-- --     let
+-- --       h : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} ϕ) .fst ≡ sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (ϕ a)) .fst)
+-- --       h = refl
+
+-- --       -- hh : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} ϕ) ≡ (sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (ϕ a)) .fst) , _)
+-- --       -- hh = Σ≡Prop isPropIsIterativeSet {!!}
+
+-- --       j : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} θ) .fst ≡ sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (θ a)) .fst)
+-- --       j = refl
+
+-- --       k : sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (ϕ a)) .fst) ≡ sup-∞ (El⁰ x) (λ a → orderedPair⁰ (tilde x a , tilde (y a) (θ a)) .fst)
+-- --       k = cong fst p
+
+-- --       kk : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} ϕ) ≃V⁰ fromEmb (El⁰ x , Ψ {ℓ} {x} {y} θ)
+-- --       kk = ≡V⁰-≃-≃V⁰ .fst p
+
+-- --       kkk : fromEmb (El⁰ x , Ψ {ℓ} {x} {y} ϕ) ≃V⁰' fromEmb (El⁰ x , Ψ {ℓ} {x} {y} θ)
+-- --       kkk = ≡V⁰-≃-≃V⁰' .fst p
+
+-- --       goal : tilde (y a) (ϕ a) ≡ tilde (y a) (θ a)
+-- --       goal = {!!}
+-- --     in isEmbedding→Inj (isEmbedding-tilde (y a)) (ϕ a) (θ a) goal))
+
+-- -- Π⁰ : (x : V⁰ {ℓ}) → (El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
+-- -- Π⁰ x y = sup⁰ (((a : El⁰ x) → El⁰ (y a)) , graph⁰ {x = x} {y = y})
+
+-- -- El⁰Π⁰IsΠ : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Π⁰ x y) ≡ ((a : El⁰ x) → El⁰ (y a))
+-- -- El⁰Π⁰IsΠ = refl
+
+-- -- -- Corollary 23
+-- -- _→⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
+-- -- x →⁰ y = Π⁰ x (λ _ → y)
+
+-- -- El⁰→⁰Is→ : {x y : V⁰ {ℓ}} → El⁰ (x →⁰ y) ≡ (El⁰ x → El⁰ y)
+-- -- El⁰→⁰Is→ = refl
+
+graph⁰ : ((a : El⁰ {ℓ} x) → El⁰ {ℓ} (y a)) → V⁰ {ℓ}
+graph⁰ {ℓ = ℓ} {x = x} {y = y} f = fromEmb E
+  where
+    E : Embedding (V⁰ {ℓ}) ℓ
+    E .fst = El⁰ x
+    E .snd .fst a = orderedPair⁰ (tilde x a , tilde (y a) (f a))
+    E .snd .snd = injEmbedding isSetV⁰ (λ {v} {w} p → isEmbedding→Inj {f = tilde x} (isEmbedding-tilde x) v w (orderedPair⁰≡orderedPair⁰ .fst p .fst))
+
+Π⁰ : (x : V⁰ {ℓ}) → ((a : El⁰ x) → V⁰ {ℓ}) → V⁰ {ℓ}
+Π⁰ {ℓ} x y = fromEmb E
+  where
+    In : {f g : (a : El⁰ {ℓ} x) → El⁰ {ℓ} (y a)} → graph⁰ {x = x} {y = y} f ≡ graph⁰ {x = x} {y = y} g → (a : El⁰ x) → f a ≡ g a
+    In {f} {g} p a = 
+      let
+        qqq : ((z : V⁰) → z ∈⁰ graph⁰ f → z ∈⁰ graph⁰ g)
+        qqq = ≡V⁰-≃-≃V⁰ .fst p .fst
+        -- ppp : Σ (overline (graph⁰ g))
+        --        (λ x₁ →
+        --           tilde (graph⁰ g) x₁ ≡ orderedPair⁰ (tilde x a , tilde (y a) (f a)))
+        ppp : Σ[ a' ∈ El⁰ x ] orderedPair⁰ ((tilde x a') , (tilde (y a') (g a'))) ≡ orderedPair⁰ ((tilde x a) , (tilde (y a) (f a)))
+        ppp = qqq (orderedPair⁰ ((tilde x a) , (tilde (y a) (f a)))) (a , refl)
+
+        a' : El⁰ x
+        a' = ppp .fst
+
+        ttt : orderedPair⁰ ((tilde x a') , (tilde (y a') (g a'))) ≡ orderedPair⁰ ((tilde x a) , (tilde (y a) (f a)))
+        ttt = ppp .snd
+
+        qqq : tilde x a' ≡ tilde x a
+        qqq = orderedPair⁰≡orderedPair⁰ .fst ttt .fst
+
+        pp : a' ≡ a
+        pp = isEmbedding→Inj {f = tilde x} (isEmbedding-tilde x) a' a qqq
+
+        sss : tilde (y a') (g a') ≡ tilde (y a) (f a)
+        sss = orderedPair⁰≡orderedPair⁰ .fst ttt .snd
+        
+        pppp : tilde (y a) (g a) ≡ tilde (y a') (g a')
+        pppp i = tilde (y (pp (~ i))) (g (pp (~ i)))
+
+        s : f a ≡ g a
+        s = isEmbedding→Inj {f = tilde (y a)} (isEmbedding-tilde (y a)) (f a) (g a) (sym (pppp ∙ sss))
+      in s
+       
+    
+    In' : {f g : (a : El⁰ {ℓ} x) → El⁰ {ℓ} (y a)} → graph⁰ {x = x} {y = y} f ≡ graph⁰ {x = x} {y = y} g → f ≡ g
+    In' p = funExt (In p)
+
+    E : Embedding (V⁰ {ℓ}) ℓ
+    E .fst = (a : El⁰ x) → El⁰ (y a)
+    E .snd .fst f = graph⁰ {x = x} {y = y} f
+    E .snd .snd = injEmbedding isSetV⁰ In'
