@@ -146,11 +146,9 @@ V-CwF .t3 Γ Γ' Δ A σ τ =
         q : PathP (λ i → refl i) (V-CwF .ctxExtEquiv Γ Δ A .fst ((V ⋆ σ) τ) .snd) (action (V-CwF .tmPresheaf) (σ , refl) (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd))
         q = cong lift (funExt λ x → sym (substRefl {B = El⁰} (τ (σ x) .snd)))
 
-        goal : PathP
-                (λ i → F-ob (V-CwF .tmPresheaf) (Γ , ((λ k → action (V-CwF .tyPresheaf) (V-CwF .t1 Γ Γ' Δ A σ τ k) A) ∙ ∘ᴾAssoc V (V-CwF .tyPresheaf) A (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .fst) σ) i) .fst)
-                (V-CwF .ctxExtEquiv Γ Δ A .fst ((V ⋆ σ) τ) .snd)
-                (action (V-CwF .tmPresheaf) (σ , refl)
-                 (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd))
+        goal : PathP (λ i → F-ob (V-CwF .tmPresheaf) (Γ , (refl ∙ refl) i) .fst)
+            (V-CwF .ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ V ⟩ τ) .snd)
+            (_[_] V-CwF (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd) σ)
         goal = subst (λ m → PathP (λ i → V-CwF .tmPresheaf .F-ob (Γ , (m i)) .fst) (V-CwF .ctxExtEquiv Γ Δ A .fst ((V ⋆ σ) τ) .snd) (action (V-CwF .tmPresheaf) (σ , refl) (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd))) compPathRefl q
     in goal
 
@@ -376,3 +374,6 @@ V-Σ-Structure .sig-iso-nat {Γ} {Δ} A B a σ = ΣPathP (
       --       goal : {!!} -- Path {!!} {!!} {!!}
       --       goal = {!!}
       --   in goal)))
+
+test : {ℓ : Level} {A : Type ℓ} (x : A) → PathP (λ _ → A) x x
+test x = refl
