@@ -1,6 +1,6 @@
 -- {-# OPTIONS --safe #-}
 
-module Cubical.Categories.WithFamilies.Base where
+module Cubical.Categories.WithFamiliesCubical.Base where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Categories.Category

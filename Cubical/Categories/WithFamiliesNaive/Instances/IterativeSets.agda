@@ -20,12 +20,11 @@ open import Cubical.Foundations.GroupoidLaws
 -- open import Cubical.Data.Equality.Conversion hiding (funExt)
 
 open import Cubical.Data.IterativeSets.Base
--- open import Cubical.Data.IterativeSets.Pi
 open import Cubical.Data.IterativeSets.Sigma
 open import Cubical.Categories.Instances.IterativeSets
-open import Cubical.Categories.WithFamilies.Base
--- open import Cubical.Categories.WithFamilies.Structure.Pi
-open import Cubical.Categories.WithFamilies.Structure.Sigma
+
+open import Cubical.Categories.WithFamiliesNaive.Base
+open import Cubical.Categories.WithFamiliesNaive.Structure.Sigma
 
 open import Cubical.Categories.Presheaf
 open import Cubical.Categories.Functor
@@ -34,7 +33,7 @@ import Cubical.Categories.Constructions.Elements as Els -- renaming (Covariant.�
 open Els.Contravariant
 
 open Functor
-module Cubical.Categories.WithFamilies.Instances.IterativeSets where
+module Cubical.Categories.WithFamiliesNaive.Instances.IterativeSets where
 
 private
   variable
@@ -136,34 +135,6 @@ V-CwF .ctxExtEquivNat Γ Γ' _ A σ τ = ΣPathP (refl , cong lift (funExt (λ x
               (lift (λ y → τ y .snd)) .lower (transp (λ j → El⁰ Γ) k x))
     in p ∙ transportRefl _ ∙ transportRefl _)))
 
-
-V-CwF .t1 _ _ _ _ _ _ = refl
-
-V-CwF .t2 Γ Γ' Δ A σ τ = cong snd (V-CwF .ctxExtEquivNat Γ Γ' Δ A σ τ)
-
-V-CwF .t3 Γ Γ' Δ A σ τ = 
-    let
-        q : PathP (λ i → refl i) (V-CwF .ctxExtEquiv Γ Δ A .fst ((V ⋆ σ) τ) .snd) (action (V-CwF .tmPresheaf) (σ , refl) (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd))
-        q = cong lift (funExt λ x → sym (substRefl {B = El⁰} (τ (σ x) .snd)))
-
-        goal : PathP (λ i → F-ob (V-CwF .tmPresheaf) (Γ , (refl ∙ refl) i) .fst)
-            (V-CwF .ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ V ⟩ τ) .snd)
-            (_[_] V-CwF (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd) σ)
-        goal = subst (λ m → PathP (λ i → V-CwF .tmPresheaf .F-ob (Γ , (m i)) .fst) (V-CwF .ctxExtEquiv Γ Δ A .fst ((V ⋆ σ) τ) .snd) (action (V-CwF .tmPresheaf) (σ , refl) (V-CwF .ctxExtEquiv Γ' Δ A .fst τ .snd))) compPathRefl q
-    in goal
-
-V-CwF .ctxExtSubstComp _ _ _ _ = refl
-
-V-CwF .ctxExtComp {Γ} {Δ} {Δ'} A τ σ =
-    substRefl {B = λ X → V .Hom[_,_] (V-CwF .ctxExtFunctor .F-ob (Γ , X)) (V-CwF .ctxExtFunctor .F-ob (Δ' , A))} _
-        ∙ funExt (λ x → ΣPathP (refl ,
-                                (substRefl {B = El⁰} _ ∙ substRefl {B = El⁰} _
-                                 ∙ sym (substRefl {B = El⁰} _))))
-
--- V-Π-Structure : {ℓ : Level} → Π-Structure-CwF (V-CwF {ℓ})
--- V-Π-Structure .Π-Structure-CwF.Π {Γ} A B x = Π⁰ (A x) (λ a → B (x , a))
--- V-Π-Structure .Π-Structure-CwF.Π-natural A B σ = funExt (λ x → cong sup⁰ (cong (λ s → s , graph⁰) {!!})) -- funExt (λ x → {!!})
--- V-Π-Structure .Π-Structure-CwF.iso-Π = {!!}
 
 open Σ-Structure-CwF
 

@@ -1,4 +1,4 @@
-module Cubical.Categories.WithFamilies.Structure.Sigma where
+module Cubical.Categories.WithFamiliesCubical.Structure.Sigma where
 
 open import Cubical.Foundations.Prelude
 
@@ -9,7 +9,7 @@ open import Cubical.Foundations.Transport
 open import Cubical.Categories.Presheaf
 open import Cubical.Foundations.Function
 
-open import Cubical.Categories.WithFamilies.Base
+open import Cubical.Categories.WithFamiliesCubical.Base
 
 record Σ-Structure-CwF {ℓ ℓ' ℓTy ℓTm : Level} {C : Category ℓ ℓ'} (cwf : CwF C ℓTy ℓTm) : Type ((ℓ-suc (ℓ-max (ℓ-max (ℓ-max ℓ ℓ') ℓTy) ℓTm))) where
   open Category C

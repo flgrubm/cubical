@@ -1,6 +1,6 @@
 -- {-# OPTIONS --safe #-}
 
-module Cubical.Categories.WithFamilies.Base where
+module Cubical.Categories.WithFamiliesNaive.Base where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Categories.Category
@@ -29,9 +29,6 @@ private
 open Category
 open Functor
 
--- TODO: try to use more PathP
-
--- check universe levels
 record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-max (ℓ-max (ℓ-max ℓ ℓ') ℓTy) ℓTm)) where
 
     Ctx : Type ℓ
@@ -95,9 +92,6 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
     ctxExtSubst-n : {Γ : Ctx} (A : Ty Γ) → ctxExtSubst A (wk A) (q A) ≡ IdSubst
     ctxExtSubst-n {Γ} A = retEq (ctxExtEquiv (ctxExt Γ A) Γ A) IdSubst
 
-    
-            
-
     field
         -- as PathP
         ctxExtEquivNat :
@@ -106,55 +100,7 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
             (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) ,
             subst⁻ (Tm Γ) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
 
-        -- ttt : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     Path {!!} (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .snd , ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ])) {!!}
-
-        -- adde : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     Subst Γ Δ × Tm Γ {!(A ∘Ty τ)!} ≡ {!!}
-
-        -- cex2 : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     PathP (λ i → Σ[ γ ∈ Subst Γ Δ ] Tm Γ {!!}) -- {!∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ!})
-        --         (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ))
-        --         (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) , ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
-
-        t1 :
-            (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-            ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .fst ≡
-           σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst)
-
-
-    r' : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        Tm Γ (A ∘Ty ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .fst)
-        ≡
-        Tm Γ ((A ∘Ty ctxExtEquiv Γ' Δ A .fst τ .fst) ∘Ty σ)
-    r' Γ Γ' Δ A σ τ = (λ i → Tm Γ (((λ k → A ∘Ty (t1 Γ Γ' Δ A σ τ k)) ∙ ∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) i))
-
-    field
-        -- remove t2
-        t2 :
-            (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-            PathP (λ i → Tm Γ (A ∘Ty (t1 Γ Γ' Δ A σ τ i)))
-            (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .snd)
-            (subst⁻ (Tm Γ) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
-     
-        t3 :
-            (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-            PathP (λ i → r' Γ Γ' Δ A σ τ i)
-            (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .snd)
-            (ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ])
-
-
-        -- test1 : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ)) ≡ 
-        --     subst⁻ (λ X → Σ (C .Hom[_,_] Γ Δ) (λ _ → Tm Γ X)) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) , (ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ]))
-        -- test :
-        --     (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     PathP (λ i → Σ (C .Hom[_,_] Γ Δ) λ γ → Tm Γ {!∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ (~ i)!})
-        --         (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ))
-        --         (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) , ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ])
-
-
-
+    -- check whether these are actually used
     -- these should be provable
     field
         ctxExtSubstComp :{Γ Δ Δ' : Ctx} (A : Ty Δ') (a : Tm Δ' A) (τ : Subst Δ Δ') (σ : Subst Γ Δ) →

@@ -20,12 +20,11 @@ open import Cubical.Foundations.GroupoidLaws
 -- open import Cubical.Data.Equality.Conversion hiding (funExt)
 
 open import Cubical.Data.IterativeSets.Base
--- open import Cubical.Data.IterativeSets.Pi
 open import Cubical.Data.IterativeSets.Sigma
+
 open import Cubical.Categories.Instances.IterativeSets
-open import Cubical.Categories.WithFamilies.Base
--- open import Cubical.Categories.WithFamilies.Structure.Pi
-open import Cubical.Categories.WithFamilies.Structure.Sigma
+open import Cubical.Categories.WithFamiliesCubical.Base
+open import Cubical.Categories.WithFamiliesCubical.Structure.Sigma
 
 open import Cubical.Categories.Presheaf
 open import Cubical.Categories.Functor
@@ -34,7 +33,7 @@ import Cubical.Categories.Constructions.Elements as Els -- renaming (Covariant.â
 open Els.Contravariant
 
 open Functor
-module Cubical.Categories.WithFamilies.Instances.IterativeSets where
+module Cubical.Categories.WithFamiliesCubical.Instances.IterativeSets where
 
 private
   variable
