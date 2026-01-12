@@ -99,14 +99,3 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
             (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ)) ≡
             (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) ,
             subst⁻ (Tm Γ) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
-
-    -- check whether these are actually used
-    -- these should be provable
-    field
-        ctxExtSubstComp :{Γ Δ Δ' : Ctx} (A : Ty Δ') (a : Tm Δ' A) (τ : Subst Δ Δ') (σ : Subst Γ Δ) →
-            Path (Subst Γ (ctxExt Δ' A)) (σ ⋆⟨ C ⟩ ctxExtSubst A τ (a [ τ ])) (ctxExtSubst A (σ ⋆⟨ C ⟩ τ) (a [ σ ⋆⟨ C ⟩ τ ]))
-        -- σ should be something else, maybe Γ → ctxExt Δ (A ∘Ty τ)
-        ctxExtComp :{Γ Δ Δ' : Ctx} (A : Ty Δ') (τ : Subst Δ Δ') (σ : Subst Γ Δ) →
-          Path (Subst (ctxExt Γ (A ∘Ty (σ ⋆⟨ C ⟩ τ))) (ctxExt Δ' A))
-            (subst⁻ (λ X → Subst (ctxExt Γ X) (ctxExt Δ' A)) (∘ᴾAssoc C tyPresheaf A τ σ) (⟨ σ , A ∘Ty τ ⟩ ⋆⟨ C ⟩ ⟨ τ , A ⟩))
-            ⟨ σ ⋆⟨ C ⟩ τ , A ⟩

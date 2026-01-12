@@ -11,7 +11,7 @@ open import Cubical.Categories.Presheaf
 open import Cubical.Categories.Functor
 open import Cubical.Foundations.Univalence
 
-import Cubical.Categories.Constructions.Elements as Els -- renaming (Covariant.∫ to ∫)
+import Cubical.Categories.Constructions.Elements as Els
 open Els.Contravariant
 open import Cubical.Categories.Constructions.BinProduct
 
@@ -19,7 +19,6 @@ open import Cubical.Categories.Functors.HomFunctor
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Transport
--- open import Cubical.Categories.NaturalTransformation
 open import Cubical.Foundations.Function
 
 private
@@ -29,9 +28,6 @@ private
 open Category
 open Functor
 
--- TODO: try to use more PathP
-
--- check universe levels
 record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-max (ℓ-max (ℓ-max ℓ ℓ') ℓTy) ℓTm)) where
 
     Ctx : Type ℓ
@@ -95,29 +91,8 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
     ctxExtSubst-n : {Γ : Ctx} (A : Ty Γ) → ctxExtSubst A (wk A) (q A) ≡ IdSubst
     ctxExtSubst-n {Γ} A = retEq (ctxExtEquiv (ctxExt Γ A) Γ A) IdSubst
 
-    
-            
-
     field
-        -- as PathP
-        ctxExtEquivNat :
-            (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-            (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ)) ≡
-            (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) ,
-            subst⁻ (Tm Γ) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
-
-        -- ttt : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     Path {!!} (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .snd , ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ])) {!!}
-
-        -- adde : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     Subst Γ Δ × Tm Γ {!(A ∘Ty τ)!} ≡ {!!}
-
-        -- cex2 : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     PathP (λ i → Σ[ γ ∈ Subst Γ Δ ] Tm Γ {!!}) -- {!∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ!})
-        --         (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ))
-        --         (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) , ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
-
-        t1 :
+        ctxExtNat₁ :
             (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
             ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .fst ≡
            σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst)
@@ -127,40 +102,11 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
         Tm Γ (A ∘Ty ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .fst)
         ≡
         Tm Γ ((A ∘Ty ctxExtEquiv Γ' Δ A .fst τ .fst) ∘Ty σ)
-    r' Γ Γ' Δ A σ τ = (λ i → Tm Γ (((λ k → A ∘Ty (t1 Γ Γ' Δ A σ τ k)) ∙ ∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) i))
+    r' Γ Γ' Δ A σ τ = (λ i → Tm Γ (((λ k → A ∘Ty (ctxExtNat₁ Γ Γ' Δ A σ τ k)) ∙ ∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) i))
 
     field
-        -- remove t2
-        t2 :
-            (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-            PathP (λ i → Tm Γ (A ∘Ty (t1 Γ Γ' Δ A σ τ i)))
-            (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .snd)
-            (subst⁻ (Tm Γ) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) ((ctxExtEquiv Γ' Δ A .fst τ .snd) [ σ ]))
-     
-        t3 :
+        ctxExtNat₂ :
             (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
             PathP (λ i → r' Γ Γ' Δ A σ τ i)
             (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ) .snd)
             (ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ])
-
-
-        -- test1 : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ)) ≡ 
-        --     subst⁻ (λ X → Σ (C .Hom[_,_] Γ Δ) (λ _ → Tm Γ X)) (∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ) (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) , (ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ]))
-        -- test :
-        --     (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
-        --     PathP (λ i → Σ (C .Hom[_,_] Γ Δ) λ γ → Tm Γ {!∘ᴾAssoc C tyPresheaf A (ctxExtEquiv Γ' Δ A .fst τ .fst) σ (~ i)!})
-        --         (ctxExtEquiv Γ Δ A .fst (σ ⋆⟨ C ⟩ τ))
-        --         (σ ⋆⟨ C ⟩ (ctxExtEquiv Γ' Δ A .fst τ .fst) , ctxExtEquiv Γ' Δ A .fst τ .snd [ σ ])
-
-
-
-    -- these should be provable
-    field
-        ctxExtSubstComp :{Γ Δ Δ' : Ctx} (A : Ty Δ') (a : Tm Δ' A) (τ : Subst Δ Δ') (σ : Subst Γ Δ) →
-            Path (Subst Γ (ctxExt Δ' A)) (σ ⋆⟨ C ⟩ ctxExtSubst A τ (a [ τ ])) (ctxExtSubst A (σ ⋆⟨ C ⟩ τ) (a [ σ ⋆⟨ C ⟩ τ ]))
-        -- σ should be something else, maybe Γ → ctxExt Δ (A ∘Ty τ)
-        ctxExtComp :{Γ Δ Δ' : Ctx} (A : Ty Δ') (τ : Subst Δ Δ') (σ : Subst Γ Δ) →
-          Path (Subst (ctxExt Γ (A ∘Ty (σ ⋆⟨ C ⟩ τ))) (ctxExt Δ' A))
-            (subst⁻ (λ X → Subst (ctxExt Γ X) (ctxExt Δ' A)) (∘ᴾAssoc C tyPresheaf A τ σ) (⟨ σ , A ∘Ty τ ⟩ ⋆⟨ C ⟩ ⟨ τ , A ⟩))
-            ⟨ σ ⋆⟨ C ⟩ τ , A ⟩
