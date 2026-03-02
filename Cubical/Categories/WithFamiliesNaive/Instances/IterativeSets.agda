@@ -180,7 +180,7 @@ V-Σ-Structure .sig-iso-nat {Γ} {Δ} A B a σ = ΣPathP (
         p = cong lift (funExt (λ x → cong (λ M → M .lower x .fst) (substRefl {B = Tm V-CwF Γ} ((V-CwF [ a ]) σ))))
 
         q : PathP (λ i → Tm V-CwF Γ {!p i!}) {!!} {!!}
-        q = {!!} ∙ {!!}
+        q = {!!}
     in p , q)
 
 -- Type of q normalized:

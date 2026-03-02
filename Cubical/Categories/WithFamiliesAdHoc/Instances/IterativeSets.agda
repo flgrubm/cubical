@@ -184,3 +184,15 @@ V-Σ-Structure {ℓ} .sig-iso-nat {Γ} A B a σ =
             (lift (λ x → subst El⁰ refl (a .lower (σ x) .snd)))
         q' = {!!}
     in ΣPathP (p , toPathP q')
+
+-- Type of q' normalized
+-- Goal: subst (Tm V-CwF Γ)
+-- (λ i x → B (σ x , subst El⁰ refl (p' x i)))
+-- (lift (λ x → subst (Tm V-CwF Γ)
+-- (λ i x →
+-- Σ⁰ (A (σ x)) ((λ a₁ → B (σ x , substRefl a₁ (~ i)))))
+-- (lift (λ x → subst El⁰ (refl {x = Σ⁰ (A (σ x)) (λ a₁ → B (σ x , a₁))}) (a .lower (σ x)))) .lower x .snd))
+-- ≡
+-- subst (Tm V-CwF Γ)
+-- (V-Σ-Structure {ℓ} .ctxExtSubstSigmaSndEq A B (lift (λ x → a .lower x .fst)) σ)
+-- (lift (λ x → subst El⁰ refl (a .lower (σ x) .snd)))
