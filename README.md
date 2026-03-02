@@ -1,3 +1,17 @@
+# Formalization of Iterative Sets
+
+This repository is part of my master thesis ["The Category of Iterative Sets in Cubical Agda"](https://grubmueller.dev/publications/2026-mt-iterative-sets/). It is a fork of the [`Agda.Cubical` library](https://github.com/agda/cubical). The changes are as follows:
+
+- `Cubical.Data.W`: contribution of the disproof of $x \notin x$
+- `Cubical.Data.IterativeMultisets`: formalization of $V^\infty$
+- `Cubical.Data.IterativeSets`: formalization of $V^0$
+- `Cubical.Categories.Instances.IterativeSets`: implementation of category $\cal{V}$
+- `Cubical.Categories.WithFamiliesNaive`: naive approach defining CwF and $\Sigma$-structure and instantiating them for iterative sets. This is mostly following along the previous formalization with some major adaptations in the implementation
+- `Cubical.Categories.WithFamiliesCubical`: improvement defining the naturality condition for CwF as a heterogenous path
+- `Cubical.Categories.WithFamiliesAdHoc`: improvement using ad-hoc functions instead of transport. This is the most complete formalization so far
+- Various minor changes can be found throughout the library, notably in the `Cubical.Functions.Embedding` module.
+
+
 A standard library for Cubical Agda
 ===================================
 
