@@ -16,24 +16,10 @@ record Σ-Structure-CwF {ℓ ℓ' ℓTy ℓTm : Level} {C : Category ℓ ℓ'} (
   open CwF cwf
 
   field
-    idsubst-action : {Γ : Ctx} (A : Ty Γ) → Tm Γ A → Tm Γ (A ∘Ty IdSubst)
+    typeeq-subst : {Γ : Ctx} {A A' : Ty Γ} → (A ≡ A') → Tm Γ A' → Tm Γ A
 
-  field
-    sig : (Γ : Ctx) (A : Ty Γ) → Ty (ctxExt Γ A) → Ty Γ
-    sig-nat : {Γ Δ : Ctx} (A : Ty Γ) (B : Ty (ctxExt Γ A)) (σ : Subst Δ Γ)
-            → sig Γ A B ∘Ty σ ≡ sig Δ (A ∘Ty σ) (B ∘Ty ⟨ σ , A ⟩) 
-
-    sig-iso : {Γ : Ctx} (A : Ty Γ) (B : Ty (ctxExt Γ A)) →
-        (Tm Γ (sig Γ A B)) ≃ (Σ[ a ∈ Tm Γ A ] (Tm Γ (B ∘Ty ctxExtSubst A IdSubst (idsubst-action A a)))) -- (subst⁻ (Tm Γ) (∘ᴾId C tyPresheaf A) a))))
-
-  dest : {Γ : Ctx} (A : Ty Γ) (B : Ty (ctxExt Γ A)) →
-        (Tm Γ (sig Γ A B)) → (Σ[ a ∈ Tm Γ A ] (Tm Γ (B ∘Ty ctxExtSubst A IdSubst (idsubst-action A a)))) -- (subst⁻ (Tm Γ) (∘ᴾId C tyPresheaf A) a))))
-  dest {Γ} A B = sig-iso {Γ} A B .fst
-
-  cons : {Γ : Ctx} (A : Ty Γ) (B : Ty (ctxExt Γ A)) →
-         (Σ[ a ∈ Tm Γ A ] (Tm Γ (B ∘Ty ctxExtSubst A IdSubst (idsubst-action A a) {-(subst⁻ (Tm Γ) (∘ᴾId C tyPresheaf A) a)-}))) → (Tm Γ (sig Γ A B))
-  cons {Γ} A B = invEq (sig-iso {Γ} A B)
-
+  idsubst-action : {Γ : Ctx} (A : Ty Γ) → Tm Γ A → Tm Γ (A ∘Ty IdSubst)
+  idsubst-action A = typeeq-subst (∘ᴾId C tyPresheaf A)
 
   field
     -- morally: σ ⋆ ⟨ IdSubst {Δ} , a ⟩ ≡ ⟨ IdSubst {Γ} , a [ σ ] ⟩ ⋆ ⟨ σ , A ⟩
@@ -44,7 +30,23 @@ record Σ-Structure-CwF {ℓ ℓ' ℓTy ℓTm : Level} {C : Category ℓ ℓ'} (
         ((B ∘Ty ⟨ σ , A ⟩) ∘Ty ctxExtSubst (A ∘Ty σ) IdSubst (idsubst-action (A ∘Ty σ) (a [ σ ])) {-(subst⁻ (Tm Γ) (∘ᴾId C tyPresheaf (A ∘Ty σ)) (a [ σ ]))-})
 
   field
-    sig-iso-nat : {Γ Δ : Ctx} (A : Ty Δ) (B : Ty (ctxExt Δ A)) (x : Tm Δ (sig Δ A B)) (σ : Subst Γ Δ) →
-        sig-iso (A ∘Ty σ) (B ∘Ty ⟨ σ , A ⟩) .fst (subst (Tm Γ) (sig-nat A B σ) (x [ σ ]))
-            ≡
-        (sig-iso A B .fst x .fst [ σ ] , subst (Tm Γ) (ctxExtSubstSigmaSndEq A B (sig-iso A B .fst x .fst) σ) (sig-iso A B .fst x .snd [ σ ]))
+    sig : (Γ : Ctx) (A : Ty Γ) → Ty (ctxExt Γ A) → Ty Γ
+    sig-nat : {Γ Δ : Ctx} (A : Ty Γ) (B : Ty (ctxExt Γ A)) (σ : Subst Δ Γ)
+            → sig Γ A B ∘Ty σ ≡ sig Δ (A ∘Ty σ) (B ∘Ty ⟨ σ , A ⟩) 
+
+    sig-pair : {Γ : Ctx} (A : Ty Γ) (B : Ty (ctxExt Γ A))
+      → (Σ[ a ∈ Tm Γ A ] (Tm Γ (B ∘Ty ctxExtSubst A IdSubst (idsubst-action A a))))
+      → (Tm Γ (sig Γ A B))
+    
+    sig-pair-nat : {Γ : Ctx} (A : Ty Γ) (B : Ty (ctxExt Γ A))
+                  (a : Tm Γ A)
+                  (b : Tm Γ (B ∘Ty ctxExtSubst A IdSubst (idsubst-action A a)))
+                  {Δ : Ctx} (τ : Subst Δ Γ)
+                → ((sig-pair A B (a , b)) [ τ ])
+                ≡ typeeq-subst (sig-nat _ _ _) (sig-pair (A ∘Ty τ) (B ∘Ty ⟨ τ , A ⟩)
+                    ((a [ τ ]) , (typeeq-subst (sym (ctxExtSubstSigmaSndEq _ _ _ _))
+                    (b [ τ ]))))
+
+    sig-pair-isEquiv : {Γ : Ctx} (A : Ty Γ) (B : Ty (ctxExt Γ A))
+      → isEquiv (sig-pair A B)
+    -- no sig-pair-isEquiv-nat needed since it’s a proposition
