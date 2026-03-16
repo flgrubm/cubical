@@ -70,12 +70,16 @@ record EFunctor {ℓOb ℓHom ℓHomEquiv ℓOb' ℓHom' ℓHomEquiv' : Level} (
   field
     EF-Ob : C .ECat.Ob → D .ECat.Ob
     EF-Hom : {x y : C .ECat.Ob} → SetoidMap (C .ECat.Hom[_,_] x y) (D .ECat.Hom[_,_] (EF-Ob x) (EF-Ob y))
+    -- seq
 
 record HFunctor {ℓOb ℓObEquiv ℓHom ℓHomEquiv ℓOb' ℓObEquiv' ℓHom' ℓHomEquiv' : Level} (C : HCat {ℓOb} {ℓObEquiv} {ℓHom} {ℓHomEquiv}) (D : HCat {ℓOb'} {ℓObEquiv'} {ℓHom'} {ℓHomEquiv'}) : Type {!!} where
   field
     EF-ObSetoid : SetoidMap (C .HCat.ObSetoid) (D .HCat.ObSetoid)
   EF-Ob : HCat.Ob C → HCat.Ob D
   EF-Ob = EF-ObSetoid .fst
+  -- seq
+
+-- setoid family (gives transport automatically)
 
   field
     EF-Hom : {x y : HCat.Ob C} → SetoidMap (C .HCat.Hom[_,_] x y) (D .HCat.Hom[_,_] (EF-Ob x) (EF-Ob y))
@@ -99,6 +103,8 @@ _^Eop : {ℓOb ℓHom ℓHomEquiv : Level} → ECat {ℓOb} {ℓHom} {ℓHomEqui
 (C ^Eop) .ECat.idr = C .ECat.idl
 (C ^Eop) .ECat.assoc = {!!}
 
+
+-- ECat SETOIDS of setoids
 
 -- SET is an HCat
 
