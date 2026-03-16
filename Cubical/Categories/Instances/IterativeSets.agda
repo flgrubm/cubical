@@ -1,6 +1,5 @@
 module Cubical.Categories.Instances.IterativeSets where
 
-open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 
 open import Cubical.Foundations.HLevels

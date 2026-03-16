@@ -3,7 +3,6 @@ module Cubical.Data.IterativeSets.Test where
 -- definitions in Base
 -- properties in Properties
 
-open import Cubical.Core.Everything
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function

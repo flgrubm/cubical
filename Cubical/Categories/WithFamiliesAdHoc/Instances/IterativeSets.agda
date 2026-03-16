@@ -1,6 +1,5 @@
 {-# OPTIONS --lossy-unification #-}
 
-open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 
 open import Cubical.Categories.Functor.Base

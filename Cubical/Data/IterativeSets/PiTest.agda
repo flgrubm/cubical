@@ -2,7 +2,6 @@
 
 module Cubical.Data.IterativeSets.PiTest where
 
-open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
