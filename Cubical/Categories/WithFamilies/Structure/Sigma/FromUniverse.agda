@@ -139,7 +139,7 @@ module Internal (U : Type ℓ)
       goal = sym (u≡t ∙∙ t≡s ∙∙ s≡r)
     in goal)
       
-  U-Σ .Σ-Structure-CwF.sig-iso-nat {Γ} {Δ} A B a σ = goal
+  U-Σ .Σ-Structure-CwF.sig-iso-nat {Δ} {Γ} A B m f = goal
     where
       -- goal : ((λ x →
       --             SigIso ((UCwF CwF.∘Ty A) σ x)
@@ -399,6 +399,62 @@ module Internal (U : Type ℓ)
       --              (λ a₁ → B (snd (SigIso Δ A) .equiv-proof (σ y , a₁) .fst .fst))
       --              .fst (a (σ y)) .snd)))
 
-      postulate goal : U-Σ .Σ-Structure-CwF.sig-iso ((UCwF CwF.∘Ty A) σ) ((UCwF CwF.∘Ty B) (CwF.⟨ UCwF , σ ⟩ A)) .fst (subst (CwF.Tm UCwF Γ) (U-Σ .Σ-Structure-CwF.sig-nat A B σ) ((UCwF CwF.[ a ]) σ)) ≡ ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .fst ]) σ , subst (CwF.Tm UCwF Γ) (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B (U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .fst) σ) ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .snd ]) σ))
+      postulate goal : U-Σ .Σ-Structure-CwF.sig-iso ((UCwF CwF.∘Ty A) f)
+                        ((UCwF CwF.∘Ty B) (CwF.⟨ UCwF , f ⟩ A)) .fst
+                        (subst (CwF.Tm UCwF Δ) (U-Σ .Σ-Structure-CwF.sig-nat A B f)
+                         ((UCwF CwF.[ m ]) f))
+                        ≡
+                        ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst m .fst ]) f ,
+                         subst (CwF.Tm UCwF Δ)
+                         (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B
+                          (U-Σ .Σ-Structure-CwF.sig-iso A B .fst m .fst) f)
+                         ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst m .snd ]) f))
       -- goal = ΣPathP (funExt (λ x → {!!}) , {!!})
 
+      test1 : CwF.Tm UCwF Γ (U-Σ .Σ-Structure-CwF.sig Γ A B) ≡ ((x : El Γ) → El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
+      test1 = refl
+
+      test2 : CwF.Tm UCwF Δ (CwF._∘Ty_ UCwF (U-Σ .Σ-Structure-CwF.sig Γ A B) f) ≡ ((x : El Δ) → El (Sig (A (f x)) (λ a → B (invEq (SigIso Γ A) (f x , a)))))
+      test2 = refl
+
+      test3 : CwF.Tm UCwF Δ (U-Σ .Σ-Structure-CwF.sig Δ (CwF._∘Ty_ UCwF A f) (CwF._∘Ty_ UCwF B (CwF.⟨_,_⟩ UCwF f A))) ≡ ((x : El Δ) →
+        El (
+          Sig (A (f x)) (
+            λ a → B (
+              invEq (SigIso Γ A) (
+                f (
+                  SigIso Δ (λ x₁ → A (f x₁)) .fst (
+                    invEq (SigIso Δ (λ x₁ → A (f x₁))) (x , a))
+                  .fst)
+                , subst⁻ El refl (
+                  SigIso Δ (λ x₁ → A (f x₁)) .fst (
+                    invEq (SigIso Δ (λ x₁ → A (f x₁))) (x , a))
+                  .snd))))))
+      test3 = refl
+
+      testA : (Σ[ a ∈ CwF.Tm UCwF Γ A ] CwF.Tm UCwF Γ (CwF._∘Ty_ UCwF B (CwF.ctxExtSubst UCwF A (idfun (El Γ)) a)))
+              ≡
+              (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Γ) → El (B (invEq (SigIso Γ A) (x , a x)))))
+      testA = refl
+
+      testB : (Σ[ a ∈ CwF.Tm UCwF Γ A ] CwF.Tm UCwF Δ (CwF._∘Ty_ UCwF (CwF._∘Ty_ UCwF B (CwF.ctxExtSubst UCwF A (idfun (El Γ)) a)) f))
+        ≡
+        (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El (B (invEq (SigIso Γ A) (f x , a (f x))))))
+      testB = refl
+
+      testC : (Σ[ a ∈ CwF.Tm UCwF Γ A ] CwF.Tm UCwF Δ (CwF._∘Ty_ UCwF B (CwF.ctxExtSubst UCwF A f (CwF._[_] UCwF a f))))
+        ≡
+        (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El (B (invEq (SigIso Γ A) (f x , subst⁻ El refl (a (f x)))))))
+      testC = refl
+
+      testD : (Σ[ a ∈ CwF.Tm UCwF Γ A ] CwF.Tm UCwF Δ (CwF._∘Ty_ UCwF (CwF._∘Ty_ UCwF B (CwF.⟨_,_⟩ UCwF f A)) (CwF.ctxExtSubst UCwF (CwF._∘Ty_ UCwF A f) (idfun (El Δ)) (CwF._[_] UCwF a f))))
+        ≡
+        (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El
+                                                         (B
+                                                          (invEq (SigIso Γ A)
+                                                           (ctxExtFunctorHomDestructured Δ Γ (λ x₁ → A (f x₁)) A
+                                                            (f , refl)
+                                                            (SigIso Δ (λ x₁ → A (f x₁)) .fst
+                                                             (invEq (SigIso Δ (λ x₁ → A (f x₁)))
+                                                              (x , subst⁻ El refl (a (f x))))))))))
+      testD = refl
