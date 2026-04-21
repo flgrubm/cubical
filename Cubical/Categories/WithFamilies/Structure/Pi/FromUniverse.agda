@@ -107,14 +107,14 @@ module Internal (U : Type ℓ)
           x = pair .fst
           y = pair .snd
 
-          pi-sec : PiIso (A x) (λ y' → B (invEq (SigIso Γ A) (x , y'))) .fst
-                    (invEq (PiIso (A x) (λ y' → B (invEq (SigIso Γ A) (x , y'))))
-                     (λ y' → b (invEq (SigIso Γ A) (x , y'))))
-                    ≡ (λ y' → b (invEq (SigIso Γ A) (x , y')))
-          pi-sec = secEq (PiIso (A x) (λ y' → B (invEq (SigIso Γ A) (x , y')))) (λ y' → b (invEq (SigIso Γ A) (x , y')))
+          pi-sec : PiIso (A x) (λ y₁ → B (invEq (SigIso Γ A) (x , y₁))) .fst
+                    (invEq (PiIso (A x) (λ y₁ → B (invEq (SigIso Γ A) (x , y₁))))
+                     (λ y₁ → b (invEq (SigIso Γ A) (x , y₁))))
+                    ≡ (λ y₁ → b (invEq (SigIso Γ A) (x , y₁)))
+          pi-sec = secEq (PiIso (A x) (λ y₁ → B (invEq (SigIso Γ A) (x , y₁)))) (λ y₁ → b (invEq (SigIso Γ A) (x , y₁)))
 
           val0 : El (B (invEq (SigIso Γ A) (x , y)))
-          val0 = fst (PiIso (A x) _) (inv b x) y
+          val0 = fst (PiIso (A x) (λ y₁ → B (snd (SigIso Γ A) .equiv-proof (x , y₁) .fst .fst))) (inv b x) y
 
           val1 : El (B (invEq (SigIso Γ A) pair))
           val1 = b (invEq (SigIso Γ A) pair)
@@ -135,35 +135,45 @@ module Internal (U : Type ℓ)
       ret : retract fun inv
       ret F = funExt (λ x →
         let
-          inner-eq : (λ y → fun F (invEq (SigIso Γ A) (x , y))) ≡ fst (PiIso (A x) _) (F x)
-          inner-eq i y =
+          inner-eq : (λ y → fun F (invEq (SigIso Γ A) (x , y))) ≡ PiIso (A x) (λ z → B (invEq (SigIso Γ A) (x , z))) .fst (F x)
+          inner-eq = funExt (λ y →
             let
+              p : El (Sig Γ A)
               p = invEq (SigIso Γ A) (x , y)
-              pair = fst (SigIso Γ A) p
-              s = secEq (SigIso Γ A) (x , y) -- Path from 'pair' to (x , y)
 
-              val0 = fst (PiIso (A (fst pair)) _) (F (fst pair)) (snd pair)
-              val1 = fst (PiIso (A x) _) (F x) y
+              pair : Σ (El Γ) (λ x₁ → El (A x₁))
+              pair = fst (SigIso Γ A) p
+
+              s : pair ≡ (x , y)
+              s = secEq (SigIso Γ A) (x , y)
+
+              val0 : El (B (invEq (SigIso Γ A)(SigIso Γ A .fst p)))
+              val0 = fst (PiIso (A (fst pair)) (λ y₁ → B (invEq (SigIso Γ A) (fst (fst (SigIso Γ A) p) , y₁)))) (F (fst pair)) (snd pair)
+
+              val1 : El (B p)
+              val1 = fst (PiIso (A x) (λ y₁ → B (invEq (SigIso Γ A) (x , y₁)))) (F x) y
 
               dpath : PathP (λ j → El (B (invEq (SigIso Γ A) (s j)))) val0 val1
-              dpath j = fst (PiIso (A (fst (s j))) _) (F (fst (s j))) (snd (s j))
+              dpath j = PiIso (A (fst (s j))) (λ y₁ → B (invEq (SigIso Γ A) (fst (secEq (SigIso Γ A) (x , y) j) , y₁))) .fst (F (fst (s j))) (snd (s j))
 
               s-subst-eq : subst (λ z → El (B z)) (λ j → invEq (SigIso Γ A) (s j)) val0 ≡ val1
               s-subst-eq = pathP-to-subst {P = λ z → El (B z)} (λ j → invEq (SigIso Γ A) (s j)) dpath
               
+              ret-path : invEq (SigIso Γ A) pair ≡ p
               ret-path = retEq (SigIso Γ A) p
-              s-path   = λ j → invEq (SigIso Γ A) (s j)
+
+              s-path : invEq (SigIso Γ A) pair ≡ p
+              s-path i = invEq (SigIso Γ A) (s i)
 
               path-eq : ret-path ≡ s-path
               path-eq = ElSet (Sig Γ A) (invEq (SigIso Γ A) pair) p ret-path s-path
 
               subst-eq : subst (λ z → El (B z)) ret-path val0 ≡ subst (λ z → El (B z)) s-path val0
-              subst-eq j = subst (λ z → El (B z)) (path-eq j) val0
+              subst-eq i = subst (λ z → El (B z)) (path-eq i) val0
 
-              goal = (subst-eq ∙ s-subst-eq) i
-            in goal
+            in (subst-eq ∙ s-subst-eq))
 
-          goal = cong (invEq (PiIso (A x) _)) inner-eq ∙ retEq (PiIso (A x) _) (F x)
+          goal = cong (invEq (PiIso (A x) (λ z → B (invEq (SigIso Γ A) (x , z))))) inner-eq ∙ retEq (PiIso (A x) (λ y → B (invEq (SigIso Γ A) (x , y)))) (F x)
         in goal)
     in isoToEquiv (iso fun inv sec ret)
 
