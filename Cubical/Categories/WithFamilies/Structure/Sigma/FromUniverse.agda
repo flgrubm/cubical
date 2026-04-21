@@ -52,8 +52,10 @@ module Internal (U : Type ℓ)
     in goal))))
 
   U-Σ .Σ-Structure-CwF.sig-iso {Γ} A B = let
-      fun : ((x : El Γ) → El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
-            → Σ ((x : El Γ) → El (A x)) (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x))))
+      fun : ((x : El Γ) →
+              El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
+            → Σ ((x : El Γ) → El (A x))
+                 (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x))))
       fun F = (λ x → SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a))) .fst (F x) .fst) , λ x → SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a))) .fst (F x) .snd
 
       inv : Σ ((x : El Γ) → El (A x)) (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x)))) 
@@ -397,15 +399,6 @@ module Internal (U : Type ℓ)
       --              (λ a₁ → B (snd (SigIso Δ A) .equiv-proof (σ y , a₁) .fst .fst))
       --              .fst (a (σ y)) .snd)))
 
-      goal : {!U-Σ .Σ-Structure-CwF.sig-iso ((UCwF CwF.∘Ty A) σ)
-              ((UCwF CwF.∘Ty B) (CwF.⟨ UCwF , σ ⟩ A)) .fst
-              (subst (CwF.Tm UCwF Γ) (U-Σ .Σ-Structure-CwF.sig-nat A B σ)
-               ((UCwF CwF.[ a ]) σ))
-              ≡
-              ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .fst ]) σ ,
-               subst (CwF.Tm UCwF Γ)
-               (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B
-                (U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .fst) σ)
-               ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .snd ]) σ))!}
-      goal = {!!}
+      postulate goal : U-Σ .Σ-Structure-CwF.sig-iso ((UCwF CwF.∘Ty A) σ) ((UCwF CwF.∘Ty B) (CwF.⟨ UCwF , σ ⟩ A)) .fst (subst (CwF.Tm UCwF Γ) (U-Σ .Σ-Structure-CwF.sig-nat A B σ) ((UCwF CwF.[ a ]) σ)) ≡ ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .fst ]) σ , subst (CwF.Tm UCwF Γ) (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B (U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .fst) σ) ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst a .snd ]) σ))
+      -- goal = ΣPathP (funExt (λ x → {!!}) , {!!})
 

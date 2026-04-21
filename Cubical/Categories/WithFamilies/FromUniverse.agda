@@ -104,7 +104,7 @@ module Internal (U : Type ℓ)
          (Unit : U)
          (UnitTerminal : isContr (El Unit))
          (Sig : (a : U) → (El a → U) → U)
-         (SigIso : (a : U) (b : El a → U) → El (Sig a b) ≃ (Σ[ x ∈ El a ] El (b x)))
+         (SigIso : (a : U) (b : El a → U) → El (Sig a b) ≃ (Σ[ x ∈ El a ] El (b x))) -- make this a path / or just an Iso
          where
   UCat : Category ℓ ℓ'
   UCat .Category.ob = U
