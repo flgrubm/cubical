@@ -52,31 +52,39 @@ module Internal (U : Type ℓ)
     in goal))))
 
   U-Σ .Σ-Structure-CwF.sig-iso {Γ} A B = let
-      fun : ((x : El Γ) →
-              El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
-            → Σ ((x : El Γ) → El (A x))
-                 (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x))))
-      fun F = (λ x → SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a))) .fst (F x) .fst) , λ x → SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a))) .fst (F x) .snd
+      iso1 : Iso ((x : El Γ) → El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
+                 ((x : El Γ) → Σ[ a ∈ El (A x) ] El (B (invEq (SigIso Γ A) (x , a))))
+      iso1 = codomainIsoDep (λ x → equivToIso (SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
+      
+      iso2 : Iso ((x : El Γ) → Σ[ a ∈ El (A x) ] El (B (invEq (SigIso Γ A) (x , a))))
+                 (Σ[ v ∈ ((x : El Γ) → El (A x)) ] ((x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x)))))
+      iso2 = Σ-Π-Iso
 
-      inv : Σ ((x : El Γ) → El (A x)) (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x)))) 
-            → ((x : El Γ) → El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
-      inv (a , b) x = invEq (SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))) (a x , b x)
+      -- fun : ((x : El Γ) →
+      --         El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
+      --       → Σ ((x : El Γ) → El (A x))
+      --            (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x))))
+      -- fun F = (λ x → SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a))) .fst (F x) .fst) , λ x → SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a))) .fst (F x) .snd
 
-      sec : (s : Σ ((x : El Γ) → El (A x)) (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x))))) → fun (inv s) ≡ s 
-      sec (a , b) = let
-          f : (a₁ : El Γ) → Σ (El (A a₁)) (λ x → El (B (invEq (SigIso Γ A) (a₁ , x))))
-          f x = SigIso (A x) (λ a₁ → B (invEq (SigIso Γ A) (x , a₁))) .fst (invEq (SigIso (A x) (λ a₁ → B (invEq (SigIso Γ A) (x , a₁)))) (a x , b x))
+      -- inv : Σ ((x : El Γ) → El (A x)) (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x)))) 
+      --       → ((x : El Γ) → El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
+      -- inv (a , b) x = invEq (SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))) (a x , b x)
 
-          p : f ≡ (λ x → (a x , b x))
-          p = funExt (λ x → secEq (SigIso (A x) (λ a₁ → B (invEq (SigIso Γ A) (x , a₁)))) (a x , b x))
+      -- sec : (s : Σ ((x : El Γ) → El (A x)) (λ v → (x : El Γ) → El (B (invEq (SigIso Γ A) (x , v x))))) → fun (inv s) ≡ s 
+      -- sec (a , b) = let
+      --     f : (a₁ : El Γ) → Σ (El (A a₁)) (λ x → El (B (invEq (SigIso Γ A) (a₁ , x))))
+      --     f x = SigIso (A x) (λ a₁ → B (invEq (SigIso Γ A) (x , a₁))) .fst (invEq (SigIso (A x) (λ a₁ → B (invEq (SigIso Γ A) (x , a₁)))) (a x , b x))
 
-          goal : (fst ∘ f , snd ∘ f) ≡ (a , b)
-          goal i = fst ∘ (p i) , snd ∘ (p i)
-        in goal
+      --     p : f ≡ (λ x → (a x , b x))
+      --     p = funExt (λ x → secEq (SigIso (A x) (λ a₁ → B (invEq (SigIso Γ A) (x , a₁)))) (a x , b x))
 
-      ret : (F : (x : El Γ) → El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a))))) → inv (fun F) ≡ F
-      ret F = funExt (λ x → retEq (SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))) (F x))
-    in isoToEquiv (iso fun inv sec ret)
+      --     goal : (fst ∘ f , snd ∘ f) ≡ (a , b)
+      --     goal i = fst ∘ (p i) , snd ∘ (p i)
+      --   in goal
+
+      -- ret : (F : (x : El Γ) → El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a))))) → inv (fun F) ≡ F
+      -- ret F = funExt (λ x → retEq (SigIso (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))) (F x))
+    in isoToEquiv (compIso iso1 iso2) -- (iso fun inv sec ret)
 
   -- U-Σ .Σ-Structure-CwF.sig-iso {Γ} A B = isoToEquiv isom
   --   where
@@ -141,275 +149,147 @@ module Internal (U : Type ℓ)
       
   U-Σ .Σ-Structure-CwF.sig-iso-nat {Δ} {Γ} A B m f = goal
     where
-      -- goal : ((λ x →
-      --             SigIso ((UCwF CwF.∘Ty A) σ x)
-      --             (λ a₁ →
-      --                (UCwF CwF.∘Ty B) (CwF.⟨ UCwF , σ ⟩ A)
-      --                (invEq (SigIso Γ ((UCwF CwF.∘Ty A) σ)) (x , a₁)))
-      --             .fst
-      --             (subst (CwF.Tm UCwF Γ)
-      --              (funExt
-      --               (λ x₁ i →
-      --                  Sig (A (σ x₁))
-      --                  (funExt
-      --                   (λ y i₁ →
-      --                      B
-      --                      (invEq (SigIso Δ A)
-      --                       (((λ i₂ →
-      --                            ctxExtFunctorHomDestructured Γ Δ (λ x₂ → A (σ x₂)) A
-      --                            (σ , (λ _ x₂ → A (σ x₂)))
-      --                            (secEq (SigIso Γ (λ x₂ → A (σ x₂))) (x₁ , y) i₂))
-      --                         ∙ (λ i₂ → σ x₁ , substRefl y i₂))
-      --                        (~ i₁))))
-      --                   i)))
-      --              ((UCwF CwF.[ a ]) σ) x)
-      --             .fst)
-      --          ,
-      --          (λ x →
-      --             SigIso ((UCwF CwF.∘Ty A) σ x)
-      --             (λ a₁ →
-      --                (UCwF CwF.∘Ty B) (CwF.⟨ UCwF , σ ⟩ A)
-      --                (invEq (SigIso Γ ((UCwF CwF.∘Ty A) σ)) (x , a₁)))
-      --             .fst
-      --             (subst (CwF.Tm UCwF Γ)
-      --              (funExt
-      --               (λ x₁ i →
-      --                  Sig (A (σ x₁))
-      --                  (funExt
-      --                   (λ y i₁ →
-      --                      B
-      --                      (invEq (SigIso Δ A)
-      --                       (((λ i₂ →
-      --                            ctxExtFunctorHomDestructured Γ Δ (λ x₂ → A (σ x₂)) A
-      --                            (σ , (λ _ x₂ → A (σ x₂)))
-      --                            (secEq (SigIso Γ (λ x₂ → A (σ x₂))) (x₁ , y) i₂))
-      --                         ∙ (λ i₂ → σ x₁ , substRefl y i₂))
-      --                        (~ i₁))))
-      --                   i)))
-      --              ((UCwF CwF.[ a ]) σ) x)
-      --             .snd))
-      --         ≡
-      --         ((UCwF CwF.[
-      --           (λ x →
-      --              SigIso (A x) (λ a₁ → B (invEq (SigIso Δ A) (x , a₁))) .fst (a x)
-      --              .fst)
-      --           ])
-      --          σ
-      --          ,
-      --          subst (CwF.Tm UCwF Γ)
-      --          (funExt
-      --           (λ x i →
-      --              ((λ i₁ →
-      --                  B
-      --                  (invEq (SigIso Δ A)
-      --                   (ctxExtFunctorHomDestructured Γ Δ (λ x₁ → A (σ x₁)) A
-      --                    (σ , (λ _ x₁ → A (σ x₁)))
-      --                    (SigIso Γ (λ x₁ → A (σ x₁)) .fst
-      --                     (invEq (SigIso Γ (λ x₁ → A (σ x₁)))
-      --                      (x ,
-      --                       substRefl
-      --                       (SigIso (A (σ x)) (λ a₁ → B (invEq (SigIso Δ A) (σ x , a₁))) .fst
-      --                        (a (σ x)) .fst)
-      --                       i₁))))))
-      --               ∙∙
-      --               (λ i₁ →
-      --                  B
-      --                  (invEq (SigIso Δ A)
-      --                   (ctxExtFunctorHomDestructured Γ Δ (λ x₁ → A (σ x₁)) A
-      --                    (σ , (λ _ x₁ → A (σ x₁)))
-      --                    (secEq (SigIso Γ (λ x₁ → A (σ x₁)))
-      --                     (x ,
-      --                      SigIso (A (σ x)) (λ a₁ → B (invEq (SigIso Δ A) (σ x , a₁))) .fst
-      --                      (a (σ x)) .fst)
-      --                     i₁))))
-      --               ∙∙
-      --               (λ i₁ →
-      --                  B
-      --                  (invEq (SigIso Δ A)
-      --                   (σ x ,
-      --                    substRefl
-      --                    (SigIso (A (σ x)) (λ a₁ → B (invEq (SigIso Δ A) (σ x , a₁))) .fst
-      --                     (a (σ x)) .fst)
-      --                    i₁))))
-      --              (~ i)))
-      --          ((UCwF CwF.[
-      --            (λ x →
-      --               SigIso (A x) (λ a₁ → B (invEq (SigIso Δ A) (x , a₁))) .fst (a x)
-      --               .snd)
-      --            ])
-      --           σ))
+      module FollowTheElement where
+        l1 : (x : El Δ) →
+              El ((UCwF CwF.∘Ty (λ z → U-Σ .Σ-Structure-CwF.sig Γ A B z)) f x)
+        l1 = λ x → subst El refl (m (f x))
 
-      -- goal : ((λ x →
-      --             SigIso (A (σ x))
-      --             (λ a₁ →
-      --                B
-      --                (snd (SigIso Δ A) .equiv-proof
-      --                 (ctxExtFunctorHomDestructured Γ Δ (λ x₁ → A (σ x₁)) A
-      --                  (σ , (λ _ x₁ → A (σ x₁)))
-      --                  (SigIso Γ (λ x₁ → A (σ x₁)) .fst
-      --                   (snd (SigIso Γ (λ x₁ → A (σ x₁))) .equiv-proof (x , a₁) .fst
-      --                    .fst)))
-      --                 .fst .fst))
-      --             .fst
-      --             (transp
-      --              (λ i →
-      --                 El
-      --                 (Sig (A (σ (transp (λ j → El Γ) i x)))
-      --                  (λ x₁ →
-      --                     B
-      --                     (snd (SigIso Δ A) .equiv-proof
-      --                      (hcomp
-      --                       (doubleComp-faces
-      --                        (λ _ →
-      --                           ctxExtFunctorHomDestructured Γ Δ (λ x₂ → A (σ x₂)) A
-      --                           (σ , (λ _ x₂ → A (σ x₂)))
-      --                           (SigIso Γ (λ x₂ → A (σ x₂)) .fst
-      --                            (snd (SigIso Γ (λ x₂ → A (σ x₂))) .equiv-proof
-      --                             (transp (λ j → El Γ) i x , x₁) .fst .fst)))
-      --                        (λ i₁ →
-      --                           σ (transp (λ j → El Γ) i x) ,
-      --                           transp (λ _ → El (A (σ (transp (λ j → El Γ) i x)))) i₁ x₁)
-      --                        (~ i))
-      --                       (ctxExtFunctorHomDestructured Γ Δ (λ x₂ → A (σ x₂)) A
-      --                        (σ , (λ _ x₂ → A (σ x₂)))
-      --                        (snd (SigIso Γ (λ x₂ → A (σ x₂))) .equiv-proof
-      --                         (transp (λ j → El Γ) i x , x₁) .fst .snd (~ i))))
-      --                      .fst .fst))))
-      --              i0
-      --              (transp
-      --               (λ i →
-      --                  El
-      --                  (Sig (A (σ (transp (λ j → El Γ) i0 x)))
-      --                   (λ a₁ →
-      --                      B
-      --                      (snd (SigIso Δ A) .equiv-proof (σ (transp (λ j → El Γ) i0 x) , a₁)
-      --                       .fst .fst))))
-      --               i0 (a (σ (transp (λ j → El Γ) i0 x)))))
-      --             .fst)
-      --          ,
-      --          (λ x →
-      --             SigIso (A (σ x))
-      --             (λ a₁ →
-      --                B
-      --                (snd (SigIso Δ A) .equiv-proof
-      --                 (ctxExtFunctorHomDestructured Γ Δ (λ x₁ → A (σ x₁)) A
-      --                  (σ , (λ _ x₁ → A (σ x₁)))
-      --                  (SigIso Γ (λ x₁ → A (σ x₁)) .fst
-      --                   (snd (SigIso Γ (λ x₁ → A (σ x₁))) .equiv-proof (x , a₁) .fst
-      --                    .fst)))
-      --                 .fst .fst))
-      --             .fst
-      --             (transp
-      --              (λ i →
-      --                 El
-      --                 (Sig (A (σ (transp (λ j → El Γ) i x)))
-      --                  (λ x₁ →
-      --                     B
-      --                     (snd (SigIso Δ A) .equiv-proof
-      --                      (hcomp
-      --                       (doubleComp-faces
-      --                        (λ _ →
-      --                           ctxExtFunctorHomDestructured Γ Δ (λ x₂ → A (σ x₂)) A
-      --                           (σ , (λ _ x₂ → A (σ x₂)))
-      --                           (SigIso Γ (λ x₂ → A (σ x₂)) .fst
-      --                            (snd (SigIso Γ (λ x₂ → A (σ x₂))) .equiv-proof
-      --                             (transp (λ j → El Γ) i x , x₁) .fst .fst)))
-      --                        (λ i₁ →
-      --                           σ (transp (λ j → El Γ) i x) ,
-      --                           transp (λ _ → El (A (σ (transp (λ j → El Γ) i x)))) i₁ x₁)
-      --                        (~ i))
-      --                       (ctxExtFunctorHomDestructured Γ Δ (λ x₂ → A (σ x₂)) A
-      --                        (σ , (λ _ x₂ → A (σ x₂)))
-      --                        (snd (SigIso Γ (λ x₂ → A (σ x₂))) .equiv-proof
-      --                         (transp (λ j → El Γ) i x , x₁) .fst .snd (~ i))))
-      --                      .fst .fst))))
-      --              i0
-      --              (transp
-      --               (λ i →
-      --                  El
-      --                  (Sig (A (σ (transp (λ j → El Γ) i0 x)))
-      --                   (λ a₁ →
-      --                      B
-      --                      (snd (SigIso Δ A) .equiv-proof (σ (transp (λ j → El Γ) i0 x) , a₁)
-      --                       .fst .fst))))
-      --               i0 (a (σ (transp (λ j → El Γ) i0 x)))))
-      --             .snd))
-      --         ≡
-      --         ((λ y →
-      --             transp (λ i → El (A (σ y))) i0
-      --             (SigIso (A (σ y))
-      --              (λ a₁ → B (snd (SigIso Δ A) .equiv-proof (σ y , a₁) .fst .fst))
-      --              .fst (a (σ y)) .fst))
-      --          ,
-      --          transp
-      --          (λ i →
-      --             (x : El Γ) →
-      --             El
-      --             (hcomp
-      --              (doubleComp-faces
-      --               (λ i₁ →
-      --                  B
-      --                  (snd (SigIso Δ A) .equiv-proof
-      --                   (ctxExtFunctorHomDestructured Γ Δ (λ x₁ → A (σ x₁)) A
-      --                    (σ , (λ _ x₁ → A (σ x₁)))
-      --                    (SigIso Γ (λ x₁ → A (σ x₁)) .fst
-      --                     (snd (SigIso Γ (λ x₁ → A (σ x₁))) .equiv-proof
-      --                      (x ,
-      --                       transp (λ _ → El (A (σ x))) i₁
-      --                       (SigIso (A (σ x))
-      --                        (λ a₁ → B (snd (SigIso Δ A) .equiv-proof (σ x , a₁) .fst .fst))
-      --                        .fst (a (σ x)) .fst))
-      --                      .fst .fst)))
-      --                   .fst .fst))
-      --               (λ i₁ →
-      --                  B
-      --                  (snd (SigIso Δ A) .equiv-proof
-      --                   (σ x ,
-      --                    transp (λ _ → El (A (σ x))) i₁
-      --                    (SigIso (A (σ x))
-      --                     (λ a₁ → B (snd (SigIso Δ A) .equiv-proof (σ x , a₁) .fst .fst))
-      --                     .fst (a (σ x)) .fst))
-      --                   .fst .fst))
-      --               (~ i))
-      --              (B
-      --               (snd (SigIso Δ A) .equiv-proof
-      --                (ctxExtFunctorHomDestructured Γ Δ (λ x₁ → A (σ x₁)) A
-      --                 (σ , (λ _ x₁ → A (σ x₁)))
-      --                 (snd (SigIso Γ (λ x₁ → A (σ x₁))) .equiv-proof
-      --                  (x ,
-      --                   SigIso (A (σ x))
-      --                   (λ a₁ → B (snd (SigIso Δ A) .equiv-proof (σ x , a₁) .fst .fst))
-      --                   .fst (a (σ x)) .fst)
-      --                  .fst .snd (~ i)))
-      --                .fst .fst))))
-      --          i0
-      --          (λ y →
-      --             transp
-      --             (λ i →
-      --                El
-      --                (B
-      --                 (snd (SigIso Δ A) .equiv-proof
-      --                  (σ y ,
-      --                   SigIso (A (σ y))
-      --                   (λ a₁ → B (snd (SigIso Δ A) .equiv-proof (σ y , a₁) .fst .fst))
-      --                   .fst (a (σ y)) .fst)
-      --                  .fst .fst)))
-      --             i0
-      --             (SigIso (A (σ y))
-      --              (λ a₁ → B (snd (SigIso Δ A) .equiv-proof (σ y , a₁) .fst .fst))
-      --              .fst (a (σ y)) .snd)))
+        l1≡ : CwF._[_] UCwF m f ≡ l1
+        l1≡ = refl
 
-      postulate goal : U-Σ .Σ-Structure-CwF.sig-iso ((UCwF CwF.∘Ty A) f)
-                        ((UCwF CwF.∘Ty B) (CwF.⟨ UCwF , f ⟩ A)) .fst
-                        (subst (CwF.Tm UCwF Δ) (U-Σ .Σ-Structure-CwF.sig-nat A B f)
-                         ((UCwF CwF.[ m ]) f))
-                        ≡
-                        ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst m .fst ]) f ,
-                         subst (CwF.Tm UCwF Δ)
-                         (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B
-                          (U-Σ .Σ-Structure-CwF.sig-iso A B .fst m .fst) f)
-                         ((UCwF CwF.[ U-Σ .Σ-Structure-CwF.sig-iso A B .fst m .snd ]) f))
-      -- goal = ΣPathP (funExt (λ x → {!!}) , {!!})
+        l1' : (x : El Δ) →
+               El ((UCwF CwF.∘Ty (λ z → U-Σ .Σ-Structure-CwF.sig Γ A B z)) f x)
+        l1' x = m (f x)
+
+        l1≡l1' : l1 ≡ l1'
+        l1≡l1' = funExt (λ x → substRefl {B = El} (m (f x)))
+
+        l2 : (x : El Δ) →
+              El
+              (U-Σ .Σ-Structure-CwF.sig Δ ((UCwF CwF.∘Ty A) f)
+               ((UCwF CwF.∘Ty B) (CwF.⟨ UCwF , f ⟩ A)) x)
+        l2 = subst (CwF.Tm UCwF Δ) (U-Σ .Σ-Structure-CwF.sig-nat A B f) l1
+
+        l2' : (x : El Δ) →
+              El
+              (U-Σ .Σ-Structure-CwF.sig Δ ((UCwF CwF.∘Ty A) f)
+               ((UCwF CwF.∘Ty B) (CwF.⟨ UCwF , f ⟩ A)) x)
+        l2' = subst (CwF.Tm UCwF Δ) (U-Σ .Σ-Structure-CwF.sig-nat A B f) l1'
+
+        l2≡l2' : l2 ≡ l2'
+        l2≡l2' = cong (subst (CwF.Tm UCwF Δ) (U-Σ .Σ-Structure-CwF.sig-nat A B f)) l1≡l1'
+
+        l3 : Σ (CwF.Tm UCwF Δ ((UCwF CwF.∘Ty A) f))
+              (λ a →
+                 CwF.Tm UCwF Δ
+                 ((UCwF CwF.∘Ty (UCwF CwF.∘Ty B) (CwF.⟨ UCwF , f ⟩ A))
+                  (CwF.ctxExtSubst UCwF ((UCwF CwF.∘Ty A) f) (CwF.IdSubst UCwF)
+                   (U-Σ .Σ-Structure-CwF.idsubst-action ((UCwF CwF.∘Ty A) f) a))))
+        l3 = U-Σ .Σ-Structure-CwF.sig-iso (CwF._∘Ty_ UCwF A f) (CwF._∘Ty_ UCwF B (CwF.⟨_,_⟩ UCwF f A)) .fst l2
+
+        l3' : Σ (CwF.Tm UCwF Δ ((UCwF CwF.∘Ty A) f))
+              (λ a →
+                 CwF.Tm UCwF Δ
+                 ((UCwF CwF.∘Ty (UCwF CwF.∘Ty B) (CwF.⟨ UCwF , f ⟩ A))
+                  (CwF.ctxExtSubst UCwF ((UCwF CwF.∘Ty A) f) (CwF.IdSubst UCwF)
+                   (U-Σ .Σ-Structure-CwF.idsubst-action ((UCwF CwF.∘Ty A) f) a))))
+        l3' = U-Σ .Σ-Structure-CwF.sig-iso (CwF._∘Ty_ UCwF A f) (CwF._∘Ty_ UCwF B (CwF.⟨_,_⟩ UCwF f A)) .fst l2'
+
+        l3≡l3' : l3 ≡ l3'
+        l3≡l3' = cong (U-Σ .Σ-Structure-CwF.sig-iso (CwF._∘Ty_ UCwF A f) (CwF._∘Ty_ UCwF B (CwF.⟨_,_⟩ UCwF f A)) .fst) l2≡l2'
+
+        r1 : (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Γ) → El (B (invEq (SigIso Γ A) (x , a x)))))
+        r1 = U-Σ .Σ-Structure-CwF.sig-iso A B .fst m
+
+        r2 : (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El (B (invEq (SigIso Γ A) (f x , a (f x))))))
+        r2 .fst = r1 .fst
+        r2 .snd x = subst El refl (r1 .snd (f x))
+        
+        r2≡ : (r1 .fst , λ x → CwF._[_] UCwF (r1 .snd) f x) ≡ r2
+        r2≡ = refl
+
+        r2' : (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El (B (invEq (SigIso Γ A) (f x , a (f x))))))
+        r2' .fst = r1 .fst
+        r2' .snd x = r1 .snd (f x)
+
+        r2≡r2' : r2 ≡ r2'
+        r2≡r2' = ΣPathP (refl , (funExt (λ x → substRefl {B = El} (r1 .snd (f x)))))
+
+        r3 : (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El (B (invEq (SigIso Γ A) (ctxExtFunctorHomDestructured Δ Γ (λ x₁ → A (f x₁)) A (f , refl) (SigIso Δ (λ x₁ → A (f x₁)) .fst (invEq (SigIso Δ (λ x₁ → A (f x₁))) (x , subst⁻ El refl (a (f x))))))))))
+        r3 .fst = r2 .fst
+        r3 .snd x = transport
+                     (λ i →
+                        El
+                        (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B (r2 .fst) f i
+                         (transp (λ j → El Δ) i x)))
+                     (r2 .snd (transport refl x))
+
+        r3≡ : (r2 .fst , subst (CwF.Tm UCwF Δ) (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B (r2 .fst) f) (r2 .snd)) ≡ r3
+        r3≡ = refl
+
+        r3' : (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El (B (invEq (SigIso Γ A) (ctxExtFunctorHomDestructured Δ Γ (λ x₁ → A (f x₁)) A (f , refl) (SigIso Δ (λ x₁ → A (f x₁)) .fst (invEq (SigIso Δ (λ x₁ → A (f x₁))) (x , subst⁻ El refl (a (f x))))))))))
+        r3' .fst = r2' .fst
+        r3' .snd x = transport
+                      (λ i →
+                         El
+                         (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B (r2' .fst) f i
+                          (transp (λ j → El Δ) i x)))
+                      (r2' .snd (transport refl x))
+
+        r3'≡ : (r2' .fst , subst (CwF.Tm UCwF Δ) (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B (r2' .fst) f) (r2' .snd)) ≡ r3'
+        r3'≡ = refl
+
+        r3≡r3' : r3 ≡ r3'
+        r3≡r3' = ΣPathP (refl , funExt (λ x → cong (λ r → transport (λ i → El (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B (r .fst) f i (transp (λ j → El Δ) i x))) (r .snd (transport refl x))) r2≡r2'))
+
+        -- r3'' : (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El (B (invEq (SigIso Γ A) (ctxExtFunctorHomDestructured Δ Γ (λ x₁ → A (f x₁)) A (f , refl) (SigIso Δ (λ x₁ → A (f x₁)) .fst (invEq (SigIso Δ (λ x₁ → A (f x₁))) (x , subst⁻ El refl (a (f x)))))))))) 
+        -- r3'' .fst = r2' .fst
+        -- r3'' .snd x = transport
+        --               (λ i →
+        --                  El
+        --                  (U-Σ .Σ-Structure-CwF.ctxExtSubstSigmaSndEq A B (r2' .fst) f i
+        --                   (transp (λ j → El Δ) i x)))
+        --               (r2' .snd x)
+
+        r4 : Σ (CwF.Tm UCwF Δ ((UCwF CwF.∘Ty A) f))
+              (λ a →
+                 CwF.Tm UCwF Δ
+                 ((UCwF CwF.∘Ty (UCwF CwF.∘Ty B) (CwF.⟨ UCwF , f ⟩ A))
+                  (CwF.ctxExtSubst UCwF ((UCwF CwF.∘Ty A) f) (CwF.IdSubst UCwF)
+                   (U-Σ .Σ-Structure-CwF.idsubst-action ((UCwF CwF.∘Ty A) f) a))))
+        r4 .fst = λ x → subst El refl (r3 .fst (f x))
+        r4 .snd = r3 .snd
+
+        r4≡ : (CwF._[_] UCwF (r3 .fst) f , r3 .snd) ≡ r4
+        r4≡ = refl
+
+      goal : FollowTheElement.l3
+              ≡
+             FollowTheElement.r4
+      goal = {!!} -- ΣPathP (funExt (λ x → {!!}) , {!!})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       test1 : CwF.Tm UCwF Γ (U-Σ .Σ-Structure-CwF.sig Γ A B) ≡ ((x : El Γ) → El (Sig (A x) (λ a → B (invEq (SigIso Γ A) (x , a)))))
       test1 = refl
@@ -449,12 +329,5 @@ module Internal (U : Type ℓ)
 
       testD : (Σ[ a ∈ CwF.Tm UCwF Γ A ] CwF.Tm UCwF Δ (CwF._∘Ty_ UCwF (CwF._∘Ty_ UCwF B (CwF.⟨_,_⟩ UCwF f A)) (CwF.ctxExtSubst UCwF (CwF._∘Ty_ UCwF A f) (idfun (El Δ)) (CwF._[_] UCwF a f))))
         ≡
-        (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El
-                                                         (B
-                                                          (invEq (SigIso Γ A)
-                                                           (ctxExtFunctorHomDestructured Δ Γ (λ x₁ → A (f x₁)) A
-                                                            (f , refl)
-                                                            (SigIso Δ (λ x₁ → A (f x₁)) .fst
-                                                             (invEq (SigIso Δ (λ x₁ → A (f x₁)))
-                                                              (x , subst⁻ El refl (a (f x))))))))))
+        (Σ[ a ∈ ((x : El Γ) → El (A x)) ] ((x : El Δ) → El (B (invEq (SigIso Γ A) (ctxExtFunctorHomDestructured Δ Γ (λ x₁ → A (f x₁)) A (f , refl) (SigIso Δ (λ x₁ → A (f x₁)) .fst (invEq (SigIso Δ (λ x₁ → A (f x₁))) (x , subst⁻ El refl (a (f x))))))))))
       testD = refl
