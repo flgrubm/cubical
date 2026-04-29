@@ -54,6 +54,7 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
     Ty : Ctx → Type ℓTy
     Ty Γ = (tyPresheaf ⟅ Γ ⟆) .fst
 
+    -- _[_]Ty
     _∘Ty_ : {Γ Δ : Ctx} → Ty Δ → Subst Γ Δ → Ty Γ
     A ∘Ty γ = A ∘ᴾ⟨ tyPresheaf ⟩ γ
 
@@ -63,6 +64,7 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
     Tm : (Γ : Ctx) → Ty Γ → Type ℓTm
     Tm Γ A = (tmPresheaf ⟅ Γ , A ⟆) .fst
 
+    -- _[_]Tm
     _[_] : {Γ Δ : Ctx} {A : Ty Δ} → Tm Δ A → (σ : Subst Γ Δ) → Tm Γ (A ∘Ty σ)
     _[_] M γ = M ∘ᴾ⟨ tmPresheaf ⟩ (γ , refl)
 
@@ -94,6 +96,7 @@ record CwF (C : Category ℓ ℓ') (ℓTy ℓTm : Level) : Type (ℓ-suc (ℓ-ma
         special-ty-rev-assoc-proof : (Γ Γ' Δ : Ctx) (A : Ty Δ) (σ : Subst Γ Γ') (τ : Subst Γ' (ctxExt Δ A)) →
           (Tm Γ ((A ∘ᴾ⟨ tyPresheaf ⟩ ctxExtEquiv Γ' Δ A .fst τ .fst) ∘ᴾ⟨ tyPresheaf ⟩ σ)) →
           (Tm Γ (A ∘ᴾ⟨ tyPresheaf ⟩ (σ ⋆⟨ C ⟩ ctxExtEquiv Γ' Δ A .fst τ .fst)))
+        -- add that this should be equal to transport (our case: transportRefl)
 
     field
         ctxExtEquivNat :

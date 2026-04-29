@@ -151,14 +151,22 @@ module Internal (U : Type ℓ)
   -- Σ[ x ∈ El Γ ] El (A x)  --->  Σ[ x ∈ El Δ ] El (B x)  --->  Σ[ x ∈ El Ε ] El (C x)
 
   UCwF .CwF.ctxExtFunctor .F-ob (Γ , A) = Sig Γ A
-  UCwF .CwF.ctxExtFunctor .F-hom {Γ , A} {Δ , B} (f , p) x = invEq (SigIso Δ B) (ctxExtFunctorHomDestructured Γ Δ A B (f , p) (SigIso Γ A .fst x))
+  UCwF .CwF.ctxExtFunctor .F-hom {Γ , A} {Δ , B} (f , p) x =
+    let      -- the same as ctxExtFunctorHomDestructured, but in a let binding so it reduces more
+      destructured : (Γ' Δ' : U) (A' : El Γ' → U) (B' : El Δ' → U) → (Σ[ f ∈ (El Γ' → El Δ') ] (λ a → B' (f a)) ≡ A') → (Σ[ x ∈ El Γ' ] El (A' x)) → (Σ[ x ∈ El Δ' ] El (B' x)) 
+      destructured _ _ _ _ (f , p) (x , a) = (f x) , (subst⁻ El (funExt⁻ p x) a)
+    in invEq (SigIso Δ B) (destructured Γ Δ A B (f , p) (SigIso Γ A .fst x))
   UCwF .CwF.ctxExtFunctor .F-id {Γ , A} = funExt (λ x → cong (invEq (SigIso Γ A)) (ΣPathP (refl , (substRefl {B = El} (SigIso Γ A .fst x .snd)))) ∙ retEq (SigIso Γ A) x)
   UCwF .CwF.ctxExtFunctor .F-seq {Γ , A} {Δ , B} {Ε , C} (f , p) (g , q) = funExt (λ x → (let
+      -- the same as ctxExtFunctorHomDestructured, but in a let binding so it reduces more
+      destructured : (Γ' Δ' : U) (A' : El Γ' → U) (B' : El Δ' → U) → (Σ[ f ∈ (El Γ' → El Δ') ] (λ a → B' (f a)) ≡ A') → (Σ[ x ∈ El Γ' ] El (A' x)) → (Σ[ x ∈ El Δ' ] El (B' x)) 
+      destructured _ _ _ _ (f , p) (x , a) = (f x) , (subst⁻ El (funExt⁻ p x) a)
+
       r : (Σ[ x ∈ El Γ ] El (A x)) → (Σ[ x ∈ El Ε ] El (C x))
       r y = g (f (y .fst)) , subst⁻ El (funExt⁻ q (f (y .fst)) ∙ funExt⁻ p (y .fst)) (y .snd)
       
       s : (Σ[ x ∈ El Γ ] El (A x)) → (Σ[ x ∈ El Ε ] El (C x))
-      s = ctxExtFunctorHomDestructured Δ Ε B C (g , q) ∘ (SigIso Δ B .fst ∘ invEq (SigIso Δ B)) ∘ ctxExtFunctorHomDestructured Γ Δ A B (f , p)
+      s = destructured Δ Ε B C (g , q) ∘ (SigIso Δ B .fst ∘ invEq (SigIso Δ B)) ∘ destructured Γ Δ A B (f , p)
       
       t : (Σ[ x ∈ El Γ ] El (A x)) → (Σ[ x ∈ El Ε ] El (C x))
       t y = g (f (y .fst)) , subst⁻ El (funExt⁻ q (f (y .fst))) (subst⁻ El (funExt⁻ p (y .fst)) (y .snd))
@@ -167,7 +175,7 @@ module Internal (U : Type ℓ)
       t' y = g (f (y .fst)) , subst⁻ El (sym (sym (funExt⁻ p (y .fst)) ∙ sym (funExt⁻ q (f (y .fst))))) (y .snd)
 
       s≡t : s ≡ t
-      s≡t = cong (λ m → ctxExtFunctorHomDestructured Δ Ε B C (g , q) ∘ m ∘ ctxExtFunctorHomDestructured Γ Δ A B (f , p)) (funExt (secEq (SigIso Δ B)))
+      s≡t = cong (λ m → destructured Δ Ε B C (g , q) ∘ m ∘ destructured Γ Δ A B (f , p)) (funExt (secEq (SigIso Δ B)))
 
       r≡t' : r ≡ t'
       r≡t' = funExt (λ y → cong (λ m → g (f (y .fst)) , subst⁻ El m (y .snd)) (sym (symDistr (sym (funExt⁻ p (y .fst))) (sym (funExt⁻ q (f (y .fst)))))))

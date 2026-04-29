@@ -17,6 +17,7 @@ record Σ-Structure-CwF {ℓ ℓ' ℓTy ℓTm : Level} {C : Category ℓ ℓ'} (
 
   field
     idsubst-action : {Γ : Ctx} (A : Ty Γ) → Tm Γ A → Tm Γ (A ∘Ty IdSubst)
+    -- proof that this is the same as transporting
 
   field
     sig : (Γ : Ctx) (A : Ty Γ) → Ty (ctxExt Γ A) → Ty Γ
