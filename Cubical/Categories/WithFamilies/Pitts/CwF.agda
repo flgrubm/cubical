@@ -121,6 +121,43 @@ module Algebraic {ℓOb ℓHom : Level} (C : Category ℓOb ℓHom) where
     infix  40 _[_]Tm
     infixl 30 _⋆_
 
+  record Π-Structure-CwF {ℓTy ℓTm : Level} (cwf : CwF ℓTy ℓTm) :
+         Type (ℓ-suc (ℓ-max ℓOb (ℓ-max ℓHom (ℓ-max ℓTm ℓTy)))) where
+    open CwF cwf
+
+    field
+      ΠTy : (A : Ty Γ) (B : Ty (Γ ⋆ A)) → Ty Γ
+
+      lam : (A : Ty Γ) (B : Ty (Γ ⋆ A)) → (Tm (Γ ⋆ A) B) → Tm Γ (ΠTy A B)
+
+      app : (A : Ty Γ) (B : Ty (Γ ⋆ A)) (a : Tm Γ A)
+            (a' : Tm Γ (A [ id ]Ty))
+            (pa' : PathP (λ i → Tm Γ ([id]Ty A i)) a' a)
+          → Tm Γ (ΠTy A B) → Tm Γ (B [ ⟨ id , a' ⟩ ]Ty)
+
+      ΠTy[] : (A : Ty Γ) (B : Ty (Γ ⋆ A)) (σ : Δ ⟶ Γ)
+              (q' : Tm (Δ ⋆ A [ σ ]Ty) (A [ σ ∘ p ]Ty))
+              (pq' : PathP (λ i → Tm  (Δ ⋆ A [ σ ]Ty) ([][]Ty A p σ (~ i))) q q')
+            → (ΠTy A B) [ σ ]Ty ≡ ΠTy (A [ σ ]Ty) (B [ ⟨ σ ∘ p , q' ⟩ ]Ty)
+
+      lam[] : (A : Ty Γ) (B : Ty (Γ ⋆ A)) (σ : Δ ⟶ Γ) (b : Tm (Γ ⋆ A) B) 
+              (q' : Tm (Δ ⋆ A [ σ ]Ty) (A [ σ ∘ p ]Ty))
+              (pq' : PathP (λ i → Tm  (Δ ⋆ A [ σ ]Ty) ([][]Ty A p σ (~ i))) q q')
+            → PathP (λ i → Tm Δ (ΠTy[] A B σ q' pq' i)) (lam A B b [ σ ]Tm) (lam (A [ σ ]Ty) (B [ ⟨ σ ∘ p , q' ⟩ ]Ty) (b [ ⟨ σ ∘ p , q' ⟩ ]Tm))
+
+      app[] : (A : Ty Γ) (B : Ty (Γ ⋆ A)) (a : Tm Γ A) (σ : Δ ⟶ Γ) 
+            (a' : Tm Γ (A [ id ]Ty))
+            (pa' : PathP (λ i → Tm Γ ([id]Ty A i)) a' a)
+            (q' : Tm (Δ ⋆ A [ σ ]Ty) (A [ σ ∘ p ]Ty))
+            (pq' : PathP (λ i → Tm  (Δ ⋆ A [ σ ]Ty) ([][]Ty A p σ (~ i))) q q')
+            (f : Tm Γ (ΠTy A B))
+            (fσ' : Tm Δ (ΠTy (A [ σ ]Ty) (B [ ⟨ σ  ∘ p , q' ⟩ ]Ty)))
+            (fσp : PathP (λ i → Tm Δ (ΠTy[] A B σ q' pq' i)) (f [ σ ]Tm) fσ')
+          → app (A [ σ ]Ty) (B [ ⟨ σ ∘ p , q' ⟩ ]Ty) (a [ σ ]Tm) ((a [ σ ]Tm) [ id ]Tm) ([id]Tm (a [ σ ]Tm)) fσ' ≡ {!app A B a a' pa' f [ σ ]Tm!}
+          -- → app (A [ σ ]Ty) (B [ ⟨ σ ∘ p , q' ⟩ ]Ty) (a [ σ ]Tm) {!!} {!!} fσ' ≡ {!!}
+          -- → PathP {!!} (app A B a a' pa' f [ σ ]Tm) (app {!!} {!!} {!!} {!!} {!!} {!f [ σ ]Tm!})
+      
+
   record Σ-Structure-CwF {ℓTy ℓTm : Level} (cwf : CwF ℓTy ℓTm) :
          Type (ℓ-suc (ℓ-max ℓOb (ℓ-max ℓHom (ℓ-max ℓTm ℓTy)))) where
 
@@ -456,6 +493,7 @@ module Categorical {ℓOb ℓHom : Level} (C : Category ℓOb ℓHom) where
                         (A : Ty[ Γ ]) (σ : Δ ⟶ Γ) (a : Tm[ Δ , A [ σ ]Ty ]) (τ : Θ ⟶ Δ)
                       → ctxExtIso A .inv (σ , a) ∘ τ
                       ≡ ctxExtIso A .inv (σ ∘ τ , Tm .F-hom (τ , sym (funExt⁻ (Ty .F-seq σ τ) A)) a)
+
 
   record Σ-Structure-CwF {ℓTy ℓTm : Level} (cwf : CwF ℓTy ℓTm) :
          Type (ℓ-suc (ℓ-max ℓOb (ℓ-max ℓHom (ℓ-max ℓTm ℓTy)))) where
