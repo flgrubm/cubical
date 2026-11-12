@@ -1,3 +1,6 @@
+-- This module provides the type V∞ of iterative multisets
+-- i.e. the W-type of well-founded trees branching over small types
+
 module Cubical.Data.IterativeMultisets.Base where
 
 open import Cubical.Foundations.Prelude
@@ -14,7 +17,7 @@ open import Cubical.Functions.Embedding
 open import Cubical.Foundations.Univalence
 open import Cubical.Data.W.W
 
-open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
+open import Cubical.Data.Empty as ⊥ using (⊥*)
 open import Cubical.Data.Unit
 open import Cubical.Data.Bool
 
@@ -73,12 +76,13 @@ V∞≃Fib = isoToEquiv Iso-V∞-Fib
 ≡V∞-≃-≡Fib {x = x} {y = y} .snd = iso→isEmbedding Iso-V∞-Fib x y
 
 -- explicitly writing down the isomorphism
-Iso-≡V∞-≡Fib' : Iso (x ≡ y) (Path (Fibration (V∞ {ℓ}) ℓ) (index x , elements x) (index y , elements y))
+Iso-≡V∞-≡Fib' : Iso (x ≡ y)
+                     (Path (Fibration (V∞ {ℓ}) ℓ) (index x , elements x) (index y , elements y))
 Iso-≡V∞-≡Fib' {x = sup-∞ x α} {y = sup-∞ y β} .Iso.fun = cong (λ s → index s , elements s)
 Iso-≡V∞-≡Fib' {x = sup-∞ x α} {y = sup-∞ y β} .Iso.inv = cong (λ s → sup-∞ (s .fst) (s .snd))
 Iso-≡V∞-≡Fib' {x = sup-∞ x α} {y = sup-∞ y β} .Iso.sec _ = refl
-Iso-≡V∞-≡Fib' {x = sup-∞ x α} {y = sup-∞ y β} .Iso.ret p = cong (λ s → cong s p)
-                                                                (funExt (λ s → sym (V∞-index-elements {x = s})))
+Iso-≡V∞-≡Fib' {x = sup-∞ x α} {y = sup-∞ y β} .Iso.ret p =
+  cong (λ s → cong s p) (funExt (λ s → sym (V∞-index-elements {x = s})))
 
 ≡V∞-≃-≡Fib' : (x ≡ y) ≃ Path (Fibration (V∞ {ℓ}) ℓ) (index x , elements x) (index y , elements y)
 ≡V∞-≃-≡Fib' = isoToEquiv Iso-≡V∞-≡Fib'
@@ -94,8 +98,9 @@ f ≡Transp g = Σ[ p ∈ f .fst ≡ g .fst ] f .snd ≡ (g .snd ∘ transport p
 
 ≡V∞-≃-≡Transp : {ℓ : Level} {x y : V∞ {ℓ}} →
                    (x ≡ y) ≃ ((index x , elements x) ≡Transp (index y , elements y))
-≡V∞-≃-≡Transp {ℓ} {x} {y} = compEquiv (compEquiv ≡V∞-≃-≡Fib (invEquiv (ΣPathTransport≃PathΣ _ _)))
-                                         (pathToEquiv (Σ-cong-snd (λ p → transport→≡∘ (elements x) (elements y) p)))
+≡V∞-≃-≡Transp {ℓ} {x} {y} =
+  compEquiv (compEquiv ≡V∞-≃-≡Fib (invEquiv (ΣPathTransport≃PathΣ _ _)))
+            (pathToEquiv (Σ-cong-snd (λ p → transport→≡∘ (elements x) (elements y) p)))
 
 ≡V∞-≃-≡Equiv : (x ≡ y) ≃ ((index x , elements x) ≡Equiv (index y , elements y))
 ≡V∞-≃-≡Equiv = compEquiv ≡V∞-≃-≡Transp (Σ-cong-equiv-fst univalence)
@@ -103,7 +108,7 @@ f ≡Transp g = Σ[ p ∈ f .fst ≡ g .fst ] f .snd ≡ (g .snd ∘ transport p
 -- examples
 
 emptySet-∞ : V∞ {ℓ}
-emptySet-∞ = sup-∞ ⊥* ⊥*-elim
+emptySet-∞ = sup-∞ ⊥* ⊥.elim*
 
 singleton-∞ : V∞ {ℓ} → V∞ {ℓ}
 singleton-∞ x = sup-∞ Unit* λ _ → x

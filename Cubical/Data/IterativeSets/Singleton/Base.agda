@@ -1,3 +1,5 @@
+-- This module provides singletons {x} of iterative sets
+
 {-# OPTIONS --lossy-unification #-}
 
 module Cubical.Data.IterativeSets.Singleton.Base where
@@ -6,9 +8,9 @@ open import Cubical.Foundations.Prelude
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Isomorphism
+open import Cubical.Foundations.Path
 open import Cubical.Data.Unit
 open import Cubical.Functions.Embedding
-open import Cubical.Data.Sigma
 
 open import Cubical.Data.IterativeSets.Base
 
@@ -39,14 +41,7 @@ singleton⁰-is-singleton {x = x} {z = z} = isoToEquiv isom
     isom .Iso.sec _ = refl
 
 singleton⁰-is-singleton-sym : {x z : V⁰ {ℓ}} → ((z ∈⁰ (singleton⁰ x)) ≃ (z ≡ x))
-singleton⁰-is-singleton-sym {x = x} {z = z} = isoToEquiv isom
-  where
-    isom : Iso (z ∈⁰ singleton⁰ x) (z ≡ x)
-    isom .Iso.fun f = sym (snd f)
-    isom .Iso.inv _ .fst = tt*
-    isom .Iso.inv p .snd = sym p
-    isom .Iso.ret _ = refl
-    isom .Iso.sec _ = refl
+singleton⁰-is-singleton-sym = compEquiv singleton⁰-is-singleton (isoToEquiv symIso)
 
 singleton⁰≡singleton⁰ : {x y : V⁰ {ℓ}} → ((x ≡ y) ≃ (singleton⁰ x ≡ singleton⁰ y))
 singleton⁰≡singleton⁰ {ℓ} {x} {y} = propBiimpl→Equiv (isSetV⁰ _ _)

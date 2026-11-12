@@ -2,7 +2,7 @@ module Cubical.Data.IterativeSets.Empty where
 
 open import Cubical.Foundations.Prelude
 
-open import Cubical.Data.Empty renaming (elim* to ⊥*-elim ; elim to ⊥-elim)
+open import Cubical.Data.Empty as ⊥ using (⊥*)
 open import Cubical.Functions.Embedding
 open import Cubical.Relation.Nullary using (¬_)
 
@@ -31,4 +31,4 @@ El⁰empty⁰Is⊥* : El⁰ {ℓ} empty⁰ ≡ ⊥* {ℓ}
 El⁰empty⁰Is⊥* = refl
 
 empty⁰-is-empty : ¬ x ∈⁰ empty⁰
-empty⁰-is-empty (⊥-inh , _) = ⊥*-elim ⊥-inh
+empty⁰-is-empty (⊥-inh , _) = ⊥.rec* ⊥-inh

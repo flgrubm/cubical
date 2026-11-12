@@ -1,3 +1,7 @@
+-- This module provides the type V⁰ of iterative sets, i.e. the iterative multisets whose
+-- element maps are hereditarily embeddings, following "The Category of Iterative Sets in
+-- Homotopy Type Theory and Univalent Foundations", https://doi.org/10.1017/S0960129524000288
+
 module Cubical.Data.IterativeSets.Base where
 
 open import Cubical.Foundations.Prelude
@@ -12,16 +16,12 @@ open import Cubical.Functions.FunExtEquiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.Relation.Nullary using (¬_)
-open import Cubical.Foundations.GroupoidLaws
 open import Cubical.Functions.Fibration
-open import Cubical.Foundations.Transport
-open import Cubical.Foundations.Path
-open import Cubical.Foundations.Equiv.Properties
-open import Cubical.Foundations.Equiv.Fiberwise
 open import Cubical.Displayed.Base
 open import Cubical.HITs.Replacement
 
-open import Cubical.Data.IterativeMultisets.Base renaming (index to index-∞ ; elements to elements-V∞ ; toFib to toFib-∞)
+open import Cubical.Data.IterativeMultisets.Base
+  renaming (index to index-∞ ; elements to elements-V∞ ; toFib to toFib-∞)
 
 private
   variable
@@ -59,7 +59,8 @@ isEmbedding-elements-∞ : (x : V⁰ {ℓ}) → isEmbedding (elements-∞ x)
 isEmbedding-elements-∞ (sup-∞ _ _ , its) = its .fst
 
 isEmbedding-elements : (x : V⁰ {ℓ}) → isEmbedding (elements x)
-isEmbedding-elements (sup-∞ _ _ , isitset) = isEmbeddingSndΣProp isPropIsIterativeSet _ (isitset .fst)
+isEmbedding-elements (sup-∞ _ _ , isitset) =
+  isEmbeddingSndΣProp isPropIsIterativeSet _ (isitset .fst)
 
 Embedding-elements : (x : V⁰ {ℓ}) → index x ↪ V⁰ {ℓ}
 Embedding-elements x .fst = elements x
@@ -123,14 +124,16 @@ x ≃V⁰ y = ((z : V⁰) → (z ∈⁰ x) → (z ∈⁰ y)) ×
     let
         x = sup-∞ A f , itsx
         y = sup-∞ B g , itsy
-    in compEquiv (EmbeddingIP (toEmb x) (toEmb y)) (invEquiv (cong toEmb , iso→isEmbedding Iso-V⁰-Emb x y))
+    in compEquiv (EmbeddingIP (toEmb x) (toEmb y))
+                 (invEquiv (cong toEmb , iso→isEmbedding Iso-V⁰-Emb x y))
 
 ≡V⁰-≃-≃V⁰ : {ℓ : Level} {x y : V⁰ {ℓ}} → (x ≡ y) ≃ (x ≃V⁰ y)
 ≡V⁰-≃-≃V⁰ {x = sup-∞ A f , itsx} {y = sup-∞ B g , itsy} =
     let
         x = sup-∞ A f , itsx
         y = sup-∞ B g , itsy
-    in compEquiv (cong toEmb , iso→isEmbedding Iso-V⁰-Emb x y) (invEquiv (EmbeddingIP (toEmb x) (toEmb y)))
+    in compEquiv (cong toEmb , iso→isEmbedding Iso-V⁰-Emb x y)
+                 (invEquiv (EmbeddingIP (toEmb x) (toEmb y)))
 
 V⁰↪Fib : (V⁰ {ℓ}) ↪ Fibration (V⁰ {ℓ}) ℓ
 V⁰↪Fib {ℓ} = compEmbedding Emb↪Fib (Iso→Embedding Iso-V⁰-Emb)
@@ -170,13 +173,14 @@ El⁰ : V⁰ {ℓ} → Type ℓ
 El⁰ = index
 
 fromEmb' : (x : V⁰ {ℓ}) → (El⁰ x ↪ V⁰ {ℓ})
-fromEmb' (sup-∞ A f , its) = toEmb (sup-∞ A f , its) .snd
+fromEmb' = Embedding-elements
 
 isSetEl⁰ : (x : V⁰ {ℓ}) → isSet (El⁰ x)
 isSetEl⁰ {ℓ} x = Embedding-into-isSet→isSet {A = El⁰ {ℓ} x} {B = V⁰ {ℓ}} (fromEmb' x) (isSetV⁰ {ℓ})
 
 isProp-∈⁰-Equiv : (x y : V⁰ {ℓ}) → isProp ((z : V⁰) → (z ∈⁰ x) ≃ (z ∈⁰ y))
-isProp-∈⁰-Equiv x y = isPropΠ λ z → isOfHLevel≃ 1 (isProp∈⁰ {x = x} {z = z}) (isProp∈⁰ {x = y} {z = z})
+isProp-∈⁰-Equiv x y =
+  isPropΠ λ z → isOfHLevel≃ 1 (isProp∈⁰ {x = x} {z = z}) (isProp∈⁰ {x = y} {z = z})
 
 ∈⁰≃∈∞ : {x z : V⁰ {ℓ}} → (z ∈⁰ x) ≃ (z .fst ∈∞ x .fst)
 ∈⁰≃∈∞ {x = sup-∞ x α , itsetx} {z = sup-∞ z γ , itsetz} = propBiimpl→Equiv
@@ -196,7 +200,8 @@ isSmallEl⁰ : ∀ {ℓ} (x : V⁰ {ℓ}) → is[ ℓ ]Small (El⁰ x)
 isSmallEl⁰ x = isℓSmallℓ (El⁰ x)
 
 isLocallySmallV∞ : {ℓ : Level} → isLocally[ ℓ ]Small (V∞ {ℓ})
-isLocallySmallV∞ {ℓ} = WInd2 (Type ℓ) (λ A → A) (Type ℓ) (λ A → A) (λ x y → is[ ℓ ]Small (x ≡ y)) step
+isLocallySmallV∞ {ℓ} =
+  WInd2 (Type ℓ) (λ A → A) (Type ℓ) (λ A → A) (λ x y → is[ ℓ ]Small (x ≡ y)) step
   where
     step : {A : Type ℓ} {α : A → V∞ {ℓ}} {B : Type ℓ} {β : B → V∞ {ℓ}}
       → ((a : A) (b : B) → is[ ℓ ]Small (α a ≡ β b))

@@ -1,3 +1,6 @@
+-- This module provides identity types of iterative sets. Every proof of a ≡ b is encoded by ∅,
+-- so that a ≡ b is encoded by a set with at most one element
+
 module Cubical.Data.IterativeSets.Identity where
 
 open import Cubical.Foundations.Prelude

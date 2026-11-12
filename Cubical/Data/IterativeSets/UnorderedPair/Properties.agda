@@ -3,7 +3,6 @@ module Cubical.Data.IterativeSets.UnorderedPair.Properties where
 open import Cubical.Foundations.Prelude
 
 open import Cubical.Relation.Nullary
-open import Cubical.Data.Unit.Properties
 open import Cubical.Data.Bool.Properties
 
 open import Cubical.Data.IterativeSets.Base
