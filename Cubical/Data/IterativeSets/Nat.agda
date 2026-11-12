@@ -78,9 +78,3 @@ vonNeumannindex≃Fin {ℓ} (suc n) =
 
 El⁰ℕ⁰Isℕ* : El⁰ (ℕ⁰ {ℓ}) ≡ ℕ* {ℓ}
 El⁰ℕ⁰Isℕ* = refl
-
--- old name of the decoding lemma
-
-ℕ⁰Isℕ* : El⁰ (ℕ⁰ {ℓ}) ≡ ℕ* {ℓ}
-ℕ⁰Isℕ* = El⁰ℕ⁰Isℕ*
-{-# WARNING_ON_USAGE ℕ⁰Isℕ* "Deprecated: Use `El⁰ℕ⁰Isℕ*` instead" #-}

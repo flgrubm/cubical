@@ -82,13 +82,3 @@ x →⁰ y = Π⁰ x (λ _ → y)
 
 El⁰→⁰Is→ : {x y : V⁰ {ℓ}} → El⁰ (x →⁰ y) ≡ (El⁰ x → El⁰ y)
 El⁰→⁰Is→ = refl
-
--- old names of the two decoding lemmas
-
-El⁰Π⁰isΠ : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Π⁰ x y) ≡ ((a : El⁰ x) → El⁰ (y a))
-El⁰Π⁰isΠ {x = x} {y = y} = El⁰Π⁰IsΠ {x = x} {y = y}
-{-# WARNING_ON_USAGE El⁰Π⁰isΠ "Deprecated: Use `El⁰Π⁰IsΠ` instead" #-}
-
-El⁰→⁰is→ : {x y : V⁰ {ℓ}} → El⁰ (x →⁰ y) ≡ (El⁰ x → El⁰ y)
-El⁰→⁰is→ {x = x} {y = y} = El⁰→⁰Is→ {x = x} {y = y}
-{-# WARNING_ON_USAGE El⁰→⁰is→ "Deprecated: Use `El⁰→⁰Is→` instead" #-}

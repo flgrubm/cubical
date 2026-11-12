@@ -18,9 +18,3 @@ bool⁰ {ℓ} = unorderedPair⁰ empty⁰ unit⁰ empty⁰≢unit⁰
 
 El⁰bool⁰IsBool* : El⁰ {ℓ} bool⁰ ≡ Bool* {ℓ}
 El⁰bool⁰IsBool* = refl
-
--- old name of the decoding lemma
-
-bool⁰IsBool : El⁰ {ℓ} bool⁰ ≡ Bool* {ℓ}
-bool⁰IsBool = El⁰bool⁰IsBool*
-{-# WARNING_ON_USAGE bool⁰IsBool "Deprecated: Use `El⁰bool⁰IsBool*` instead" #-}
