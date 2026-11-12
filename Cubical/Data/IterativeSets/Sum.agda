@@ -1,14 +1,12 @@
-{-# OPTIONS --lossy-unification #-}
+-- This module provides binary sums of iterative sets. The elements of the two summands are
+-- tagged with ∅ and {∅}, i.e. inl a is encoded by ⟨ ∅ , a ⟩ and inr b by ⟨ {∅} , b ⟩
 
 module Cubical.Data.IterativeSets.Sum where
 
 open import Cubical.Foundations.Prelude
 
-open import Cubical.Data.Sigma
-open import Cubical.Foundations.Function
-open import Cubical.Foundations.Equiv
 open import Cubical.Functions.Embedding
-open import Cubical.Data.Sum renaming (rec to ⊎-rec)
+open import Cubical.Data.Sum as ⊎
 open import Cubical.Relation.Nullary using (¬_)
 
 open import Cubical.Data.IterativeSets.Base
@@ -30,17 +28,17 @@ private
         fr b = ⟨ unit⁰ , elements y b ⟩⁰
 
         f : El⁰ x ⊎ El⁰ y → V⁰ {ℓ}
-        f = ⊎-rec fl fr
+        f = ⊎.rec fl fr
 
         embfl : isEmbedding fl
-        embfl = compEmbedding ((curry orderedPair⁰ empty⁰)
-                                , (Embedding-×-fst-const isSetV⁰ empty⁰ orderedPair⁰ isEmbOrderedPair⁰))
-                              ((elements x) , (isEmbedding-elements x)) .snd
+        embfl = isEmbedding-∘
+                  (Embedding-×-fst-const isSetV⁰ empty⁰ orderedPair⁰ isEmbOrderedPair⁰)
+                  (isEmbedding-elements x)
 
         embfr : isEmbedding fr
-        embfr = compEmbedding ((curry orderedPair⁰ unit⁰)
-                                , (Embedding-×-fst-const isSetV⁰ unit⁰ orderedPair⁰ isEmbOrderedPair⁰))
-                              ((elements y) , (isEmbedding-elements y)) .snd
+        embfr = isEmbedding-∘
+                  (Embedding-×-fst-const isSetV⁰ unit⁰ orderedPair⁰ isEmbOrderedPair⁰)
+                  (isEmbedding-elements y)
 
         fla≢frb : (a : El⁰ x) (b : El⁰ y) → ¬ fl a ≡ fr b
         fla≢frb a b fla≡frb = empty⁰≢unit⁰ (orderedPair⁰≡orderedPair⁰ .fst fla≡frb .fst)
@@ -49,12 +47,12 @@ private
         femb = isEmbeddingPair fl fr embfl embfr fla≢frb
 
 _+⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
-x +⁰ y = fromEmb E
+_+⁰_ {ℓ} x y = fromEmb E
   where
-    E : Embedding V⁰ _
+    E : Embedding (V⁰ {ℓ}) ℓ
     E .fst = El⁰ x ⊎ El⁰ y
-    E .snd .fst = f
-    E .snd .snd = femb
+    E .snd .fst = f {x = x} {y = y}
+    E .snd .snd = femb {x = x} {y = y}
 
 El⁰+⁰Is⊎ : {x y : V⁰ {ℓ}} → El⁰ (x +⁰ y) ≡ El⁰ x ⊎ El⁰ y
 El⁰+⁰Is⊎ = refl

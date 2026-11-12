@@ -88,18 +88,24 @@ lift-V⁰-bool⁰ : (ℓ' : Level) → lift-V⁰ ℓ' (bool⁰ {ℓ}) ≡ bool�
 lift-V⁰-bool⁰ ℓ' = lift-V⁰-unorderedPair⁰ ℓ' empty⁰≢unit⁰
                    ∙ unorderedPair⁰-cong (lift-V⁰-empty⁰ ℓ') (lift-V⁰-unit⁰ ℓ')
 
-lift-V⁰-orderedPair⁰ : (ℓ' : Level) (x y : V⁰ {ℓ})
-                     → lift-V⁰ ℓ' ⟨ x , y ⟩⁰ ≡ ⟨ lift-V⁰ ℓ' x , lift-V⁰ ℓ' y ⟩⁰
-lift-V⁰-orderedPair⁰ ℓ' x y =
-  lift-V⁰-unorderedPair⁰ ℓ' unorderedPair⁰≢singleton⁰ ∙ unorderedPair⁰-cong left right
-  where
-    left : lift-V⁰ ℓ' (unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰)
-           ≡ unorderedPair⁰ (singleton⁰ (lift-V⁰ ℓ' x)) empty⁰ singleton⁰≢empty⁰
-    left = lift-V⁰-unorderedPair⁰ ℓ' singleton⁰≢empty⁰
-           ∙ unorderedPair⁰-cong (lift-V⁰-singleton⁰ ℓ' x) (lift-V⁰-empty⁰ ℓ')
+-- this is the only lemma that needs the encoding of ordered pairs
+opaque
+  unfolding ⟨_,_⟩⁰
 
-    right : lift-V⁰ ℓ' (singleton⁰ (singleton⁰ y)) ≡ singleton⁰ (singleton⁰ (lift-V⁰ ℓ' y))
-    right = lift-V⁰-singleton⁰ ℓ' (singleton⁰ y) ∙ cong singleton⁰ (lift-V⁰-singleton⁰ ℓ' y)
+  lift-V⁰-orderedPair⁰ : (ℓ' : Level) (x y : V⁰ {ℓ})
+                       → lift-V⁰ ℓ' ⟨ x , y ⟩⁰ ≡ ⟨ lift-V⁰ ℓ' x , lift-V⁰ ℓ' y ⟩⁰
+  lift-V⁰-orderedPair⁰ ℓ' x y =
+    lift-V⁰-unorderedPair⁰ ℓ' unorderedPair⁰≢singleton⁰ ∙ unorderedPair⁰-cong left right
+    where
+      left : lift-V⁰ ℓ' (unorderedPair⁰ (singleton⁰ x) empty⁰ singleton⁰≢empty⁰)
+             ≡ unorderedPair⁰ (singleton⁰ (lift-V⁰ ℓ' x)) empty⁰ singleton⁰≢empty⁰
+      left = lift-V⁰-unorderedPair⁰ ℓ' singleton⁰≢empty⁰
+             ∙ unorderedPair⁰-cong (lift-V⁰-singleton⁰ ℓ' x) (lift-V⁰-empty⁰ ℓ')
+
+      right : lift-V⁰ ℓ' (singleton⁰ (singleton⁰ y))
+              ≡ singleton⁰ (singleton⁰ (lift-V⁰ ℓ' y))
+      right = lift-V⁰-singleton⁰ ℓ' (singleton⁰ y)
+              ∙ cong singleton⁰ (lift-V⁰-singleton⁰ ℓ' y)
 
 -- raising commutes with the type formers
 

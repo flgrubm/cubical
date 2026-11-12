@@ -1,15 +1,13 @@
-{-# OPTIONS --lossy-unification #-}
+-- This module provides Σ-types of iterative sets. A pair (a , b) is encoded by the ordered
+-- pair ⟨ a , b ⟩ of the corresponding elements
+
 module Cubical.Data.IterativeSets.Sigma where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
 open import Cubical.Functions.Embedding
-open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Equiv
-open import Cubical.Foundations.Equiv.Fiberwise
-open import Cubical.Homotopy.Base
 open import Cubical.Foundations.HLevels
-open import Cubical.Foundations.Path
 open import Cubical.Foundations.Transport
 
 open import Cubical.Data.Sigma
@@ -20,13 +18,6 @@ open import Cubical.Data.IterativeSets.OrderedPair
 private
   variable
     ℓ : Level
-    x : V⁰ {ℓ}
-    y : El⁰ x → V⁰ {ℓ}
-
-private
-    module _ {ℓ ℓ' : Level} {M : Type ℓ} {N : Type ℓ'} (h : M → N) where
-        Inj : Type (ℓ-max ℓ ℓ')
-        Inj = {x y : M} → h x ≡ h y → x ≡ y
 
 module _ {ℓA ℓA' ℓB ℓB' : Level} {A : Type ℓA} {B : A → Type ℓB}
                                  {A' : Type ℓA'} {B' : A' → Type ℓB'}
@@ -36,7 +27,8 @@ module _ {ℓA ℓA' ℓB ℓB' : Level} {A : Type ℓA} {B : A → Type ℓB}
     Σfun (a , _) .fst = f a
     Σfun (a , b) .snd = g a b
 
-    Inj-Σfun : isEmbedding f → ((a : A) → isEmbedding (g a)) → Inj Σfun
+    Inj-Σfun : isEmbedding f → ((a : A) → isEmbedding (g a))
+             → {s t : Σ A B} → Σfun s ≡ Σfun t → s ≡ t
     Inj-Σfun embf embg {a , b} {a' , b'} p = ΣPathP (q₁ , q₂)
         where
             ΣP₁ : Σ[ q ∈ f a ≡ f a' ] subst B' q (g a b) ≡ (g a' b')
@@ -72,8 +64,10 @@ module _ {ℓA ℓA' ℓB ℓB' : Level} {A : Type ℓA} {B : A → Type ℓB}
     E .fst = (Σ[ a ∈ El⁰ {ℓ} x ] El⁰ {ℓ} (y a))
     E .snd .fst (a , b) = ⟨ (elements x a) , (elements (y a) b) ⟩⁰
     E .snd .snd = isEmbedding-∘ isEmbOrderedPair⁰
-                                (Emb-Σfun _ _ (isSetΣ isSetV⁰ (λ _ → isSetV⁰))
-                                              (isEmbedding-elements x) λ a → isEmbedding-elements (y a))
+                                (Emb-Σfun (elements x) (λ a → elements (y a))
+                                          (isSetΣ isSetV⁰ (λ _ → isSetV⁰))
+                                          (isEmbedding-elements x)
+                                          (λ a → isEmbedding-elements (y a)))
 
 El⁰Σ⁰IsΣ : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Σ⁰ x y) ≡ (Σ (El⁰ x) (λ a → El⁰ (y a)))
 El⁰Σ⁰IsΣ = refl
