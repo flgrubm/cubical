@@ -22,33 +22,41 @@ private
   variable
     ℓ : Level
 
+private
+  pairElements : (x y : V⁰ {ℓ}) → Bool* {ℓ} → V⁰ {ℓ}
+  pairElements x y (lift false) = x
+  pairElements x y (lift true) = y
+
+  opaque
+    isEmbedding-pairElements : (x y : V⁰ {ℓ}) → ¬ (x ≡ y) → isEmbedding (pairElements x y)
+    isEmbedding-pairElements x y x≢y = injEmbedding isSetV⁰ inj
+      where
+        inj : {a b : Bool*} → pairElements x y a ≡ pairElements x y b → a ≡ b
+        inj {lift false} {lift true} x≡y = ⊥.rec (x≢y x≡y)
+        inj {lift true} {lift false} y≡x = ⊥.rec (x≢y (sym y≡x))
+        inj {lift false} {lift false} _ = refl
+        inj {lift true} {lift true} _ = refl
+
 unorderedPair⁰ : (x y : V⁰ {ℓ}) → ¬ (x ≡ y) → V⁰ {ℓ}
-unorderedPair⁰ {ℓ} x y x≢y = fromEmb emb
-    where
-        emb : Embedding (V⁰ {ℓ}) ℓ
-        emb .fst = Bool* {ℓ}
-        emb .snd .fst (lift false) = x
-        emb .snd .fst (lift true) = y
-        emb .snd .snd = injEmbedding isSetV⁰ inj
-            where
-                inj : {a b : _} → emb .snd .fst a ≡ emb .snd .fst b → a ≡ b
-                inj {lift false} {lift true} x≡y = ⊥.rec (x≢y x≡y)
-                inj {lift true} {lift false} y≡x = ⊥.rec (x≢y (sym y≡x))
-                inj {lift false} {lift false} _ = refl
-                inj {lift true} {lift true} _ = refl
+unorderedPair⁰ {ℓ} x y x≢y = fromEmb E
+  where
+    E : Embedding (V⁰ {ℓ}) ℓ
+    E .fst = Bool* {ℓ}
+    E .snd .fst = pairElements x y
+    E .snd .snd = isEmbedding-pairElements x y x≢y
 
 -- {x , y} ≡ {y , x}
 unorderedUnorderedPair⁰ : {x y : V⁰ {ℓ}} {x≢y : ¬ (x ≡ y)} {y≢x : ¬ (y ≡ x)}
                             → unorderedPair⁰ x y x≢y ≡ unorderedPair⁰ y x y≢x
-unorderedUnorderedPair⁰ {x = x} {y = y} = invEq ≡V⁰-≃-≃V⁰ (f , g)
+unorderedUnorderedPair⁰ {x = x} {y = y} {x≢y = x≢y} {y≢x = y≢x} = invEq ≡V⁰-≃-≃V⁰ (f , g)
     where
-        f : (z : V⁰) → z ∈⁰ unorderedPair⁰ x y _ → z ∈⁰ unorderedPair⁰ y x _
+        f : (z : V⁰) → z ∈⁰ unorderedPair⁰ x y x≢y → z ∈⁰ unorderedPair⁰ y x y≢x
         f _ (lift false , _) .fst = lift true
         f _ (lift false , prf) .snd = prf
         f _ (lift true , _) .fst = lift false
         f _ (lift true , prf) .snd = prf
 
-        g : (z : V⁰) → z ∈⁰ unorderedPair⁰ y x _ → z ∈⁰ unorderedPair⁰ x y _
+        g : (z : V⁰) → z ∈⁰ unorderedPair⁰ y x y≢x → z ∈⁰ unorderedPair⁰ x y x≢y
         g _ (lift false , _) .fst = lift true
         g _ (lift false , prf) .snd = prf
         g _ (lift true , _) .fst = lift false
@@ -56,9 +64,9 @@ unorderedUnorderedPair⁰ {x = x} {y = y} = invEq ≡V⁰-≃-≃V⁰ (f , g)
 
 unorderedPair⁰-is-unordered-pair : {x y z : V⁰ {ℓ}} {x≢y : ¬ (x ≡ y)}
                                     → ((z ∈⁰ (unorderedPair⁰ x y x≢y)) ≃ ((x ≡ z) ⊎ (y ≡ z)))
-unorderedPair⁰-is-unordered-pair {x = x} {y = y} {z = z} = isoToEquiv isom
+unorderedPair⁰-is-unordered-pair {x = x} {y = y} {z = z} {x≢y = x≢y} = isoToEquiv isom
     where
-        isom : Iso (z ∈⁰ unorderedPair⁰ x y _) ((x ≡ z) ⊎ (y ≡ z))
+        isom : Iso (z ∈⁰ unorderedPair⁰ x y x≢y) ((x ≡ z) ⊎ (y ≡ z))
         isom .Iso.fun (lift false , q) = inl q
         isom .Iso.fun (lift true , q) = inr q
         isom .Iso.inv (inl _) .fst = lift false
@@ -72,8 +80,8 @@ unorderedPair⁰-is-unordered-pair {x = x} {y = y} {z = z} = isoToEquiv isom
 
 unorderedPair⁰-is-unordered-pair-sym : {x y z : V⁰ {ℓ}} {x≢y : ¬ (x ≡ y)}
                                          → ((z ∈⁰ (unorderedPair⁰ x y x≢y)) ≃ ((z ≡ x) ⊎ (z ≡ y)))
-unorderedPair⁰-is-unordered-pair-sym =
-  compEquiv unorderedPair⁰-is-unordered-pair
+unorderedPair⁰-is-unordered-pair-sym {x≢y = x≢y} =
+  compEquiv (unorderedPair⁰-is-unordered-pair {x≢y = x≢y})
             (⊎-equiv (isoToEquiv symIso) (isoToEquiv symIso))
 
 unorderedPair⁰-≢-witness-agnostic : {x y : V⁰ {ℓ}} (x≢y₁ x≢y₂ : ¬ (x ≡ y))
@@ -114,8 +122,8 @@ unorderedPair⁰≡unorderedPair⁰ {x = x} {y = y} {a = a} {b = b} {x≢y = x�
     L : ((z : V⁰) → (z ∈⁰ unorderedPair⁰ x y x≢y) ≃ (z ∈⁰ unorderedPair⁰ a b a≢b))
           ≃
         ((z : V⁰) → ((z ≡ x) ⊎ (z ≡ y)) ≃ ((z ≡ a) ⊎ (z ≡ b)))
-    L = equivΠCod (λ z → equivComp unorderedPair⁰-is-unordered-pair-sym
-                                    unorderedPair⁰-is-unordered-pair-sym)
+    L = equivΠCod (λ z → equivComp (unorderedPair⁰-is-unordered-pair-sym {x≢y = x≢y})
+                                    (unorderedPair⁰-is-unordered-pair-sym {x≢y = a≢b}))
 
     M : ((z : V⁰) → ((z ≡ x) ⊎ (z ≡ y)) ≃ ((z ≡ a) ⊎ (z ≡ b)))
            ≃

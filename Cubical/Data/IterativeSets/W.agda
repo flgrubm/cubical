@@ -1,8 +1,6 @@
 -- This module provides W-types of iterative sets. A tree sup-W a g is encoded by the ordered
 -- pair of its label and the graph of its encoded subtrees, i.e. ⟨ a , { ⟨ b , g b ⟩ ∣ b } ⟩
 
-{-# OPTIONS --lossy-unification #-}
-
 module Cubical.Data.IterativeSets.W where
 
 open import Cubical.Foundations.Prelude
@@ -21,16 +19,24 @@ private
 
 private
   -- the graph of h as a set of ordered pairs
-  graphV⁰ : (z : V⁰ {ℓ}) → (El⁰ z → V⁰ {ℓ}) → V⁰ {ℓ}
-  graphV⁰ {ℓ} z h = fromEmb E
-    where
-      E : Embedding (V⁰ {ℓ}) ℓ
-      E .fst = El⁰ z
-      E .snd .fst b = ⟨ elements z b , h b ⟩⁰
-      E .snd .snd = injEmbedding isSetV⁰ λ {b} {b'} p →
+  module _ (z : V⁰ {ℓ}) (h : El⁰ z → V⁰ {ℓ}) where
+    graphElements : El⁰ z → V⁰ {ℓ}
+    graphElements b = ⟨ elements z b , h b ⟩⁰
+
+    opaque
+      isEmbedding-graphElements : isEmbedding graphElements
+      isEmbedding-graphElements = injEmbedding isSetV⁰ λ {b} {b'} p →
         isEmbedding→Inj (isEmbedding-elements z) b b'
           (orderedPair⁰≡orderedPair⁰ {x = elements z b} {y = h b}
                                      {a = elements z b'} {b = h b'} .fst p .fst)
+
+    graphV⁰ : V⁰ {ℓ}
+    graphV⁰ = fromEmb E
+      where
+        E : Embedding (V⁰ {ℓ}) ℓ
+        E .fst = El⁰ z
+        E .snd .fst = graphElements
+        E .snd .snd = isEmbedding-graphElements
 
   graphV⁰-inj : (z z' : V⁰ {ℓ}) (h : El⁰ z → V⁰ {ℓ}) (h' : El⁰ z' → V⁰ {ℓ})
               → graphV⁰ z h ≡ graphV⁰ z' h'
@@ -74,13 +80,17 @@ module _ (x : V⁰ {ℓ}) (y : El⁰ x → V⁰ {ℓ}) where
             (graphV⁰-inj (y a) (y a') (encode ∘ g) (encode ∘ g') (pair≡ .snd) b b'
                          (λ i → elements (y (a≡a' i)) (q i)))
 
+    opaque
+      isEmbedding-encode : isEmbedding encode
+      isEmbedding-encode = injEmbedding isSetV⁰ λ {u} {v} → encode-inj u v
+
   W⁰ : V⁰ {ℓ}
   W⁰ = fromEmb E
     where
       E : Embedding (V⁰ {ℓ}) ℓ
       E .fst = W (El⁰ x) (λ a → El⁰ (y a))
       E .snd .fst = encode
-      E .snd .snd = injEmbedding isSetV⁰ λ {u} {v} → encode-inj u v
+      E .snd .snd = isEmbedding-encode
 
 El⁰W⁰IsW : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (W⁰ x y) ≡ W (El⁰ x) (λ a → El⁰ (y a))
 El⁰W⁰IsW = refl

@@ -1,8 +1,6 @@
 -- universe⁰ is closed under the codes for the basic sets and the type formers,
 -- using that lift-V⁰ commutes with each of them
 
-{-# OPTIONS --lossy-unification #-}
-
 module Cubical.Data.IterativeSets.Universes.Closures where
 
 open import Cubical.Foundations.Prelude

@@ -19,8 +19,9 @@ module GraphElements {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ {ℓ} x → V⁰ 
     inj {a} {b} p = isEmbedding→Inj (isEmbedding-elements x) a b
                       (orderedPair⁰≡orderedPair⁰ .fst p .fst)
 
-    emb : isEmbedding (graphEl⁰ Φ)
-    emb = injEmbedding isSetV⁰ inj
+    opaque
+      emb : isEmbedding (graphEl⁰ Φ)
+      emb = injEmbedding isSetV⁰ inj
 
   graphEl⁰-inj' : (Φ Ψ : (a : El⁰ {ℓ} x) → El⁰ {ℓ} (y a)) (a : El⁰ x)
                    → graphEl⁰ Φ ≡ graphEl⁰ Ψ → Φ a ≡ Ψ a
@@ -59,8 +60,9 @@ module Graph {ℓ : Level} {x : V⁰ {ℓ}} {y : El⁰ {ℓ} x → V⁰ {ℓ}} w
           a'≡a = isEmbedding→Inj (isEmbedding-elements x) a' a
                    (orderedPair⁰≡orderedPair⁰ .fst q .fst)
 
-  graph⁰-emb : isEmbedding graph⁰
-  graph⁰-emb = injEmbedding isSetV⁰ graph⁰-inj
+  opaque
+    graph⁰-emb : isEmbedding graph⁰
+    graph⁰-emb = injEmbedding isSetV⁰ graph⁰-inj
 
 private
   variable

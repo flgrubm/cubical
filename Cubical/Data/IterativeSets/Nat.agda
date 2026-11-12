@@ -22,6 +22,15 @@ private
   variable
     ℓ : Level
 
+private
+  opaque
+    isEmbedding-suc⁰ : (x : V⁰ {ℓ})
+                     → isEmbedding (⊎.rec (elements x) (λ (_ : Unit* {ℓ}) → x))
+    isEmbedding-suc⁰ x = isEmbeddingPair (elements x) (λ _ → x)
+                           (isEmbedding-elements x)
+                           (isEmbedding-isProp→isSet isPropUnit* isSetV⁰ (λ _ → x))
+                           (λ a _ p → ∈⁰-irrefl (a , p))
+
 -- suc x = x ⊎ {x}
 suc⁰ : {ℓ : Level} → V⁰ {ℓ} → V⁰ {ℓ}
 suc⁰ {ℓ} x = fromEmb E
@@ -29,10 +38,7 @@ suc⁰ {ℓ} x = fromEmb E
     E : Embedding (V⁰ {ℓ}) ℓ
     E .fst = El⁰ x ⊎ Unit* {ℓ}
     E .snd .fst = ⊎.rec (elements x) (λ _ → x)
-    E .snd .snd = isEmbeddingPair (elements x) (λ _ → x)
-                    (isEmbedding-elements x)
-                    (isEmbedding-isProp→isSet isPropUnit* isSetV⁰ (λ _ → x))
-                    (λ a _ p → ∈⁰-irrefl (a , p))
+    E .snd .snd = isEmbedding-suc⁰ x
 
 vonNeumannEncoding : ℕ* {ℓ} → V⁰ {ℓ}
 vonNeumannEncoding (lift zero) = empty⁰
@@ -63,18 +69,24 @@ vonNeumannindex≃Fin {ℓ} (suc n) =
     ≃⟨ isoToEquiv Iso-Fin1⊎Fin-FinSuc ⟩
   Fin (suc n) ■
 
-ℕ⁰ : V⁰ {ℓ}
-ℕ⁰ {ℓ} = fromEmb E
-    where
+private
+  opaque
+    isEmbedding-vonNeumannEncoding : isEmbedding (vonNeumannEncoding {ℓ})
+    isEmbedding-vonNeumannEncoding {ℓ} = injEmbedding isSetV⁰ (λ {w} {x} → isinj w x)
+      where
         isinj : (w x : ℕ* {ℓ}) → vonNeumannEncoding w ≡ vonNeumannEncoding x → w ≡ x
         isinj (lift n) (lift m) p =
           liftExt (Fin-inj n m (ua (compEquiv (invEquiv (vonNeumannindex≃Fin n))
                                               (compEquiv (pathToEquiv (cong index p))
                                                          (vonNeumannindex≃Fin m)))))
-        E : Embedding (V⁰ {ℓ}) ℓ
-        E .fst = ℕ* {ℓ}
-        E .snd .fst = vonNeumannEncoding {ℓ}
-        E .snd .snd = injEmbedding isSetV⁰ (λ {w} {x} → isinj w x)
+
+ℕ⁰ : V⁰ {ℓ}
+ℕ⁰ {ℓ} = fromEmb E
+  where
+    E : Embedding (V⁰ {ℓ}) ℓ
+    E .fst = ℕ* {ℓ}
+    E .snd .fst = vonNeumannEncoding {ℓ}
+    E .snd .snd = isEmbedding-vonNeumannEncoding
 
 El⁰ℕ⁰Isℕ* : El⁰ (ℕ⁰ {ℓ}) ≡ ℕ* {ℓ}
 El⁰ℕ⁰Isℕ* = refl

@@ -57,17 +57,26 @@ module _ {ℓA ℓA' ℓB ℓB' : Level} {A : Type ℓA} {B : A → Type ℓB}
     Emb-Σfun : isSet (Σ A' B') → isEmbedding f → ((a : A) → isEmbedding (g a)) → isEmbedding Σfun
     Emb-Σfun setΣ embf embg = injEmbedding setΣ (Inj-Σfun embf embg)
 
+private
+  module _ (x : V⁰ {ℓ}) (y : El⁰ x → V⁰ {ℓ}) where
+    pairs : Σ[ a ∈ El⁰ x ] El⁰ (y a) → V⁰ {ℓ}
+    pairs (a , b) = ⟨ elements x a , elements (y a) b ⟩⁰
+
+    opaque
+      isEmbedding-pairs : isEmbedding pairs
+      isEmbedding-pairs = isEmbedding-∘ isEmbOrderedPair⁰
+                                        (Emb-Σfun (elements x) (λ a → elements (y a))
+                                                  (isSetΣ isSetV⁰ (λ _ → isSetV⁰))
+                                                  (isEmbedding-elements x)
+                                                  (λ a → isEmbedding-elements (y a)))
+
 Σ⁰ : (x : V⁰ {ℓ}) → (El⁰ x → V⁰ {ℓ}) → V⁰ {ℓ}
 Σ⁰ {ℓ = ℓ} x y = fromEmb E
   where
     E : Embedding (V⁰ {ℓ}) ℓ
     E .fst = (Σ[ a ∈ El⁰ {ℓ} x ] El⁰ {ℓ} (y a))
-    E .snd .fst (a , b) = ⟨ (elements x a) , (elements (y a) b) ⟩⁰
-    E .snd .snd = isEmbedding-∘ isEmbOrderedPair⁰
-                                (Emb-Σfun (elements x) (λ a → elements (y a))
-                                          (isSetΣ isSetV⁰ (λ _ → isSetV⁰))
-                                          (isEmbedding-elements x)
-                                          (λ a → isEmbedding-elements (y a)))
+    E .snd .fst = pairs x y
+    E .snd .snd = isEmbedding-pairs x y
 
 El⁰Σ⁰IsΣ : {x : V⁰ {ℓ}} {y : El⁰ x → V⁰ {ℓ}} → El⁰ (Σ⁰ x y) ≡ (Σ (El⁰ x) (λ a → El⁰ (y a)))
 El⁰Σ⁰IsΣ = refl

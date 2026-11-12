@@ -1,7 +1,5 @@
 -- This module provides singletons {x} of iterative sets
 
-{-# OPTIONS --lossy-unification #-}
-
 module Cubical.Data.IterativeSets.Singleton.Base where
 
 open import Cubical.Foundations.Prelude
@@ -19,13 +17,19 @@ private
     ℓ : Level
     x : V⁰ {ℓ}
 
+-- opaque (here and for the other codes), as unfolding this proof is very expensive
+private
+  opaque
+    isEmbedding-const : (x : V⁰ {ℓ}) → isEmbedding (λ (_ : Unit* {ℓ}) → x)
+    isEmbedding-const x = isEmbedding-isProp→isSet isPropUnit* isSetV⁰ _
+
 singleton⁰ : V⁰ {ℓ} → V⁰ {ℓ}
 singleton⁰ {ℓ} x = fromEmb E
   where
     E : Embedding (V⁰ {ℓ}) ℓ
     E .fst = Unit*
     E .snd .fst _ = x
-    E .snd .snd = isEmbedding-isProp→isSet isPropUnit* isSetV⁰ _
+    E .snd .snd = isEmbedding-const x
 
 El⁰singleton⁰IsUnit* : El⁰ (singleton⁰ x) ≡ Unit*
 El⁰singleton⁰IsUnit* = refl
@@ -44,10 +48,11 @@ singleton⁰-is-singleton-sym : {x z : V⁰ {ℓ}} → ((z ∈⁰ (singleton⁰ 
 singleton⁰-is-singleton-sym = compEquiv singleton⁰-is-singleton (isoToEquiv symIso)
 
 singleton⁰≡singleton⁰ : {x y : V⁰ {ℓ}} → ((x ≡ y) ≃ (singleton⁰ x ≡ singleton⁰ y))
-singleton⁰≡singleton⁰ {ℓ} {x} {y} = propBiimpl→Equiv (isSetV⁰ _ _)
-                                                     (isSetV⁰ _ _)
+singleton⁰≡singleton⁰ {ℓ} {x} {y} = propBiimpl→Equiv (isSetV⁰ x y)
+                                                     (isSetV⁰ (singleton⁰ x) (singleton⁰ y))
                                                      (cong singleton⁰)
                                                      inv
   where
     inv : singleton⁰ x ≡ singleton⁰ y → x ≡ y
-    inv p = singleton⁰-is-singleton .fst (≡V⁰-≃-≃V⁰ .fst p .snd y (tt* , refl))
+    inv p = singleton⁰-is-singleton {x = x} {z = y} .fst
+              (≡V⁰-≃-≃V⁰ {x = singleton⁰ x} {y = singleton⁰ y} .fst p .snd y (tt* , refl))

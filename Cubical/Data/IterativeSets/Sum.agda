@@ -43,8 +43,9 @@ private
         fla≢frb : (a : El⁰ x) (b : El⁰ y) → ¬ fl a ≡ fr b
         fla≢frb a b fla≡frb = empty⁰≢unit⁰ (orderedPair⁰≡orderedPair⁰ .fst fla≡frb .fst)
 
-        femb : isEmbedding f
-        femb = isEmbeddingPair fl fr embfl embfr fla≢frb
+        opaque
+            femb : isEmbedding f
+            femb = isEmbeddingPair fl fr embfl embfr fla≢frb
 
 _+⁰_ : V⁰ {ℓ} → V⁰ {ℓ} → V⁰ {ℓ}
 _+⁰_ {ℓ} x y = fromEmb E
